@@ -1,0 +1,155 @@
+{
+  "version": "1.0.0",
+  "system": {
+    "name": "agentdb-contextual-analyzer",
+    "enabled": true,
+    "provider": "agentdb",
+    "queryTimeout": 10000,
+    "maxRetries": 3
+  },
+  "sessionMatching": {
+    "timestampTolerance": {
+      "minutes": 10,
+      "description": "Match git commit timestamps with AgentDB sessions within +/- 10 minutes"
+    },
+    "matchingStrategy": "closest-timestamp",
+    "fallbackStrategy": "date-range",
+    "confidenceThreshold": 0.7,
+    "requireExactMatch": false
+  },
+  "queryPatterns": {
+    "byTimestamp": {
+      "enabled": true,
+      "query": "SELECT session_id, user_prompt, reasoning_chain, created_at FROM sessions WHERE created_at BETWEEN ? AND ?",
+      "sortBy": "created_at",
+      "sortOrder": "desc"
+    },
+    "byProject": {
+      "enabled": true,
+      "query": "SELECT session_id, user_prompt, reasoning_chain, project_context FROM sessions WHERE project_context LIKE ?",
+      "fuzzyMatch": true
+    },
+    "byIntent": {
+      "enabled": true,
+      "query": "SELECT session_id, user_prompt, reasoning_chain, intent_vector FROM sessions WHERE intent_vector IS NOT NULL",
+      "vectorComparison": true
+    }
+  },
+  "extractionRules": {
+    "userPrompt": {
+      "field": "user_prompt",
+      "required": true,
+      "maxLength": 5000,
+      "sanitize": true
+    },
+    "reasoningChain": {
+      "field": "reasoning_chain",
+      "required": true,
+      "parseJSON": true,
+      "maxDepth": 10
+    },
+    "intentVector": {
+      "field": "intent_vector",
+      "required": false,
+      "dimensions": 1536,
+      "normalize": true
+    },
+    "projectContext": {
+      "field": "project_context",
+      "required": false,
+      "parseJSON": true
+    },
+    "toolCalls": {
+      "field": "tool_calls",
+      "required": false,
+      "parseJSON": true,
+      "filterTypes": [
+        "Write",
+        "Edit",
+        "Bash",
+        "SlashCommand"
+      ]
+    }
+  },
+  "sourceClassification": {
+    "agentSwarm": {
+      "indicators": [
+        "claude-flow",
+        "mcp__",
+        "swarm_init",
+        "agent_spawn",
+        "task_orchestrate"
+      ],
+      "minConfidence": 0.8,
+      "tag": "agent_swarm"
+    },
+    "manualOverride": {
+      "indicators": [
+        "direct edit",
+        "manual commit",
+        "no session found"
+      ],
+      "fallbackTag": "manual_override"
+    }
+  },
+  "intentExtraction": {
+    "enabled": true,
+    "extractFromPrompt": true,
+    "extractFromReasoning": true,
+    "keyPhrases": [
+      "implement",
+      "fix",
+      "refactor",
+      "optimize",
+      "migrate",
+      "add feature",
+      "remove",
+      "update",
+      "test",
+      "document"
+    ],
+    "categorization": {
+      "feature": ["implement", "add", "create", "build"],
+      "bugfix": ["fix", "resolve", "patch", "correct"],
+      "refactor": ["refactor", "restructure", "reorganize", "clean up"],
+      "optimization": ["optimize", "improve", "enhance", "speed up"],
+      "maintenance": ["update", "upgrade", "migrate", "maintain"],
+      "documentation": ["document", "comment", "explain", "describe"],
+      "testing": ["test", "verify", "validate", "check"]
+    }
+  },
+  "cachingStrategy": {
+    "enabled": true,
+    "ttl": 3600,
+    "maxSize": 1000,
+    "strategy": "lru",
+    "persistToFile": true,
+    "cacheFile": "memory/agentdb-cache.json"
+  },
+  "performance": {
+    "parallelQueries": true,
+    "maxConcurrentQueries": 3,
+    "batchSize": 20,
+    "enableProgressLogging": true,
+    "logLevel": "info",
+    "metricsEnabled": true,
+    "metricsPath": ".claude-flow/metrics/agentdb-metrics.json"
+  },
+  "errorHandling": {
+    "onSessionNotFound": "tag_manual",
+    "onMultipleMatches": "use_closest",
+    "onQueryTimeout": "retry_then_skip",
+    "onInvalidData": "log_and_skip",
+    "fallbackBehavior": "partial_data"
+  },
+  "outputFormat": {
+    "includeSessionId": true,
+    "includeTimestamp": true,
+    "includeConfidence": true,
+    "includeRawPrompt": true,
+    "includeReasoningSummary": true,
+    "includeToolCallsSummary": true,
+    "summarizeReasoning": true,
+    "maxReasoningLength": 500
+  }
+}

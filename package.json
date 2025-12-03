@@ -1,0 +1,50 @@
+{
+  "name": "portfolio-cognitive-command",
+  "version": "8.0.0",
+  "description": "AI-powered portfolio analysis with semantic clustering and drift detection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "pcc": "./dist/index.js",
+    "portfolio-cognitive-command": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "scan": "ts-node src/index.ts scan",
+    "analyze": "ts-node src/index.ts analyze",
+    "dashboard": "ts-node src/index.ts dashboard",
+    "metrics": "ts-node src/index.ts metrics",
+    "all": "ts-node src/index.ts all",
+    "status": "ts-node src/index.ts status"
+  },
+  "dependencies": {
+    "openai": "^4.20.0",
+    "commander": "^11.0.0",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0"
+  },
+  "keywords": [
+    "portfolio",
+    "ai",
+    "semantic-analysis",
+    "clustering",
+    "drift-detection"
+  ],
+  "author": "",
+  "license": "MIT"
+}

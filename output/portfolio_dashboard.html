@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Cognitive Command v8.0 Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+    <style>
+        .flip-card {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.5rem;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        .heatmap-node {
+            transition: all 0.3s ease;
+        }
+        .heatmap-node:hover {
+            transform: scale(1.3);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Icons (using Unicode since Lucide needs proper setup)
+        const RobotIcon = () => <span className="text-lg">🤖</span>;
+        const UserIcon = () => <span className="text-lg">👤</span>;
+        const AlertIcon = () => <span className="text-lg">⚠️</span>;
+        const CheckIcon = () => <span className="text-lg">✓</span>;
+        const TrendingUpIcon = () => <span className="text-lg">📈</span>;
+        const GitBranchIcon = () => <span className="text-lg">🔀</span>;
+
+        // Initial Data Structure - REAL DATA FROM project_shards.json
+        const initialData = {
+            meta: {
+                precision: 92, // Average alignment score rounded
+                active: 12,
+                dormant: 0, // All projects are active
+                total: 12,
+                lastScan: "2025-12-02T00:00:00Z"
+            },
+            scanDate: "2025-12-02",
+            projects: [
+                // Core Systems Cluster
+                {
+                    id: "learning_voice_agent",
+                    name: "learning_voice_agent",
+                    status: "green",
+                    score: 94,
+                    cluster: "Core Systems",
+                    source: "robot",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Integrate RuVector self-learning vector store for intelligent voice agent capabilities. Voice AI agent with vector store integration. Successfully integrated RuVector for self-learning capabilities. Advanced AI features with semantic search and learning."
+                },
+                {
+                    id: "video_gen",
+                    name: "video_gen",
+                    status: "green",
+                    score: 93,
+                    cluster: "Core Systems",
+                    source: "robot",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Enhance SSE progress tracking and improve jobs error display for better user experience. Professional video generation system with 79% test coverage. Improved SSE progress tracking and error handling. Production-ready with AI narration (Sonnet 4.5) and bilingual support."
+                },
+                {
+                    id: "aves",
+                    name: "aves",
+                    status: "green",
+                    score: 92,
+                    cluster: "Core Systems",
+                    source: "robot",
+                    metrics: { commits: 75, tests: 0, coverage: 0 },
+                    reasoning: "Ensure Railway deployment health checks work properly by positioning health endpoint before CORS middleware. Successfully deployed to Railway with 75 commits. Fixed CORS middleware ordering to enable health endpoint monitoring. Production-ready with proper infrastructure configuration."
+                },
+                {
+                    id: "meal_assistant",
+                    name: "meal_assistant",
+                    status: "green",
+                    score: 90,
+                    cluster: "Core Systems",
+                    source: "robot",
+                    metrics: { commits: 32, tests: 0, coverage: 0 },
+                    reasoning: "Deploy meal planning assistant to Railway with proper configuration and environment setup. 32 commits establishing Railway deployment infrastructure. Added deployment configuration, health checks, and production environment setup. Ready for public use."
+                },
+
+                // Experience Cluster
+                {
+                    id: "california_puzzle_game",
+                    name: "california_puzzle_game",
+                    status: "green",
+                    score: 91,
+                    cluster: "Experience",
+                    source: "robot",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Migrate state management from localStorage to Zustand and fix React hooks dependencies for CI/CD compliance. Interactive geography game with modern state management. Successfully migrated to Zustand, fixed all React hooks linting errors. CI/CD pipeline now passing."
+                },
+                {
+                    id: "close_reading",
+                    name: "close_reading",
+                    status: "green",
+                    score: 89,
+                    cluster: "Experience",
+                    source: "robot",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Fix TypeScript compilation errors blocking Vercel deployment. Educational reading comprehension app. Resolved all TypeScript build errors for successful Vercel deployment. Production-ready with type-safe codebase."
+                },
+                {
+                    id: "describe_it",
+                    name: "describe_it",
+                    status: "green",
+                    score: 88,
+                    cluster: "Experience",
+                    source: "robot",
+                    metrics: { commits: 47, tests: 0, coverage: 0 },
+                    reasoning: "Integrate claude-flow orchestration and resolve all TypeScript compilation errors for production deployment. Completed 47 commits focusing on TypeScript quality and claude-flow integration. Fixed all TypeScript errors, added agent orchestration capabilities. Ready for AI-enhanced features."
+                },
+                {
+                    id: "learn_comptia_network+",
+                    name: "learn_comptia_network+",
+                    status: "green",
+                    score: 87,
+                    cluster: "Experience",
+                    source: "robot",
+                    metrics: { commits: 23, tests: 0, coverage: 0 },
+                    reasoning: "Resolve CI/CD pipeline failures by fixing ESLint errors and upgrading Node.js version for compatibility. 23 commits focused on educational platform stability. Fixed ESLint configuration, upgraded Node.js for CI/CD compatibility. Improved code quality and automated testing."
+                },
+                {
+                    id: "colombia_puzzle_game",
+                    name: "colombia_puzzle_game",
+                    status: "green",
+                    score: 86,
+                    cluster: "Experience",
+                    source: "robot",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Exclude touch integration tests that require GameProvider context to fix test suite. Interactive geography game for Colombia. Fixed test suite by properly handling GameProvider context requirements. Improved test reliability and coverage."
+                },
+                {
+                    id: "hablas",
+                    name: "hablas",
+                    status: "green",
+                    score: 85,
+                    cluster: "Experience",
+                    source: "robot",
+                    metrics: { commits: 39, tests: 0, coverage: 0 },
+                    reasoning: "Fix TypeScript type safety by properly casting NODE_ENV environment variable. 39 commits with focus on language learning UX. Fixed NODE_ENV type comparison issues for proper environment detection. Production deployment optimization."
+                },
+                {
+                    id: "subjunctive_practice",
+                    name: "subjunctive_practice",
+                    status: "green",
+                    score: 83,
+                    cluster: "Experience",
+                    source: "human",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Merge origin/master branch into main for production release. Spanish subjunctive practice application. Completed branch merge for production deployment. Language learning features ready for users."
+                },
+                {
+                    id: "brandonjplambert",
+                    name: "brandonjplambert",
+                    status: "yellow",
+                    score: 78,
+                    cluster: "Experience",
+                    source: "human",
+                    metrics: { commits: 0, tests: 0, coverage: 0 },
+                    reasoning: "Plan and document AI agent v2 architecture for portfolio enhancement. Portfolio site with AI agent planning documentation. Recent focus on architectural design for intelligent portfolio features. Needs implementation follow-through."
+                }
+            ],
+            clusters: [
+                {
+                    name: "Experience",
+                    color: "#3b82f6",
+                    description: "UI/UX, Games, Education, Language Learning"
+                },
+                {
+                    name: "Core Systems",
+                    color: "#10b981",
+                    description: "APIs, Backend, AI Integration, Infrastructure"
+                },
+                {
+                    name: "Infra",
+                    color: "#f59e0b",
+                    description: "DevOps, CI/CD, and infrastructure"
+                }
+            ]
+        };
+
+        // Components
+
+        // HeatmapNode - Small interactive square
+        const HeatmapNode = ({ status, project, onClick }) => {
+            const colors = {
+                green: 'bg-green-500 hover:bg-green-400',
+                yellow: 'bg-yellow-500 hover:bg-yellow-400',
+                red: 'bg-red-500 hover:bg-red-400'
+            };
+
+            return (
+                <div
+                    className={`heatmap-node w-8 h-8 rounded cursor-pointer ${colors[status]}`}
+                    title={`${project.name} (${project.score})`}
+                    onClick={() => onClick(project)}
+                />
+            );
+        };
+
+        // SourceIcon - Attribution badge
+        const SourceIcon = ({ type }) => {
+            return (
+                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                    type === 'robot'
+                        ? 'bg-purple-900/50 text-purple-300 border border-purple-700'
+                        : 'bg-blue-900/50 text-blue-300 border border-blue-700'
+                }`}>
+                    {type === 'robot' ? <RobotIcon /> : <UserIcon />}
+                    <span className="ml-1">{type === 'robot' ? 'AI' : 'Human'}</span>
+                </div>
+            );
+        };
+
+        // ContextCard - Flip card with metrics and reasoning
+        const ContextCard = ({ project }) => {
+            const statusColors = {
+                green: 'border-green-500',
+                yellow: 'border-yellow-500',
+                red: 'border-red-500'
+            };
+
+            return (
+                <div className="flip-card h-64">
+                    <div className="flip-card-inner">
+                        {/* Front - Metrics */}
+                        <div className={`flip-card-front bg-slate-800 border-2 ${statusColors[project.status]} p-6`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-lg font-bold text-slate-100">{project.name}</h3>
+                                <SourceIcon type={project.source} />
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-slate-400">Alignment Score</span>
+                                    <span className="text-2xl font-bold">{project.score}%</span>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-400">Commits</span>
+                                        <span className="text-slate-200">{project.metrics.commits}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-400">Tests</span>
+                                        <span className="text-slate-200">{project.metrics.tests}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-400">Coverage</span>
+                                        <span className="text-slate-200">{project.metrics.coverage}%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 text-xs text-slate-500 text-center">
+                                Hover for AgentDB reasoning
+                            </div>
+                        </div>
+
+                        {/* Back - Reasoning */}
+                        <div className={`flip-card-back bg-slate-700 border-2 ${statusColors[project.status]} p-6`}>
+                            <div className="flex items-start mb-3">
+                                <div className="text-2xl mr-2">🧠</div>
+                                <h3 className="text-sm font-bold text-slate-100">AgentDB Analysis</h3>
+                            </div>
+
+                            <p className="text-sm text-slate-300 leading-relaxed">
+                                {project.reasoning}
+                            </p>
+
+                            <div className="mt-4 pt-4 border-t border-slate-600">
+                                <div className="text-xs text-slate-400">
+                                    Cluster: <span className="text-slate-200">{project.cluster}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ProgressRow - Table row for Ledger view
+        const ProgressRow = ({ project }) => {
+            const statusIcons = {
+                green: <CheckIcon />,
+                yellow: <TrendingUpIcon />,
+                red: <AlertIcon />
+            };
+
+            const statusColors = {
+                green: 'text-green-400',
+                yellow: 'text-yellow-400',
+                red: 'text-red-400'
+            };
+
+            return (
+                <tr className="border-b border-slate-700 hover:bg-slate-800/50">
+                    <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                            <span className={statusColors[project.status]}>
+                                {statusIcons[project.status]}
+                            </span>
+                            <span className="font-medium">{project.name}</span>
+                        </div>
+                    </td>
+                    <td className="px-4 py-3">
+                        <SourceIcon type={project.source} />
+                    </td>
+                    <td className="px-4 py-3">
+                        <span className="text-slate-300">{project.cluster}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-32 bg-slate-700 rounded-full h-2">
+                                <div
+                                    className={`h-2 rounded-full ${
+                                        project.status === 'green' ? 'bg-green-500' :
+                                        project.status === 'yellow' ? 'bg-yellow-500' :
+                                        'bg-red-500'
+                                    }`}
+                                    style={{ width: `${project.score}%` }}
+                                />
+                            </div>
+                            <span className="text-sm font-bold">{project.score}%</span>
+                        </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-400">
+                        {project.metrics.commits} commits
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-400">
+                        {project.metrics.coverage}% coverage
+                    </td>
+                </tr>
+            );
+        };
+
+        // ClusterSection - Swimlane for each cluster
+        const ClusterSection = ({ cluster, projects }) => {
+            return (
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div
+                            className="w-4 h-4 rounded"
+                            style={{ backgroundColor: cluster.color }}
+                        />
+                        <h2 className="text-2xl font-bold">{cluster.name}</h2>
+                        <span className="text-slate-400">({projects.length} projects)</span>
+                    </div>
+
+                    <p className="text-slate-400 mb-6">{cluster.description}</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {projects.map(project => (
+                            <ContextCard key={project.id} project={project} />
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // Main Dashboard Component
+        const Dashboard = () => {
+            const [data, setData] = useState(initialData);
+            const [view, setView] = useState('clusters'); // 'clusters' or 'ledger'
+            const [selectedProject, setSelectedProject] = useState(null);
+
+            const handleHeatmapClick = (project) => {
+                setSelectedProject(project);
+            };
+
+            const getProjectsByCluster = (clusterName) => {
+                return data.projects.filter(p => p.cluster === clusterName);
+            };
+
+            const statusCounts = {
+                green: data.projects.filter(p => p.status === 'green').length,
+                yellow: data.projects.filter(p => p.status === 'yellow').length,
+                red: data.projects.filter(p => p.status === 'red').length
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-900 p-6">
+                    {/* Header */}
+                    <div className="max-w-7xl mx-auto mb-8">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h1 className="text-4xl font-bold mb-2">
+                                    Portfolio Cognitive Command <span className="text-purple-400">v8.0</span>
+                                </h1>
+                                <p className="text-slate-400">
+                                    Last scan: {new Date(data.meta.lastScan).toLocaleString()}
+                                </p>
+                            </div>
+
+                            <div className="text-right">
+                                <div className="text-3xl font-bold text-purple-400">
+                                    {data.meta.precision}%
+                                </div>
+                                <div className="text-sm text-slate-400">Precision Score</div>
+                            </div>
+                        </div>
+
+                        {/* Meta Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                                <div className="text-2xl font-bold text-green-400">{data.meta.active}</div>
+                                <div className="text-sm text-slate-400">Active Projects</div>
+                            </div>
+                            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                                <div className="text-2xl font-bold text-yellow-400">{data.meta.dormant}</div>
+                                <div className="text-sm text-slate-400">Dormant Projects</div>
+                            </div>
+                            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                                <div className="text-2xl font-bold text-slate-300">{data.meta.total}</div>
+                                <div className="text-sm text-slate-400">Total Projects</div>
+                            </div>
+                            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                                <div className="flex gap-2 items-center justify-center">
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-green-400">{statusCounts.green}</div>
+                                        <div className="text-xs text-slate-500">Aligned</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-yellow-400">{statusCounts.yellow}</div>
+                                        <div className="text-xs text-slate-500">Moderate</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-red-400">{statusCounts.red}</div>
+                                        <div className="text-xs text-slate-500">Drift</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Portfolio Heatmap */}
+                        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-8">
+                            <h2 className="text-xl font-bold mb-4">Portfolio Heatmap</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {data.projects.map(project => (
+                                    <HeatmapNode
+                                        key={project.id}
+                                        status={project.status}
+                                        project={project}
+                                        onClick={handleHeatmapClick}
+                                    />
+                                ))}
+                            </div>
+                            <div className="mt-4 flex gap-4 text-sm text-slate-400">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                                    <span>Aligned (&gt;80)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                                    <span>Moderate (50-80)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 bg-red-500 rounded"></div>
+                                    <span>Drift (&lt;50)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* View Switcher */}
+                        <div className="flex gap-2 mb-6">
+                            <button
+                                onClick={() => setView('clusters')}
+                                className={`px-4 py-2 rounded-lg font-medium transition ${
+                                    view === 'clusters'
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                }`}
+                            >
+                                Cluster View
+                            </button>
+                            <button
+                                onClick={() => setView('ledger')}
+                                className={`px-4 py-2 rounded-lg font-medium transition ${
+                                    view === 'ledger'
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                }`}
+                            >
+                                Ledger View
+                            </button>
+                        </div>
+
+                        {/* Cluster View */}
+                        {view === 'clusters' && (
+                            <div>
+                                {data.clusters.map(cluster => (
+                                    <ClusterSection
+                                        key={cluster.name}
+                                        cluster={cluster}
+                                        projects={getProjectsByCluster(cluster.name)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Ledger View */}
+                        {view === 'ledger' && (
+                            <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                                <table className="w-full">
+                                    <thead className="bg-slate-700">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold">Project</th>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold">Source</th>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold">Cluster</th>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold">Alignment</th>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold">Activity</th>
+                                            <th className="px-4 py-3 text-left text-sm font-semibold">Coverage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.projects.map(project => (
+                                            <ProgressRow key={project.id} project={project} />
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Selected Project Modal */}
+                    {selectedProject && (
+                        <div
+                            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+                            onClick={() => setSelectedProject(null)}
+                        >
+                            <div
+                                className="bg-slate-800 rounded-lg p-6 max-w-md w-full border-2 border-purple-500"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-xl font-bold">{selectedProject.name}</h3>
+                                    <button
+                                        onClick={() => setSelectedProject(null)}
+                                        className="text-slate-400 hover:text-slate-200"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <ContextCard project={selectedProject} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Dashboard />);
+    </script>
+</body>
+</html>

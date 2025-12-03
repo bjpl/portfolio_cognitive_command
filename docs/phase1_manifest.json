@@ -1,0 +1,330 @@
+{
+  "scan_date": "2025-12-02",
+  "total_repos": 37,
+  "active_repos": [
+    "aves",
+    "brandonjplambert",
+    "california_puzzle_game",
+    "close_reading",
+    "colombia_puzzle_game",
+    "describe_it",
+    "hablas",
+    "language-learning/subjunctive_practice",
+    "learn_comptia_network+",
+    "learning_voice_agent",
+    "meal_assistant",
+    "video_gen"
+  ],
+  "dormant_repos": [
+    "algorithms_and_data_structures",
+    "cocinas_aprendes",
+    "cocinas_aprendes/cocinas_aprendes",
+    "colombia_puzzle_game/deployment_sprint",
+    "colores",
+    "conjugation_gui",
+    "corporate_intel",
+    "cuerpo_humano",
+    "fancy_monkey",
+    "formas_y_tamanos",
+    "internet",
+    "lab_visualizer",
+    "learn_my_system",
+    "learn_strudel",
+    "letratos",
+    "llms_on_my_system",
+    "mundo",
+    "online_language_learning_resources",
+    "open_learn",
+    "planetas",
+    "report_assistant",
+    "sec_latent",
+    "sinonimos",
+    "sinonimos_de_caminar",
+    "sinonimos_de_hablar"
+  ],
+  "manifest": [
+    {
+      "name": "algorithms_and_data_structures",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/algorithms_and_data_structures",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "efed2ea docs: resolve merge conflicts - accept remote development"
+    },
+    {
+      "name": "aves",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/aves",
+      "status": "ACTIVE",
+      "commits_7d": 75,
+      "last_commit": "8933d75 fix: move health endpoint before CORS middleware for Railway"
+    },
+    {
+      "name": "brandonjplambert",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/brandonjplambert",
+      "status": "ACTIVE",
+      "commits_7d": 6,
+      "last_commit": "e3fdf7c docs: add AI agent v2 planning documentation"
+    },
+    {
+      "name": "california_puzzle_game",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/california_puzzle_game",
+      "status": "ACTIVE",
+      "commits_7d": 3,
+      "last_commit": "799098c fix: CI/CD lint errors - localStorage to Zustand, React hooks deps"
+    },
+    {
+      "name": "close_reading",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/close_reading",
+      "status": "ACTIVE",
+      "commits_7d": 15,
+      "last_commit": "a37514f fix: Resolve TypeScript build errors for Vercel deployment"
+    },
+    {
+      "name": "cocinas_aprendes",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cocinas_aprendes",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "33d5673 docs: add LICENSE and enhance README for portfolio"
+    },
+    {
+      "name": "cocinas_aprendes/cocinas_aprendes",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cocinas_aprendes/cocinas_aprendes",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "e89c38c docs: Add instructions for merging to main branch"
+    },
+    {
+      "name": "colombia_puzzle_game",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colombia_puzzle_game",
+      "status": "ACTIVE",
+      "commits_7d": 12,
+      "last_commit": "d0410a0 fix: exclude touch integration test requiring GameProvider context"
+    },
+    {
+      "name": "colombia_puzzle_game/deployment_sprint",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colombia_puzzle_game/deployment_sprint",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "2ce7997 refactor: Add critical swarm orchestration architecture callout to CLAUDE.md"
+    },
+    {
+      "name": "colores",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colores",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "3f2c2c5 docs: add LICENSE and enhance README for portfolio"
+    },
+    {
+      "name": "conjugation_gui",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/conjugation_gui",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "b0166fe merge: accept remote version of conjugation_gui project"
+    },
+    {
+      "name": "corporate_intel",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/corporate_intel",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "bad6c74 fix: update references after documentation reorganization"
+    },
+    {
+      "name": "cuerpo_humano",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cuerpo_humano",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "34635cd docs: add LICENSE and enhance README for portfolio"
+    },
+    {
+      "name": "describe_it",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/describe_it",
+      "status": "ACTIVE",
+      "commits_7d": 47,
+      "last_commit": "2ee3468 fix: resolve TypeScript errors and add claude-flow integration"
+    },
+    {
+      "name": "fancy_monkey",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/fancy_monkey",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "fa78b99 docs: resolve merge conflict - use portfolio README version"
+    },
+    {
+      "name": "formas_y_tamanos",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/formas_y_tamanos",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "9ee0971 docs: add LICENSE and enhance README for portfolio"
+    },
+    {
+      "name": "hablas",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/hablas",
+      "status": "ACTIVE",
+      "commits_7d": 39,
+      "last_commit": "274bc4e6 fix: cast NODE_ENV as string to fix type comparison"
+    },
+    {
+      "name": "internet",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/internet",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "6ebd708 docs: add MIT LICENSE for portfolio presentation"
+    },
+    {
+      "name": "lab_visualizer",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/lab_visualizer",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "12eee57 docs: Add visual UI guide for interactive features"
+    },
+    {
+      "name": "language-learning/subjunctive_practice",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/language-learning/subjunctive_practice",
+      "status": "ACTIVE",
+      "commits_7d": 7,
+      "last_commit": "8112f84 Merge origin/master into main for production"
+    },
+    {
+      "name": "learn_comptia_network+",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_comptia_network+",
+      "status": "ACTIVE",
+      "commits_7d": 23,
+      "last_commit": "c0f8127 fix: resolve CI failures - ESLint errors and Node.js version"
+    },
+    {
+      "name": "learn_my_system",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_my_system",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "4570012 docs: reorganize documentation structure"
+    },
+    {
+      "name": "learn_strudel",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_strudel",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "18740b8 docs: create standard documentation structure"
+    },
+    {
+      "name": "learning_voice_agent",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learning_voice_agent",
+      "status": "ACTIVE",
+      "commits_7d": 9,
+      "last_commit": "56d1bb4 feat: integrate RuVector self-learning vector store"
+    },
+    {
+      "name": "letratos",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/letratos",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "8d2bbc3 docs: reorganize documentation structure"
+    },
+    {
+      "name": "llms_on_my_system",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/llms_on_my_system",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "8434cb8 docs: reorganize documentation structure"
+    },
+    {
+      "name": "meal_assistant",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/meal_assistant",
+      "status": "ACTIVE",
+      "commits_7d": 32,
+      "last_commit": "5f1dce0 feat: add Railway deployment configuration"
+    },
+    {
+      "name": "mundo",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/mundo",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "8b3ef3d docs: portfolio preparation - add LICENSE and update README"
+    },
+    {
+      "name": "online_language_learning_resources",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/online_language_learning_resources",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "75f16e0 Merge branch 'main' of https://github.com/bjpl/online_language_learning_resources"
+    },
+    {
+      "name": "open_learn",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/open_learn",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "a20dc49 docs: portfolio preparation - add LICENSE and update README"
+    },
+    {
+      "name": "planetas",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/planetas",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "8e8363b docs: portfolio preparation - add LICENSE and update README"
+    },
+    {
+      "name": "report_assistant",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/report_assistant",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "04f368f fix: update all documentation references after reorganization"
+    },
+    {
+      "name": "sec_latent",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sec_latent",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "f1cbfa4 docs: portfolio preparation - add LICENSE and update README"
+    },
+    {
+      "name": "sinonimos",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "b6f4eda feat: Add deployment guide and success modal for user guidance (#3)"
+    },
+    {
+      "name": "sinonimos_de_caminar",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos_de_caminar",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "55fc310 docs: Update README with current project status and accurate information"
+    },
+    {
+      "name": "sinonimos_de_hablar",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos_de_hablar",
+      "status": "DORMANT",
+      "commits_7d": 0,
+      "last_commit": "7d73f8c docs: Update README with current project status and accurate information"
+    },
+    {
+      "name": "video_gen",
+      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/video_gen",
+      "status": "ACTIVE",
+      "commits_7d": 18,
+      "last_commit": "a049d0a fix: Enhance SSE progress tracking and jobs error display"
+    }
+  ],
+  "summary": {
+    "active_count": 12,
+    "dormant_count": 25,
+    "most_active": {
+      "name": "aves",
+      "commits_7d": 75
+    },
+    "activity_rate": "32.43%"
+  },
+  "insights": {
+    "high_activity_repos": [
+      {"name": "aves", "commits": 75},
+      {"name": "describe_it", "commits": 47},
+      {"name": "hablas", "commits": 39},
+      {"name": "meal_assistant", "commits": 32},
+      {"name": "learn_comptia_network+", "commits": 23}
+    ],
+    "patterns": [
+      "Majority of recent commits are fixes and deployments",
+      "12 repositories actively developed in past week",
+      "25 repositories in dormant state (portfolio/documentation phase)",
+      "Strong focus on language learning applications (aves, hablas, describe_it)"
+    ]
+  }
+}
