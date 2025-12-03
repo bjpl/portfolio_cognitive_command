@@ -13,6 +13,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import { config } from './config';
 import { scanRepos, getChangedFiles, RepoScanResult } from './skills/repo-scanner';
 import { generateEmbedding } from './skills/semantic-analyzer';
 import { detectDrift } from './skills/drift-detector';
@@ -45,12 +46,12 @@ interface CognitiveMetrics {
 }
 
 // ============================================================================
-// CONSTANTS
+// CONSTANTS (from config)
 // ============================================================================
 
-const DEFAULT_SCAN_DIR = '/mnt/c/Users/brand/Development/Project_Workspace/active-development';
+const DEFAULT_SCAN_DIR = config.defaultScanDir;
 const DEFAULT_MAX_DEPTH = 3;
-const DOCS_DIR = path.join(process.cwd(), 'docs');
+const DOCS_DIR = path.join(config.outputDir, 'docs');
 const SHARDS_DIR = path.join(DOCS_DIR, 'shards');
 
 // ============================================================================
@@ -62,7 +63,7 @@ const program = new Command();
 program
   .name('portfolio-cognitive-command')
   .description('AI-powered portfolio analysis with semantic clustering')
-  .version('8.0.0');
+  .version('1.0.0');
 
 // ============================================================================
 // COMMAND: scan
