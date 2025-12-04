@@ -20,6 +20,8 @@ import { detectDrift } from './skills/drift-detector';
 import { generateShard, batchGenerateShards, saveShards, loadShards, calculateStats } from './skills/shard-generator';
 import { linkToAgentDB } from './skills/cognitive-linker';
 import { createDashboardConfig, buildDashboardHTML, saveDashboard } from './skills/dashboard-builder';
+import { generateBrief } from './skills/brief-generator';
+import { generateLedger } from './skills/ledger-generator';
 
 // ============================================================================
 // TYPES
@@ -361,6 +363,19 @@ program
       console.log('');
       console.log('✅ Metrics saved!');
       console.log(`  Location: ${options.output}`);
+
+      // Generate Portfolio Brief
+      console.log('');
+      console.log('📝 Generating Portfolio Brief...');
+      const briefResult = generateBrief(options.shards, path.join(DOCS_DIR, 'cognitive_metrics.json'), DOCS_DIR);
+      console.log(`  ✓ Brief saved: ${briefResult.filepath}`);
+
+      // Generate Progress Ledger
+      console.log('');
+      console.log('📋 Generating Progress Ledger...');
+      const ledgerResult = await generateLedger({ shardDir: options.shards, outputDir: DOCS_DIR });
+      console.log(`  ✓ Ledger saved: ${ledgerResult.ledgerPath}`);
+
     } catch (error) {
       console.error('❌ Error generating metrics:', error);
       process.exit(1);
@@ -494,6 +509,20 @@ program
       fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
 
       console.log(`✓ Metrics exported`);
+
+      // Generate Portfolio Brief
+      console.log('');
+      console.log('Phase 5/6: Portfolio Brief Generation');
+      console.log('─'.repeat(60));
+      const briefResult = generateBrief(SHARDS_DIR, metricsPath, DOCS_DIR);
+      console.log(`✓ Brief generated: ${briefResult.filename}`);
+
+      // Generate Progress Ledger
+      console.log('');
+      console.log('Phase 6/6: Progress Ledger Generation');
+      console.log('─'.repeat(60));
+      const ledgerResult = await generateLedger({ shardDir: SHARDS_DIR, outputDir: DOCS_DIR });
+      console.log(`✓ Ledger generated: ${path.basename(ledgerResult.ledgerPath)}`);
       console.log('');
 
       // Summary
