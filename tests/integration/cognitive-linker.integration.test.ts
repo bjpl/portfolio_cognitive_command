@@ -42,7 +42,8 @@ describe('Cognitive Linker Integration Tests', () => {
 
     it('should return manual link for unknown commit hash', async () => {
       const commitHash = 'unknown123';
-      const commitTimestamp = new Date('2025-12-03T08:00:00.000Z');
+      // Use a timestamp far outside any session's 1-hour window
+      const commitTimestamp = new Date('2025-01-01T00:00:00.000Z');
 
       const result = await linkToAgentDB(commitTimestamp, commitHash, testDbPath);
 
