@@ -137,7 +137,7 @@ export class FileStorageBackend implements StorageBackend {
       const document = JSON.parse(content) as T;
 
       // Convert date strings back to Date objects
-      this.deserializeDates(document);
+      this.deserializeDates(document as unknown as Record<string, unknown>);
 
       return document;
     } catch (error) {
@@ -256,7 +256,7 @@ export class FileStorageBackend implements StorageBackend {
           'utf-8'
         );
         const doc = JSON.parse(content) as T;
-        this.deserializeDates(doc);
+        this.deserializeDates(doc as unknown as Record<string, unknown>);
         documents.push(doc);
       }
 
@@ -290,11 +290,11 @@ export class FileStorageBackend implements StorageBackend {
    */
   private matchesFilter(doc: Document, filter: QueryFilter): boolean {
     for (const [key, value] of Object.entries(filter)) {
-      const docValue = (doc as Record<string, unknown>)[key];
+      const docValue = (doc as unknown as Record<string, unknown>)[key];
 
       // Handle operators
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        if (!this.matchesOperator(docValue, value)) {
+        if (!this.matchesOperator(docValue, value as Record<string, unknown>)) {
           return false;
         }
       } else {
@@ -342,12 +342,15 @@ export class FileStorageBackend implements StorageBackend {
     sort: { field: string; order: 'asc' | 'desc' }
   ): T[] {
     return [...documents].sort((a, b) => {
-      const aVal = (a as Record<string, unknown>)[sort.field];
-      const bVal = (b as Record<string, unknown>)[sort.field];
+      const aVal = (a as unknown as Record<string, unknown>)[sort.field];
+      const bVal = (b as unknown as Record<string, unknown>)[sort.field];
 
       let comparison = 0;
-      if (aVal < bVal) comparison = -1;
-      if (aVal > bVal) comparison = 1;
+      // Type-safe comparison for unknown values
+      if (aVal !== undefined && aVal !== null && bVal !== undefined && bVal !== null) {
+        if (aVal < bVal) comparison = -1;
+        else if (aVal > bVal) comparison = 1;
+      }
 
       return sort.order === 'asc' ? comparison : -comparison;
     });

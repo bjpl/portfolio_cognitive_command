@@ -519,7 +519,13 @@ export class QueryBuilder {
     sessions: SessionState[];
     worldStates: WorldState[];
     metrics: MetricsDocument[];
-    alertStats: Awaited<ReturnType<typeof this.getDriftAlertStats>>;
+    alertStats: {
+      total: number;
+      bySeverity: Record<DriftSeverity, number>;
+      acknowledged: number;
+      resolved: number;
+      criticalUnresolved: number;
+    };
   }> {
     const [
       latestAnalysis,

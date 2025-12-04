@@ -132,7 +132,7 @@ export class SyncManager {
     const namespace = `agentdb/${collection}`;
     let synced = 0;
     let conflicts = 0;
-    const errors: string[] = [];
+    let errors: string[] = [];
 
     try {
       // Get local documents
