@@ -369,7 +369,7 @@ export class SyncManager {
           strategy: 'remote',
         };
 
-      case 'latest':
+      case 'latest': {
         const latest =
           localDoc.updatedAt > remoteDoc.updatedAt ? localDoc : remoteDoc;
         return {
@@ -378,9 +378,10 @@ export class SyncManager {
           resolvedVersion: latest,
           strategy: latest === localDoc ? 'local' : 'remote',
         };
+      }
 
       case 'manual':
-      default:
+      default: {
         // For manual resolution, prefer the version with higher version number
         const resolved = localDoc.version > remoteDoc.version ? localDoc : remoteDoc;
         return {
@@ -389,6 +390,7 @@ export class SyncManager {
           resolvedVersion: resolved,
           strategy: 'merge',
         };
+      }
     }
   }
 

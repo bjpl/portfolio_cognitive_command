@@ -5,7 +5,12 @@ import * as path from 'path';
 dotenv.config();
 
 export interface Config {
-  // OpenAI API Configuration
+  // Claude API Configuration (Primary)
+  anthropicApiKey: string | undefined;
+  claudeModel: string;
+  useClaudeApi: boolean;
+
+  // OpenAI API Configuration (Fallback)
   openaiApiKey: string | undefined;
   openaiEmbeddingModel: string;
   embeddingDimensions: number;
@@ -62,11 +67,16 @@ function parseNumber(value: string | undefined, defaultValue: number, min?: numb
  * Application configuration loaded from environment variables
  */
 export const config: Config = {
-  // OpenAI API Configuration
+  // Claude API Configuration (Primary)
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  claudeModel: process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514',
+  useClaudeApi: parseBoolean(process.env.USE_CLAUDE_API, true),
+
+  // OpenAI API Configuration (Fallback)
   openaiApiKey: process.env.OPENAI_API_KEY,
   openaiEmbeddingModel: process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small',
   embeddingDimensions: parseNumber(process.env.EMBEDDING_DIMENSIONS, 1536, 1, 3072),
-  useOpenAIApi: parseBoolean(process.env.USE_OPENAI_API, true),
+  useOpenAIApi: parseBoolean(process.env.USE_OPENAI_API, false),
 
   // Project Paths
   defaultScanDir: process.env.SCAN_DIR || process.cwd(),
@@ -93,10 +103,16 @@ export function validateConfig(): { valid: boolean; warnings: string[]; errors: 
   const warnings: string[] = [];
   const errors: string[] = [];
 
-  // Check OpenAI API key
-  if (config.useOpenAIApi && !config.openaiApiKey) {
+  // Check Claude API key (primary)
+  if (config.useClaudeApi && !config.anthropicApiKey) {
+    warnings.push('ANTHROPIC_API_KEY not set. System will try OpenAI or fall back to keywords.');
+    config.useClaudeApi = false;
+  }
+
+  // Check OpenAI API key (fallback)
+  if (!config.useClaudeApi && config.useOpenAIApi && !config.openaiApiKey) {
     warnings.push('OPENAI_API_KEY not set. System will use keyword-based fallback.');
-    config.useOpenAIApi = false; // Force fallback
+    config.useOpenAIApi = false;
   }
 
   // Validate drift threshold
@@ -131,16 +147,23 @@ export function validateConfig(): { valid: boolean; warnings: string[]; errors: 
  * Print configuration to console (hiding sensitive data)
  */
 export function printConfig(): void {
-  const maskedApiKey = config.openaiApiKey
+  const maskedAnthropicKey = config.anthropicApiKey
+    ? `${config.anthropicApiKey.substring(0, 10)}...${config.anthropicApiKey.substring(config.anthropicApiKey.length - 4)}`
+    : 'Not set';
+  const maskedOpenAIKey = config.openaiApiKey
     ? `${config.openaiApiKey.substring(0, 7)}...${config.openaiApiKey.substring(config.openaiApiKey.length - 4)}`
     : 'Not set';
 
   console.log('\n=== Portfolio Cognitive Command Configuration ===');
-  console.log('\nOpenAI Settings:');
-  console.log(`  API Key: ${maskedApiKey}`);
+  console.log('\nClaude API Settings (Primary):');
+  console.log(`  API Key: ${maskedAnthropicKey}`);
+  console.log(`  Model: ${config.claudeModel}`);
+  console.log(`  Use Claude API: ${config.useClaudeApi}`);
+  console.log('\nOpenAI Settings (Fallback):');
+  console.log(`  API Key: ${maskedOpenAIKey}`);
   console.log(`  Model: ${config.openaiEmbeddingModel}`);
   console.log(`  Dimensions: ${config.embeddingDimensions}`);
-  console.log(`  Use API: ${config.useOpenAIApi}`);
+  console.log(`  Use OpenAI API: ${config.useOpenAIApi}`);
 
   console.log('\nPaths:');
   console.log(`  Scan Directory: ${config.defaultScanDir}`);

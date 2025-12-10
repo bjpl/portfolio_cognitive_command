@@ -1,10 +1,12 @@
 /**
  * Semantic Analyzer Skill
- * Generates semantic embeddings using Ruvector-style clustering
- * Optionally uses OpenAI API when available, falls back to keyword-based approach
+ * Generates semantic embeddings using Claude API (Sonnet 4.5) as primary
+ * Falls back to OpenAI embeddings, then keyword-based approach
  */
 
+import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
+import { config } from '../config';
 
 export type ClusterType = 'Experience' | 'Core Systems' | 'Infra';
 
@@ -14,10 +16,16 @@ export interface SemanticEmbedding {
   confidence: number;
 }
 
-// Initialize OpenAI client if API key is available
+// Initialize Claude client (primary)
+let claudeClient: Anthropic | null = null;
+if (config.anthropicApiKey || process.env.ANTHROPIC_API_KEY) {
+  claudeClient = new Anthropic({ apiKey: config.anthropicApiKey || process.env.ANTHROPIC_API_KEY });
+}
+
+// Initialize OpenAI client (fallback)
 let openaiClient: OpenAI | null = null;
-if (process.env.OPENAI_API_KEY) {
-  openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+if (config.openaiApiKey || process.env.OPENAI_API_KEY) {
+  openaiClient = new OpenAI({ apiKey: config.openaiApiKey || process.env.OPENAI_API_KEY });
 }
 
 /**
@@ -168,30 +176,90 @@ function calculateScore(
 }
 
 /**
- * Generates embedding vector
- * Uses OpenAI API if available, falls back to keyword-based approach
+ * Generates embedding vector using Claude API (primary), OpenAI (fallback), or keywords
+ * Claude generates semantic embeddings through structured analysis
  */
 async function generateVector(
   text: string,
   paths: string[],
   cluster: ClusterType
 ): Promise<number[]> {
-  // Try OpenAI API first if available
+  const combinedText = `${text} ${paths.join(' ')}`.substring(0, 8000);
+
+  // Try Claude API first (primary)
+  if (claudeClient && config.useClaudeApi) {
+    try {
+      const embedding = await generateClaudeEmbedding(combinedText, cluster);
+      if (embedding) {
+        return embedding;
+      }
+    } catch (error) {
+      console.warn('[SemanticAnalyzer] Claude API failed, trying OpenAI fallback:', error);
+    }
+  }
+
+  // Try OpenAI API as fallback
   if (openaiClient) {
     try {
-      const combinedText = `${text} ${paths.join(' ')}`.substring(0, 8000);
       const response = await openaiClient.embeddings.create({
         model: 'text-embedding-3-small',
         input: combinedText,
       });
       return response.data[0].embedding;
     } catch (error) {
-      console.warn('[SemanticAnalyzer] OpenAI API failed, using fallback:', error);
+      console.warn('[SemanticAnalyzer] OpenAI API failed, using keyword fallback:', error);
     }
   }
 
-  // Fallback: keyword-based vector generation
+  // Final fallback: keyword-based vector generation
   return generateKeywordVector(text, paths, cluster);
+}
+
+/**
+ * Generates semantic embedding using Claude API (Sonnet 4.5)
+ * Uses structured semantic analysis to create dense vector representation
+ */
+async function generateClaudeEmbedding(
+  text: string,
+  cluster: ClusterType
+): Promise<number[] | null> {
+  if (!claudeClient) return null;
+
+  try {
+    const response = await claudeClient.messages.create({
+      model: config.claudeModel,
+      max_tokens: 4096,
+      messages: [{
+        role: 'user',
+        content: `Analyze this code/commit context and generate a semantic embedding as a JSON array of 1536 floating-point numbers between -1 and 1. The embedding should capture:
+1. Technical domain (frontend/backend/infra)
+2. Code patterns and architecture style
+3. Complexity and scope indicators
+4. Language/framework signals
+
+Context to analyze:
+${text}
+
+Primary cluster hint: ${cluster}
+
+Return ONLY a valid JSON array of exactly 1536 numbers, no other text.`
+      }]
+    });
+
+    // Extract the text content from Claude's response
+    const content = response.content[0];
+    if (content.type === 'text') {
+      const parsed = JSON.parse(content.text);
+      if (Array.isArray(parsed) && parsed.length === 1536) {
+        return parsed as number[];
+      }
+    }
+    console.warn('[SemanticAnalyzer] Claude returned invalid embedding format');
+    return null;
+  } catch (error) {
+    console.warn('[SemanticAnalyzer] Claude embedding generation failed:', error);
+    return null;
+  }
 }
 
 /**

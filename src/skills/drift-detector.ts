@@ -71,7 +71,7 @@ function parseText(text: string): { messages: string[]; paths: string[] } {
 
   for (const line of lines) {
     // Detect file paths (contain / or \ and file extensions)
-    if (line.match(/[\/\\]/) || line.match(/\.\w{1,4}$/)) {
+    if (line.match(/[/\\]/) || line.match(/\.\w{1,4}$/)) {
       paths.push(line.trim());
     } else {
       // Treat as commit message or description

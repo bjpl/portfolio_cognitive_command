@@ -1155,6 +1155,401 @@ describe('AgentDB', () => {
   });
 
   // ==========================================================================
+  // Analysis Operations
+  // ==========================================================================
+
+  describe('saveAnalysis', () => {
+    it('should save analysis document', async () => {
+      const analysis: AnalysisResult = {
+        id: 'analysis-123',
+        collection: 'analyses',
+        analysisId: 'analysis-123',
+        sessionId: 'session-123',
+        analysisType: 'semantic',
+        repositories: ['test/repo'],
+        totalRepositories: 1,
+        totalCommits: 50,
+        processingTime: 5000,
+        status: 'completed',
+        performedBy: 'agent-123',
+        performedAt: new Date('2025-01-01'),
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        version: 1,
+      };
+      mockStorage.save.mockResolvedValue(analysis);
+
+      const result = await db.saveAnalysis(analysis);
+
+      expect(mockStorage.save).toHaveBeenCalledWith('analyses', analysis);
+      expect(result).toEqual(analysis);
+    });
+  });
+
+  describe('getLatestAnalysis', () => {
+    it('should delegate to query builder', async () => {
+      const analysis: AnalysisResult = {
+        id: 'analysis-123',
+        collection: 'analyses',
+        analysisId: 'analysis-123',
+        sessionId: 'session-123',
+        analysisType: 'comprehensive',
+        repositories: ['test/repo'],
+        totalRepositories: 1,
+        totalCommits: 100,
+        processingTime: 10000,
+        status: 'completed',
+        performedBy: 'agent-123',
+        performedAt: new Date('2025-01-01'),
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        version: 1,
+      };
+      mockQueryBuilder.getLatestAnalysisForRepo.mockResolvedValue(analysis);
+
+      const result = await db.getLatestAnalysis('test/repo');
+
+      expect(mockQueryBuilder.getLatestAnalysisForRepo).toHaveBeenCalledWith('test/repo');
+      expect(result).toEqual(analysis);
+    });
+
+    it('should return null when no analysis found', async () => {
+      mockQueryBuilder.getLatestAnalysisForRepo.mockResolvedValue(null);
+
+      const result = await db.getLatestAnalysis('test/repo');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  // ==========================================================================
+  // Drift Alert Operations
+  // ==========================================================================
+
+  describe('createDriftAlert', () => {
+    it('should create drift alert document', async () => {
+      const alert: DriftAlert = {
+        id: 'alert-123',
+        collection: 'driftAlerts',
+        alertId: 'alert-123',
+        repository: 'test/repo',
+        driftResult: {
+          alignmentScore: 0.75,
+          driftAlert: true,
+          highPrecision: true,
+          intentVector: [0.1, 0.2, 0.3],
+          implementationVector: [0.2, 0.3, 0.4],
+        },
+        severity: 'high',
+        intentSummary: 'Add authentication feature',
+        implementationSummary: 'Added login form without validation',
+        acknowledged: false,
+        resolved: false,
+        recommendations: ['Add input validation', 'Add security tests'],
+        actionsTaken: [],
+        detectedBy: 'agent-123',
+        detectedAt: new Date('2025-01-01'),
+        sessionId: 'session-123',
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        version: 1,
+      };
+      mockStorage.save.mockResolvedValue(alert);
+
+      const result = await db.createDriftAlert(alert);
+
+      expect(mockStorage.save).toHaveBeenCalledWith('driftAlerts', alert);
+      expect(result).toEqual(alert);
+    });
+  });
+
+  describe('acknowledgeDriftAlert', () => {
+    it('should acknowledge drift alert', async () => {
+      const alert: DriftAlert = {
+        id: 'alert-123',
+        collection: 'driftAlerts',
+        alertId: 'alert-123',
+        repository: 'test/repo',
+        driftResult: {
+          alignmentScore: 0.75,
+          driftAlert: true,
+          highPrecision: true,
+          intentVector: [0.1, 0.2, 0.3],
+          implementationVector: [0.2, 0.3, 0.4],
+        },
+        severity: 'medium',
+        intentSummary: 'Test',
+        implementationSummary: 'Test',
+        acknowledged: true,
+        acknowledgedBy: 'agent-456',
+        acknowledgedAt: new Date('2025-01-02'),
+        resolved: false,
+        recommendations: [],
+        actionsTaken: [],
+        detectedBy: 'agent-123',
+        detectedAt: new Date('2025-01-01'),
+        sessionId: 'session-123',
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-02'),
+        version: 1,
+      };
+      mockStorage.update.mockResolvedValue(alert);
+
+      const result = await db.acknowledgeDriftAlert('alert-123', 'agent-456');
+
+      expect(mockStorage.update).toHaveBeenCalledWith('driftAlerts', 'alert-123', {
+        acknowledged: true,
+        acknowledgedBy: 'agent-456',
+        acknowledgedAt: expect.any(Date),
+      });
+      expect(result).toEqual(alert);
+    });
+
+    it('should set timestamp when acknowledging alert', async () => {
+      const beforeUpdate = new Date();
+      const alert: DriftAlert = {
+        id: 'alert-123',
+        collection: 'driftAlerts',
+        alertId: 'alert-123',
+        repository: 'test/repo',
+        driftResult: {
+          alignmentScore: 0.5,
+          driftAlert: true,
+          highPrecision: true,
+          intentVector: [0.1, 0.2, 0.3],
+          implementationVector: [0.2, 0.3, 0.4],
+        },
+        severity: 'low',
+        intentSummary: 'Test',
+        implementationSummary: 'Test',
+        acknowledged: true,
+        acknowledgedAt: new Date(),
+        resolved: false,
+        recommendations: [],
+        actionsTaken: [],
+        detectedBy: 'agent-123',
+        detectedAt: new Date('2025-01-01'),
+        sessionId: 'session-123',
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        version: 1,
+      };
+      mockStorage.update.mockResolvedValue(alert);
+
+      await db.acknowledgeDriftAlert('alert-123', 'agent-456');
+
+      const callArgs = mockStorage.update.mock.calls[0][2] as any;
+      expect(callArgs.acknowledgedAt).toBeInstanceOf(Date);
+      expect(callArgs.acknowledgedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime());
+    });
+  });
+
+  describe('resolveDriftAlert', () => {
+    it('should resolve drift alert', async () => {
+      const alert: DriftAlert = {
+        id: 'alert-123',
+        collection: 'driftAlerts',
+        alertId: 'alert-123',
+        repository: 'test/repo',
+        driftResult: {
+          alignmentScore: 0.75,
+          driftAlert: true,
+          highPrecision: true,
+          intentVector: [0.1, 0.2, 0.3],
+          implementationVector: [0.2, 0.3, 0.4],
+        },
+        severity: 'high',
+        intentSummary: 'Test',
+        implementationSummary: 'Test',
+        acknowledged: true,
+        resolved: true,
+        resolvedAt: new Date('2025-01-03'),
+        recommendations: [],
+        actionsTaken: [],
+        detectedBy: 'agent-123',
+        detectedAt: new Date('2025-01-01'),
+        sessionId: 'session-123',
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-03'),
+        version: 1,
+      };
+      mockStorage.update.mockResolvedValue(alert);
+
+      const result = await db.resolveDriftAlert('alert-123');
+
+      expect(mockStorage.update).toHaveBeenCalledWith('driftAlerts', 'alert-123', {
+        resolved: true,
+        resolvedAt: expect.any(Date),
+      });
+      expect(result).toEqual(alert);
+    });
+
+    it('should set timestamp when resolving alert', async () => {
+      const beforeUpdate = new Date();
+      const alert: DriftAlert = {
+        id: 'alert-123',
+        collection: 'driftAlerts',
+        alertId: 'alert-123',
+        repository: 'test/repo',
+        driftResult: {
+          alignmentScore: 0.9,
+          driftAlert: true,
+          highPrecision: true,
+          intentVector: [0.1, 0.2, 0.3],
+          implementationVector: [0.2, 0.3, 0.4],
+        },
+        severity: 'critical',
+        intentSummary: 'Test',
+        implementationSummary: 'Test',
+        acknowledged: true,
+        resolved: true,
+        resolvedAt: new Date(),
+        recommendations: [],
+        actionsTaken: [],
+        detectedBy: 'agent-123',
+        detectedAt: new Date('2025-01-01'),
+        sessionId: 'session-123',
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        version: 1,
+      };
+      mockStorage.update.mockResolvedValue(alert);
+
+      await db.resolveDriftAlert('alert-123');
+
+      const callArgs = mockStorage.update.mock.calls[0][2] as any;
+      expect(callArgs.resolvedAt).toBeInstanceOf(Date);
+      expect(callArgs.resolvedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime());
+    });
+  });
+
+  describe('getUnacknowledgedAlerts', () => {
+    it('should delegate to query builder', async () => {
+      const alert: DriftAlert = {
+        id: 'alert-123',
+        collection: 'driftAlerts',
+        alertId: 'alert-123',
+        repository: 'test/repo',
+        driftResult: {
+          alignmentScore: 0.8,
+          driftAlert: true,
+          highPrecision: true,
+          intentVector: [0.1, 0.2, 0.3],
+          implementationVector: [0.2, 0.3, 0.4],
+        },
+        severity: 'high',
+        intentSummary: 'Test',
+        implementationSummary: 'Test',
+        acknowledged: false,
+        resolved: false,
+        recommendations: [],
+        actionsTaken: [],
+        detectedBy: 'agent-123',
+        detectedAt: new Date('2025-01-01'),
+        sessionId: 'session-123',
+        tags: [],
+        customData: {},
+        createdAt: new Date('2025-01-01'),
+        updatedAt: new Date('2025-01-01'),
+        version: 1,
+      };
+      const mockResult: QueryResult<DriftAlert> = {
+        documents: [alert],
+        total: 1,
+        hasMore: false,
+      };
+      mockQueryBuilder.getUnacknowledgedAlerts.mockResolvedValue(mockResult);
+
+      const result = await db.getUnacknowledgedAlerts();
+
+      expect(mockQueryBuilder.getUnacknowledgedAlerts).toHaveBeenCalled();
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should return empty result when no unacknowledged alerts', async () => {
+      const mockResult: QueryResult<DriftAlert> = {
+        documents: [],
+        total: 0,
+        hasMore: false,
+      };
+      mockQueryBuilder.getUnacknowledgedAlerts.mockResolvedValue(mockResult);
+
+      const result = await db.getUnacknowledgedAlerts();
+
+      expect(result.documents).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+  });
+
+  // ==========================================================================
+  // Additional Skill Operation Tests
+  // ==========================================================================
+
+  describe('recordSkillExecution - edge cases', () => {
+    it('should calculate average execution time correctly', async () => {
+      const skill = createMockSkill({
+        executionCount: 5,
+        errorCount: 0,
+        averageExecutionTime: 1000,
+      });
+      mockStorage.load.mockResolvedValue(skill);
+      mockStorage.update.mockResolvedValue(skill);
+
+      await db.recordSkillExecution('skill-123', true, 1500);
+
+      const callArgs = mockStorage.update.mock.calls[0][2] as any;
+      // (1000 * 5 + 1500) / 6 ≈ 1083.33
+      expect(callArgs.averageExecutionTime).toBeCloseTo(1083.33, 1);
+    });
+
+    it('should handle first execution', async () => {
+      const skill = createMockSkill({
+        executionCount: 0,
+        errorCount: 0,
+        averageExecutionTime: 0,
+        successRate: 0,
+      });
+      mockStorage.load.mockResolvedValue(skill);
+      mockStorage.update.mockResolvedValue(skill);
+
+      await db.recordSkillExecution('skill-123', true, 2000);
+
+      const callArgs = mockStorage.update.mock.calls[0][2] as any;
+      expect(callArgs.executionCount).toBe(1);
+      expect(callArgs.errorCount).toBe(0);
+      expect(callArgs.successRate).toBe(1);
+      expect(callArgs.averageExecutionTime).toBe(2000);
+    });
+
+    it('should update lastExecuted timestamp', async () => {
+      const beforeUpdate = new Date();
+      const skill = createMockSkill();
+      mockStorage.load.mockResolvedValue(skill);
+      mockStorage.update.mockResolvedValue(skill);
+
+      await db.recordSkillExecution('skill-123', true, 1000);
+
+      const callArgs = mockStorage.update.mock.calls[0][2] as any;
+      expect(callArgs.lastExecuted).toBeInstanceOf(Date);
+      expect(callArgs.lastExecuted.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime());
+    });
+  });
+
+  // ==========================================================================
   // Cleanup
   // ==========================================================================
 

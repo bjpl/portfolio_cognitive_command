@@ -19,10 +19,14 @@ import {
   DriftAlert,
   NeuralPattern,
   MetricsDocument,
+  VectorQueryOptions,
+  VectorSearchResult,
 } from './types';
 import { StorageBackend, FileStorageBackend } from './storage';
 import { SyncManager, MCPMemoryTools } from './sync';
 import { QueryBuilder } from './queries';
+import { SemanticEmbedding } from '../skills/semantic-analyzer';
+import { VectorStore } from './vector-store';
 
 /**
  * Main AgentDB class
@@ -32,17 +36,23 @@ export class AgentDB {
   private storage: StorageBackend;
   private sync?: SyncManager;
   private queries: QueryBuilder;
+  private vectorStore?: VectorStore;
 
   constructor(
     storage: StorageBackend,
     mcpTools?: MCPMemoryTools,
-    syncConfig?: SyncConfig
+    syncConfig?: SyncConfig,
+    enableVectorSearch: boolean = true
   ) {
     this.storage = storage;
     this.queries = new QueryBuilder(storage);
 
     if (mcpTools && syncConfig) {
       this.sync = new SyncManager(storage, mcpTools, syncConfig);
+    }
+
+    if (enableVectorSearch) {
+      this.vectorStore = new VectorStore();
     }
   }
 
@@ -474,6 +484,170 @@ export class AgentDB {
   }
 
   // ============================================================================
+  // Vector Search Operations
+  // ============================================================================
+
+  /**
+   * Store an embedding for a document
+   * Creates a composite ID in format "collection:documentId"
+   * @param collection - Collection name
+   * @param documentId - Document ID
+   * @param embedding - Semantic embedding to store
+   * @throws Error if vector store is not enabled
+   */
+  async storeEmbedding(
+    collection: CollectionName,
+    documentId: string,
+    embedding: SemanticEmbedding
+  ): Promise<void> {
+    if (!this.vectorStore) {
+      throw new Error('Vector store is not enabled');
+    }
+
+    // Create composite ID to track collection + document
+    const vectorId = `${collection}:${documentId}`;
+
+    await this.vectorStore.add(
+      vectorId,
+      embedding.vector,
+      {
+        collection,
+        documentId,
+        cluster: embedding.cluster,
+        confidence: embedding.confidence,
+      }
+    );
+  }
+
+  /**
+   * Search for documents by vector similarity
+   * @param collection - Collection to search
+   * @param query - Query vector
+   * @param options - Search options (limit, threshold, filter)
+   * @returns Array of search results with similarity scores
+   * @throws Error if vector store is not enabled
+   */
+  async searchByVector<T extends Document>(
+    collection: CollectionName,
+    query: number[],
+    options?: VectorQueryOptions
+  ): Promise<VectorSearchResult<T>[]> {
+    if (!this.vectorStore) {
+      throw new Error('Vector store is not enabled');
+    }
+
+    const limit = options?.limit ?? 10;
+    const threshold = options?.threshold ?? 0.0;
+
+    // Search all vectors (VectorStore doesn't support per-collection filtering)
+    // We'll need to request more results and filter by collection
+    const vectorResults = await this.vectorStore.search(query, limit * 3);
+
+    // Load full documents and apply filters
+    const results: VectorSearchResult<T>[] = [];
+
+    for (const vectorResult of vectorResults) {
+      // Check if this result belongs to the requested collection
+      const metadata = vectorResult.doc.metadata;
+      if (metadata.collection !== collection) {
+        continue;
+      }
+
+      // Check similarity threshold
+      if (vectorResult.similarity < threshold) {
+        continue;
+      }
+
+      const documentId = metadata.documentId as string;
+      const document = await this.load<T>(collection, documentId);
+
+      if (!document) {
+        continue; // Document may have been deleted
+      }
+
+      // Apply filter if provided
+      if (options?.filter && !this.matchesFilter(document, options.filter)) {
+        continue;
+      }
+
+      results.push({
+        document,
+        similarity: vectorResult.similarity,
+        vector: vectorResult.doc.vector,
+      });
+
+      // Stop when we have enough results
+      if (results.length >= limit) {
+        break;
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Find documents similar to a given document
+   * @param collection - Collection to search
+   * @param documentId - ID of the reference document
+   * @param limit - Maximum number of results (default: 10)
+   * @returns Array of similar documents with similarity scores
+   * @throws Error if vector store is not enabled or document not found
+   */
+  async findSimilar<T extends Document>(
+    collection: CollectionName,
+    documentId: string,
+    limit: number = 10
+  ): Promise<VectorSearchResult<T>[]> {
+    if (!this.vectorStore) {
+      throw new Error('Vector store is not enabled');
+    }
+
+    // Get the vector for the reference document
+    const vectorId = `${collection}:${documentId}`;
+    const vectorDoc = await this.vectorStore.get(vectorId);
+
+    if (!vectorDoc) {
+      throw new Error(`No embedding found for document: ${documentId}`);
+    }
+
+    // Search using the document's vector
+    const results = await this.searchByVector<T>(
+      collection,
+      vectorDoc.vector,
+      { limit: limit + 1 } // Get one extra to exclude the reference document
+    );
+
+    // Filter out the reference document itself
+    return results.filter(r => r.document.id !== documentId).slice(0, limit);
+  }
+
+  /**
+   * Helper method to check if a document matches a filter
+   * Simple implementation for vector search filtering
+   */
+  private matchesFilter(document: Document, filter: QueryFilter): boolean {
+    for (const [key, value] of Object.entries(filter)) {
+      const docValue = (document as unknown as Record<string, unknown>)[key];
+
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        // Handle query operators
+        const operators = value as Record<string, unknown>;
+
+        if ('$eq' in operators && docValue !== operators.$eq) return false;
+        if ('$ne' in operators && docValue === operators.$ne) return false;
+        if ('$in' in operators && !Array.isArray(operators.$in)) return false;
+        if ('$in' in operators && !(operators.$in as unknown[]).includes(docValue)) return false;
+        // Add more operators as needed
+      } else {
+        // Direct equality check
+        if (docValue !== value) return false;
+      }
+    }
+
+    return true;
+  }
+
+  // ============================================================================
   // Sync Operations
   // ============================================================================
 
@@ -551,8 +725,9 @@ export class AgentDB {
 export function createAgentDB(
   basePath?: string,
   mcpTools?: MCPMemoryTools,
-  syncConfig?: SyncConfig
+  syncConfig?: SyncConfig,
+  enableVectorSearch: boolean = true
 ): AgentDB {
   const storage = new FileStorageBackend(basePath);
-  return new AgentDB(storage, mcpTools, syncConfig);
+  return new AgentDB(storage, mcpTools, syncConfig, enableVectorSearch);
 }

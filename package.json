@@ -23,6 +23,7 @@
     "status": "ts-node src/index.ts status"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "commander": "^11.0.0",
     "dotenv": "^17.2.3",
     "glob": "^10.3.0",

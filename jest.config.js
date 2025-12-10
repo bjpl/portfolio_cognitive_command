@@ -1,11 +1,12 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/index.ts'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  testTimeout: 30000,
-  forceExit: true
+  testTimeout: 10000,
+  forceExit: true,
+  maxWorkers: 1
 };

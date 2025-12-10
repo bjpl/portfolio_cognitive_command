@@ -444,6 +444,34 @@ export interface QueryResult<T extends Document> {
 }
 
 // ============================================================================
+// Vector Search Types
+// ============================================================================
+
+/**
+ * Options for vector similarity search
+ */
+export interface VectorQueryOptions {
+  /** Maximum number of results to return */
+  limit?: number;
+  /** Minimum similarity score threshold (0-1) */
+  threshold?: number;
+  /** Additional filters to apply to results */
+  filter?: QueryFilter;
+}
+
+/**
+ * Result from vector similarity search
+ */
+export interface VectorSearchResult<T extends Document> {
+  /** The matching document */
+  document: T;
+  /** Similarity score (0-1, higher is more similar) */
+  similarity: number;
+  /** The embedding vector */
+  vector: number[];
+}
+
+// ============================================================================
 // Sync Types
 // ============================================================================
 
