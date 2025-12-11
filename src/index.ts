@@ -57,6 +57,22 @@ const DEFAULT_MAX_DEPTH = 3;
 const DOCS_DIR = path.join(config.outputDir, 'docs');
 const SHARDS_DIR = path.join(DOCS_DIR, 'shards');
 
+// Helper to generate dated metrics filename
+function getDatedMetricsFilename(): string {
+  const date = new Date().toISOString().split('T')[0];
+  return `cognitive_metrics_${date}.json`;
+}
+
+// Helper to find latest metrics file
+function findLatestMetricsFile(dir: string): string | null {
+  if (!fs.existsSync(dir)) return null;
+  const files = fs.readdirSync(dir)
+    .filter(f => f.startsWith('cognitive_metrics_') && f.endsWith('.json'))
+    .sort()
+    .reverse();
+  return files.length > 0 ? path.join(dir, files[0]) : null;
+}
+
 // ============================================================================
 // CLI SETUP
 // ============================================================================
@@ -318,8 +334,11 @@ program
   .command('metrics')
   .description('Generate cognitive metrics JSON file')
   .option('--shards <path>', 'Path to shards directory', SHARDS_DIR)
-  .option('--output <path>', 'Output path for metrics', path.join(DOCS_DIR, 'cognitive_metrics.json'))
+  .option('--output <path>', 'Output path for metrics (default: dated filename)')
   .action(async (options) => {
+    // Use dated filename if not specified
+    const outputPath = options.output || path.join(DOCS_DIR, getDatedMetricsFilename());
+
     console.log('📈 Phase 4: Generating Cognitive Metrics...');
     console.log('');
 
@@ -357,7 +376,7 @@ program
       };
 
       // Save metrics
-      fs.writeFileSync(options.output, JSON.stringify(metrics, null, 2));
+      fs.writeFileSync(outputPath, JSON.stringify(metrics, null, 2));
 
       console.log('  Metrics Summary:');
       console.log(`    Total Projects: ${metrics.totalProjects}`);
@@ -373,12 +392,12 @@ program
       });
       console.log('');
       console.log('✅ Metrics saved!');
-      console.log(`  Location: ${options.output}`);
+      console.log(`  Location: ${outputPath}`);
 
       // Generate Portfolio Brief
       console.log('');
       console.log('📝 Generating Portfolio Brief...');
-      const briefResult = generateBrief(options.shards, path.join(DOCS_DIR, 'cognitive_metrics.json'), DOCS_DIR);
+      const briefResult = generateBrief(options.shards, outputPath, DOCS_DIR);
       console.log(`  ✓ Brief saved: ${briefResult.filepath}`);
 
       // Generate Progress Ledger
@@ -527,7 +546,7 @@ program
         precisionScore: stats.averageAlignment
       };
 
-      const metricsPath = path.join(DOCS_DIR, 'cognitive_metrics.json');
+      const metricsPath = path.join(DOCS_DIR, getDatedMetricsFilename());
       fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2));
 
       console.log(`✓ Metrics exported`);
@@ -748,13 +767,13 @@ program
       console.log(`  └─ ${(stats.size / 1024).toFixed(1)} KB dashboard`);
     }
 
-    // Check for metrics
-    const metricsPath = path.join(DOCS_DIR, 'cognitive_metrics.json');
-    const metricsExist = fs.existsSync(metricsPath);
+    // Check for metrics (find latest dated file)
+    const metricsPath = findLatestMetricsFile(DOCS_DIR);
+    const metricsExist = metricsPath !== null;
     console.log(`Phase 4 (Metrics):  ${metricsExist ? '✓ Complete' : '✗ Not run'}`);
-    if (metricsExist) {
+    if (metricsExist && metricsPath) {
       const metrics: CognitiveMetrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
-      console.log(`  └─ ${(metrics.averageAlignment * 100).toFixed(1)}% precision`);
+      console.log(`  └─ ${(metrics.averageAlignment * 100).toFixed(1)}% precision (${path.basename(metricsPath)})`);
     }
 
     console.log('');
@@ -762,7 +781,7 @@ program
     console.log(`  • Docs: ${DOCS_DIR}/`);
     console.log(`  • Shards: ${SHARDS_DIR}/`);
     console.log(`  • Dashboard: ${dashboardPath}`);
-    console.log(`  • Metrics: ${metricsPath}`);
+    console.log(`  • Metrics: ${metricsPath || 'Not generated yet'}`);
     console.log('');
 
     if (dashboardExists) {

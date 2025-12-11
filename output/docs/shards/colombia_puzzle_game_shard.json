@@ -3,14 +3,14 @@
   "cluster": "Experience",
   "alignmentScore": 0.95,
   "driftAlert": false,
-  "lastIntent": "fix: exclude useFocusTrap from CI, remove unused test files\n\n- useFocusTrap tests pass in isolation but conflict with other tests\n- Removed useSVGTouchInteraction.verify.ts (debugging file)\n- Removed useScreenReaderAnnouncer.simple.test.ts (redundant)\n\nTest suite: 344 passing, build successful\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-  "executionSummary": "Status: ACTIVE • 23 commits in last 7 days • Manual implementation",
-  "rawCommit": "fix: exclude useFocusTrap from CI, remove unused test files\n\n- useFocusTrap tests pass in isolation but conflict with other tests\n- Removed useSVGTouchInteraction.verify.ts (debugging file)\n- Removed useScreenReaderAnnouncer.simple.test.ts (redundant)\n\nTest suite: 344 passing, build successful\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "lastIntent": "fix: resolve UI truncation and badge positioning issues\n\n- Fix GameModeSelector card titles being cut off by replacing Button\n  wrappers with native button elements and adding whitespace-nowrap\n- Fix hint button badge positioning in ModernGameHeader and GameHeader\n  by moving badge outside Button into a relative container wrapper\n- Improve StudyMode header button styling with consistent sizing,\n  whitespace-nowrap, and better border/shadow styling\n- Shorten view mode labels for better fit on smaller screens\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 24 commits in last 7 days • Manual implementation",
+  "rawCommit": "fix: resolve UI truncation and badge positioning issues\n\n- Fix GameModeSelector card titles being cut off by replacing Button\n  wrappers with native button elements and adding whitespace-nowrap\n- Fix hint button badge positioning in ModernGameHeader and GameHeader\n  by moving badge outside Button into a relative container wrapper\n- Improve StudyMode header button styling with consistent sizing,\n  whitespace-nowrap, and better border/shadow styling\n- Shorten view mode labels for better fit on smaller screens\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
   "source": "manual_override",
   "metadata": {
-    "timestamp": "2025-12-10T23:23:17-08:00",
-    "commitHash": "5e4050b",
-    "commitCount7d": 23,
+    "timestamp": "2025-12-11T10:22:39-08:00",
+    "commitHash": "87d1007",
+    "commitCount7d": 24,
     "status": "ACTIVE"
   }
 }

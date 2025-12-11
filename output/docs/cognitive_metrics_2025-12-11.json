@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-12-11T19:19:32.865Z",
+  "totalProjects": 37,
+  "activeProjects": 8,
+  "dormantProjects": 29,
+  "averageAlignment": 0.9499999999999997,
+  "driftAlerts": 0,
+  "agentDrivenPercentage": 0,
+  "clusterDistribution": {
+    "Experience": 28,
+    "Core Systems": 8,
+    "Infra": 1
+  },
+  "precisionScore": 0.9499999999999997
+}

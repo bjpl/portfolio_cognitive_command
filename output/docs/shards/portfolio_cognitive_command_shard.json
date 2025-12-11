@@ -3,15 +3,14 @@
   "cluster": "Experience",
   "alignmentScore": 0.95,
   "driftAlert": false,
-  "lastIntent": "feat: Complete Phase 1 portfolio scan with 37 projects at 95% alignment",
-  "executionSummary": "Status: ACTIVE • 7 commits in last 7 days • Portfolio intelligence system",
-  "rawCommit": "feat: Complete Phase 1 portfolio scan with 37 projects at 95% alignment\n\nPortfolio Cognitive Command now provides comprehensive portfolio intelligence:\n\n- 37 repositories scanned (8 active, 29 dormant)\n- Global Precision Score: 95.0%\n- Zero drift alerts (removed test session artifacts)\n- 3 strategic clusters: Experience (28), Core Systems (8), Infra (1)\n\nGenerated artifacts:\n- Dashboard with real-time project status\n- Project shards with semantic embeddings\n- Portfolio Brief with executive summary\n- Progress Ledger for compliance tracking\n- Cognitive metrics JSON for integrations\n\nAlso includes:\n- Claude semantic analyzer with fallback chain (OpenAI → Claude → keywords)\n- Skills for portfolio-scan, generate-brief, drift-analysis\n- Updated config with environment variable support\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "lastIntent": "refine(semantic-analyzer): Improve Claude prompt for semantic feature extraction\n\nEnhanced the Claude API prompt in semantic-analyzer with:\n\n- Added system message defining role as \"semantic analysis engine\"\n- Structured prompt with clear sections: Input Context, Cluster Hint, Required Output\n- Added evaluation criteria explaining domain inference logic\n- Improved instructions for technologies, patterns, complexity assessment\n- Better guidance on keyword extraction (exclude generic terms)\n- Explicit JSON output instruction (no markdown blocks)\n\nThis improves the quality and consistency of semantic feature extraction\nfor vector embedding generation.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 10 commits in last 7 days • Manual implementation",
+  "rawCommit": "refine(semantic-analyzer): Improve Claude prompt for semantic feature extraction\n\nEnhanced the Claude API prompt in semantic-analyzer with:\n\n- Added system message defining role as \"semantic analysis engine\"\n- Structured prompt with clear sections: Input Context, Cluster Hint, Required Output\n- Added evaluation criteria explaining domain inference logic\n- Improved instructions for technologies, patterns, complexity assessment\n- Better guidance on keyword extraction (exclude generic terms)\n- Explicit JSON output instruction (no markdown blocks)\n\nThis improves the quality and consistency of semantic feature extraction\nfor vector embedding generation.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
   "source": "manual_override",
   "metadata": {
-    "timestamp": "2025-12-11T10:13:48-08:00",
-    "commitHash": "5e47cd9",
-    "sessionId": null,
-    "commitCount7d": 7,
+    "timestamp": "2025-12-11T10:53:57-08:00",
+    "commitHash": "2a87889",
+    "commitCount7d": 10,
     "status": "ACTIVE"
   }
 }

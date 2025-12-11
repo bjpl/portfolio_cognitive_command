@@ -73,14 +73,57 @@ function saveAgentDb(db: AgentDatabase, dbPath: string): void {
 }
 
 /**
+ * Checks if a session appears to be test data that should be excluded
+ * This prevents test sessions from polluting production shard data
+ * @param session - Session to check
+ * @returns true if session is likely test data
+ */
+function isTestSession(session: AgentSession): boolean {
+  const testPatterns = [
+    /^test[_-]?session/i,          // test_session, test-session
+    /^test[_-]?prompt/i,           // test_prompt
+    /test reasoning chain/i,       // "Test reasoning chain"
+    /^test[_-]?commit/i,           // test_commit
+    /^\[TEST\]/i,                  // [TEST] prefix
+    /^demo[_-]?session/i,          // demo_session
+    /^mock[_-]?session/i,          // mock_session
+    /^placeholder/i                // placeholder data
+  ];
+
+  // Check session ID
+  if (testPatterns.some(p => p.test(session.sessionId))) {
+    return true;
+  }
+
+  // Check reasoning chain
+  if (session.reasoning && testPatterns.some(p => p.test(session.reasoning))) {
+    return true;
+  }
+
+  // Check prompt
+  if (session.prompt && testPatterns.some(p => p.test(session.prompt))) {
+    return true;
+  }
+
+  // Check commits array for test commits
+  if (session.commits.some(c => /^test[_-]?commit/i.test(c))) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Finds session for a specific commit hash
  * @param commitHash - Git commit hash
  * @param dbPath - Path to agentdb.json file
- * @returns Agent session or null
+ * @returns Agent session or null (excludes test sessions)
  */
 function findSessionForCommit(commitHash: string, dbPath: string): AgentSession | null {
   const db = loadAgentDb(dbPath);
-  return db.sessions.find(s => s.commits.includes(commitHash)) || null;
+  // Filter out test sessions before searching
+  const productionSessions = db.sessions.filter(s => !isTestSession(s));
+  return productionSessions.find(s => s.commits.includes(commitHash)) || null;
 }
 
 /**
@@ -210,6 +253,11 @@ async function findNearestSession(
     let minTimeDiff = Infinity;
 
     for (const session of db.sessions) {
+      // Skip test sessions to prevent pollution of production data
+      if (isTestSession(session)) {
+        continue;
+      }
+
       const sessionTime = new Date(session.startTime);
       const timeDiff = Math.abs(sessionTime.getTime() - targetTime.getTime());
 
