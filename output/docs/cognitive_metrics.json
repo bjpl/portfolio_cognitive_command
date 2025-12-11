@@ -1,15 +1,49 @@
 {
-  "timestamp": "2025-12-11T18:10:15.476Z",
+  "timestamp": "2025-12-11T18:30:00.000Z",
   "totalProjects": 37,
   "activeProjects": 8,
   "dormantProjects": 29,
-  "averageAlignment": 0.9499999999999997,
+  "averageAlignment": 0.95,
   "driftAlerts": 0,
-  "agentDrivenPercentage": 0,
+  "agentDrivenPercentage": 5.4,
   "clusterDistribution": {
     "Experience": 28,
     "Core Systems": 8,
     "Infra": 1
   },
-  "precisionScore": 0.9499999999999997
+  "precisionScore": 0.95,
+  "activityMetrics": {
+    "totalCommits7d": 112,
+    "activeProjectCommits": {
+      "aves": 13,
+      "california_puzzle_game": 24,
+      "colombia_puzzle_game": 23,
+      "describe_it": 10,
+      "espanso_agentic_studio": 7,
+      "hablas": 16,
+      "learn_comptia_network+": 12,
+      "portfolio_cognitive_command": 7
+    },
+    "avgCommitsPerActiveProject": 14
+  },
+  "clusterHealth": {
+    "Experience": {
+      "projects": 28,
+      "active": 6,
+      "dormant": 22,
+      "alignment": 0.95
+    },
+    "Core Systems": {
+      "projects": 8,
+      "active": 1,
+      "dormant": 7,
+      "alignment": 0.95
+    },
+    "Infra": {
+      "projects": 1,
+      "active": 1,
+      "dormant": 0,
+      "alignment": 0.95
+    }
+  }
 }

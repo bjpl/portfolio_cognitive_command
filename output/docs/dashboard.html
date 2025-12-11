@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portfolio Cognitive Command - Dashboard</title>
   <style>
-    
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -60,9 +60,9 @@
 
     .metric-card:hover { transform: translateY(-4px); }
 
-    .metric-card.alert {
-      border-color: #ff6b6b;
-      background: linear-gradient(135deg, #141933, #2a1a1a);
+    .metric-card.success {
+      border-color: #4ade80;
+      background: linear-gradient(135deg, #141933, #1a2a1a);
     }
 
     .metric-value {
@@ -71,6 +71,8 @@
       color: #00d9ff;
       margin-bottom: 0.5rem;
     }
+
+    .metric-value.success-text { color: #4ade80; }
 
     .metric-label {
       color: #7a8ca0;
@@ -87,11 +89,96 @@
       border-bottom: 2px solid #1a2236;
     }
 
+    /* Activity Heatmap Section */
+    .heatmap-section {
+      margin-bottom: 3rem;
+    }
+
+    .heatmap-container {
+      background: #141933;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid #1a2236;
+    }
+
+    .heatmap-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .heatmap-row:hover {
+      background: rgba(0, 217, 255, 0.05);
+    }
+
+    .heatmap-project {
+      width: 240px;
+      font-weight: 500;
+      color: #e0e6ed;
+      font-size: 0.95rem;
+    }
+
+    .heatmap-commits {
+      width: 80px;
+      text-align: center;
+      font-weight: 600;
+      color: #00d9ff;
+    }
+
+    .heatmap-bar-container {
+      flex: 1;
+      height: 24px;
+      background: #0a0e27;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .heatmap-bar {
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.5s ease-out;
+    }
+
+    .heatmap-bar.high { background: linear-gradient(90deg, #4ade80, #22c55e); }
+    .heatmap-bar.medium { background: linear-gradient(90deg, #00d9ff, #0ea5e9); }
+    .heatmap-bar.low { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+
+    .heatmap-legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #1a2236;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #7a8ca0;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.high { background: #4ade80; }
+    .legend-dot.medium { background: #00d9ff; }
+    .legend-dot.low { background: #fbbf24; }
+
     .clusters-section { margin-bottom: 3rem; }
 
     .clusters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 1.5rem;
     }
 
@@ -102,21 +189,53 @@
       border: 1px solid #1a2236;
     }
 
+    .cluster-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
     .cluster-name {
       font-size: 1.3rem;
       color: #00d9ff;
-      margin-bottom: 0.5rem;
+    }
+
+    .cluster-badge {
+      padding: 0.25rem 0.75rem;
+      background: rgba(0, 217, 255, 0.1);
+      border-radius: 12px;
+      font-size: 0.8rem;
+      color: #00d9ff;
     }
 
     .cluster-stats {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
       margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
+      padding-bottom: 1rem;
       border-bottom: 1px solid #1a2236;
-      color: #7a8ca0;
-      font-size: 0.9rem;
     }
+
+    .cluster-stat {
+      text-align: center;
+    }
+
+    .cluster-stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #e0e6ed;
+    }
+
+    .cluster-stat-label {
+      font-size: 0.75rem;
+      color: #7a8ca0;
+      text-transform: uppercase;
+    }
+
+    .cluster-stat-value.active { color: #4ade80; }
+    .cluster-stat-value.dormant { color: #64748b; }
 
     .alignment-score { color: #4ade80; }
 
@@ -124,23 +243,54 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      max-height: 300px;
+      overflow-y: auto;
     }
 
     .mini-project-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem;
+      padding: 0.75rem;
       background: #0a0e27;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 0.9rem;
+      transition: transform 0.2s;
     }
 
-    .mini-project-card.drift-alert {
-      border-left: 3px solid #ff6b6b;
+    .mini-project-card:hover {
+      transform: translateX(4px);
     }
+
+    .mini-project-card.active-project {
+      border-left: 3px solid #4ade80;
+    }
+
+    .project-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .activity-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .activity-indicator.active { background: #4ade80; }
+    .activity-indicator.dormant { background: #64748b; }
 
     .project-score { color: #4ade80; font-weight: 600; }
+
+    .commit-badge {
+      padding: 0.15rem 0.5rem;
+      background: rgba(74, 222, 128, 0.1);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: #4ade80;
+      margin-left: 0.5rem;
+    }
 
     .projects-table {
       width: 100%;
@@ -168,10 +318,6 @@
     .projects-table td {
       padding: 1rem;
       border-top: 1px solid #1a2236;
-    }
-
-    .projects-table tr.drift {
-      background: linear-gradient(90deg, rgba(255,107,107,0.1), transparent);
     }
 
     .status-badge {
@@ -221,11 +367,6 @@
       z-index: 1;
     }
 
-    .drift-indicator {
-      color: #ff6b6b;
-      font-weight: 600;
-    }
-
     .intent-cell {
       max-width: 400px;
       overflow: hidden;
@@ -233,6 +374,25 @@
       white-space: nowrap;
       font-size: 0.9rem;
       color: #9ca3af;
+      cursor: help;
+      position: relative;
+    }
+
+    .intent-cell:hover::after {
+      content: attr(title);
+      position: absolute;
+      left: 0;
+      top: 100%;
+      background: #1a2236;
+      color: #e0e6ed;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #2a3446;
+      max-width: 500px;
+      white-space: normal;
+      z-index: 100;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .source-badge {
@@ -254,65 +414,32 @@
       color: #0a0e27;
     }
 
-    .drift-alerts-section { margin-top: 3rem; }
+    .health-status-section {
+      margin-top: 3rem;
+    }
 
-    .no-alerts {
+    .health-card {
+      background: linear-gradient(135deg, #1a2a1a, #141933);
+      border: 2px solid #4ade80;
+      border-radius: 12px;
+      padding: 2rem;
       text-align: center;
-      padding: 3rem;
-      background: #141933;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
     }
 
-    .success-icon {
-      font-size: 3rem;
-      color: #4ade80;
-    }
-
-    .drift-alerts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .drift-alert-card {
-      background: linear-gradient(135deg, #2a1a1a, #141933);
-      border: 2px solid #ff6b6b;
-      border-radius: 12px;
-      padding: 1.5rem;
-    }
-
-    .alert-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .health-icon {
+      font-size: 4rem;
       margin-bottom: 1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 107, 107, 0.3);
     }
 
-    .alert-header h4 {
-      font-size: 1.2rem;
-      color: #ff6b6b;
+    .health-title {
+      font-size: 1.5rem;
+      color: #4ade80;
+      margin-bottom: 0.5rem;
     }
 
-    .alert-score {
-      font-weight: 600;
-      color: #fbbf24;
-    }
-
-    .alert-body p {
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
-    }
-
-    .recommendation {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      background: rgba(255, 107, 107, 0.1);
-      border-left: 3px solid #ff6b6b;
-      color: #fbbf24;
-      font-weight: 500;
+    .health-description {
+      color: #7a8ca0;
+      font-size: 1rem;
     }
 
     .project-meta {
@@ -324,23 +451,42 @@
       font-size: 0.8rem;
       color: #7a8ca0;
     }
-  
+
+    /* Sparkline styles */
+    .sparkline-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 20px;
+    }
+
+    .sparkline-bar {
+      width: 4px;
+      background: #00d9ff;
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
   </style>
 </head>
 <body>
   <div class="dashboard">
-    
+
     <header class="dashboard-header">
       <h1>Portfolio Cognitive Command</h1>
       <p class="subtitle">Agent-Driven Repository Intelligence</p>
-      <div class="last-updated">Last updated: 12/11/2025, 10:10:15 AM</div>
+      <div class="last-updated">Last updated: 12/11/2025, 6:30:00 PM</div>
     </header>
-  
-    
+
+
     <section class="metrics-panel">
-      <div class="metric-card">
-        <div class="metric-value">95.0%</div>
+      <div class="metric-card success">
+        <div class="metric-value success-text">95.0%</div>
         <div class="metric-label">Precision Score</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">37</div>
+        <div class="metric-label">Total Projects</div>
       </div>
       <div class="metric-card">
         <div class="metric-value">8</div>
@@ -350,346 +496,498 @@
         <div class="metric-value">29</div>
         <div class="metric-label">Dormant Projects</div>
       </div>
-      <div class="metric-card ">
-        <div class="metric-value">0</div>
+      <div class="metric-card success">
+        <div class="metric-value success-text">0</div>
         <div class="metric-label">Drift Alerts</div>
       </div>
+      <div class="metric-card">
+        <div class="metric-value">112</div>
+        <div class="metric-label">Commits (7d)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">5.4%</div>
+        <div class="metric-label">Agent-Driven</div>
+      </div>
     </section>
-  
-    
+
+
+    <section class="heatmap-section">
+      <h2>Activity Heatmap (Last 7 Days)</h2>
+      <div class="heatmap-container">
+        <div class="heatmap-row">
+          <span class="heatmap-project">california_puzzle_game</span>
+          <span class="heatmap-commits">24</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar high" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">colombia_puzzle_game</span>
+          <span class="heatmap-commits">23</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar high" style="width: 96%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">hablas</span>
+          <span class="heatmap-commits">16</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar medium" style="width: 67%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">aves</span>
+          <span class="heatmap-commits">13</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar medium" style="width: 54%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">learn_comptia_network+</span>
+          <span class="heatmap-commits">12</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar medium" style="width: 50%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">describe_it</span>
+          <span class="heatmap-commits">10</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar low" style="width: 42%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">espanso_agentic_studio</span>
+          <span class="heatmap-commits">7</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar low" style="width: 29%"></div>
+          </div>
+        </div>
+        <div class="heatmap-row">
+          <span class="heatmap-project">portfolio_cognitive_command</span>
+          <span class="heatmap-commits">7</span>
+          <div class="heatmap-bar-container">
+            <div class="heatmap-bar low" style="width: 29%"></div>
+          </div>
+        </div>
+        <div class="heatmap-legend">
+          <div class="legend-item">
+            <span class="legend-dot high"></span>
+            <span>High Activity (20+)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot medium"></span>
+            <span>Medium Activity (10-19)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot low"></span>
+            <span>Low Activity (1-9)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <section class="clusters-section">
       <h2>Clusters</h2>
       <div class="clusters-grid">
-        
+
       <div class="cluster-card">
-        <h3 class="cluster-name">Experience</h3>
+        <div class="cluster-header">
+          <h3 class="cluster-name">Experience</h3>
+          <span class="cluster-badge">28 projects</span>
+        </div>
         <div class="cluster-stats">
-          <span>28 projects</span>
-          <span class="alignment-score">95.0% aligned</span>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value active">6</div>
+            <div class="cluster-stat-label">Active</div>
+          </div>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value dormant">22</div>
+            <div class="cluster-stat-label">Dormant</div>
+          </div>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value alignment-score">95%</div>
+            <div class="cluster-stat-label">Aligned</div>
+          </div>
         </div>
         <div class="cluster-projects">
-          
-            <div class="mini-project-card ">
-              <span class="project-name">algorithms_and_data_structures</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">california_puzzle_game</span>
+                <span class="commit-badge">24 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">california_puzzle_game</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">colombia_puzzle_game</span>
+                <span class="commit-badge">23 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">close_reading</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">hablas</span>
+                <span class="commit-badge">16 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">cocinas_aprendes</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">learn_comptia_network+</span>
+                <span class="commit-badge">12 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">colombia_puzzle_game</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">describe_it</span>
+                <span class="commit-badge">10 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">colores</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">portfolio_cognitive_command</span>
+                <span class="commit-badge">7 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">conjugation_gui</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">algorithms_and_data_structures</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">corporate_intel</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">close_reading</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">cuerpo_humano</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">cocinas_aprendes</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">describe_it</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">colores</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">fancy_monkey</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">conjugation_gui</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">formas_y_tamanos</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">corporate_intel</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">hablas</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">cuerpo_humano</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">internet</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">fancy_monkey</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">lab_visualizer</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">formas_y_tamanos</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">subjunctive_practice</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">internet</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">learn_comptia_network+</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">lab_visualizer</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">mundo</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">mundo</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">online_language_learning_resources</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">online_language_learning_resources</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">open_learn</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">open_learn</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">planetas</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">planetas</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">portfolio_cognitive_command</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">report_assistant</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">report_assistant</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">sec_latent</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">sec_latent</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">sinonimos</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">sinonimos</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">sinonimos_de_caminar</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">sinonimos_de_caminar</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">sinonimos_de_hablar</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">sinonimos_de_hablar</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">subjunctive_practice</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">video_gen</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">video_gen</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
+
         </div>
       </div>
-    
+
       <div class="cluster-card">
-        <h3 class="cluster-name">Core Systems</h3>
+        <div class="cluster-header">
+          <h3 class="cluster-name">Core Systems</h3>
+          <span class="cluster-badge">8 projects</span>
+        </div>
         <div class="cluster-stats">
-          <span>8 projects</span>
-          <span class="alignment-score">95.0% aligned</span>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value active">1</div>
+            <div class="cluster-stat-label">Active</div>
+          </div>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value dormant">7</div>
+            <div class="cluster-stat-label">Dormant</div>
+          </div>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value alignment-score">95%</div>
+            <div class="cluster-stat-label">Aligned</div>
+          </div>
         </div>
         <div class="cluster-projects">
-          
-            <div class="mini-project-card ">
-              <span class="project-name">aves</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">aves</span>
+                <span class="commit-badge">13 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">brandonjplambert</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">brandonjplambert</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">learn_my_system</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">learning_voice_agent</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">learn_strudel</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">learn_my_system</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">learning_voice_agent</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">learn_strudel</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">letratos</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">letratos</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">llms_on_my_system</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">llms_on_my_system</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
-            <div class="mini-project-card ">
-              <span class="project-name">meal_assistant</span>
+
+            <div class="mini-project-card">
+              <div class="project-info">
+                <span class="activity-indicator dormant"></span>
+                <span class="project-name">meal_assistant</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
+
         </div>
       </div>
-    
+
       <div class="cluster-card">
-        <h3 class="cluster-name">Infra</h3>
+        <div class="cluster-header">
+          <h3 class="cluster-name">Infra</h3>
+          <span class="cluster-badge">1 project</span>
+        </div>
         <div class="cluster-stats">
-          <span>1 projects</span>
-          <span class="alignment-score">95.0% aligned</span>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value active">1</div>
+            <div class="cluster-stat-label">Active</div>
+          </div>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value dormant">0</div>
+            <div class="cluster-stat-label">Dormant</div>
+          </div>
+          <div class="cluster-stat">
+            <div class="cluster-stat-value alignment-score">95%</div>
+            <div class="cluster-stat-label">Aligned</div>
+          </div>
         </div>
         <div class="cluster-projects">
-          
-            <div class="mini-project-card ">
-              <span class="project-name">espanso_agentic_studio</span>
+
+            <div class="mini-project-card active-project">
+              <div class="project-info">
+                <span class="activity-indicator active"></span>
+                <span class="project-name">espanso_agentic_studio</span>
+                <span class="commit-badge">7 commits</span>
+              </div>
               <span class="project-score">95%</span>
             </div>
-          
+
         </div>
       </div>
-    
+
       </div>
     </section>
-  
-    
+
+
     <section class="projects-section">
-      <h2>All Projects</h2>
+      <h2>Active Projects</h2>
       <table class="projects-table">
         <thead>
           <tr>
             <th>Project</th>
             <th>Status</th>
+            <th>Commits (7d)</th>
             <th>Alignment</th>
-            <th>Drift</th>
             <th>Last Intent</th>
             <th>Source</th>
           </tr>
         </thead>
         <tbody>
-          
-      <tr class="">
-        <td>
-          <strong>algorithms_and_data_structures</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: resolve merge conflicts - accept remote development</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>aves</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge active">ACTIVE</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: improve ReinforcementLearningEngine categorization and test assertions
 
-- Reorder categorizeRejection checks to prevent false matches
-  - Check &#039;not found&#039;, &#039;does not exist&#039;, &#039;false&#039; before &#039;feature&#039;
-  - Prevents &quot;Feature not found&quot; being categorized as incorrect_feature
-
-- Fix test assertions that incorrectly searched SQL strings for params
-  - rejection_rate and avg_correction_magnitude are in params, not SQL
-  - Update assertions to check feedback_metrics table with param values
-
-- Fix getRejectionAnalytics test expecting undefined second param
-
-All 27 ReinforcementLearningEngine tests now pass.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>brandonjplambert</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: add AI agent v2 planning documentation
-
-Swarm-generated planning artifacts from queen-coordinator, system-architect, and goal-planner agents:
-
-- Queen orchestration plan (16,000+ words)
-- System architecture design
-- Module specifications
-- GOAP execution plan with 24 actions
-- Execution commands and visualization
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
+      <tr>
         <td>
           <strong>california_puzzle_game</strong>
           <span class="project-meta">Experience</span>
@@ -697,92 +995,20 @@ Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
         <td>
           <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>24</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">fix(game): initialize remaining counties when game starts
-
-The counties tray was empty because remainingCounties was never
-populated in the countyPlacementStore when the game started.
-
-- Add useEffect to initialize remainingCounties from allCaliforniaCounties
-- Convert County[] to CountyPiece[] with required properties
-- Add setRemainingCounties call in GameContainer when game starts
-
-Fixes: Counties (0) showing empty tray after clicking Begin Exploration
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
+        <td class="intent-cell" title="fix(test): correct variable name reference in integration test">fix(test): correct variable name reference in integration test</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
-        <td>
-          <strong>close_reading</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: Resolve TypeScript build errors for Vercel deployment
 
-- Fix EntityDeduplication.ts: Expand ClaudeEntity to proper properties object
-- Fix lazyRoutes.tsx: Remove invalid Chakra UI v3 Spinner props (thickness, speed)
-- Fix ModelLoader.ts: Cast data.buffer as ArrayBuffer for crypto.subtle.digest
-- Add downlevelIteration to tsconfig.json for Map/Set iteration support
-
-Swarm coordination: Queen + Architect + GOAP planning agents
-Memory records stored with causal edges for fix chain
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>cocinas_aprendes</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: add LICENSE and enhance README for portfolio
-
-- Add MIT LICENSE file
-- Add comprehensive &#039;Exploring the Code&#039; section
-- Remove footer emoji
-- Professional voice throughout</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
+      <tr>
         <td>
           <strong>colombia_puzzle_game</strong>
           <span class="project-meta">Experience</span>
@@ -790,259 +1016,20 @@ Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
         <td>
           <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>23</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: exclude useFocusTrap from CI, remove unused test files
-
-- useFocusTrap tests pass in isolation but conflict with other tests
-- Removed useSVGTouchInteraction.verify.ts (debugging file)
-- Removed useScreenReaderAnnouncer.simple.test.ts (redundant)
-
-Test suite: 344 passing, build successful
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
+        <td class="intent-cell" title="fix: exclude useFocusTrap from CI, remove unused test files">fix: exclude useFocusTrap from CI, remove unused test files</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
-        <td>
-          <strong>colores</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: add LICENSE and enhance README for portfolio
 
-- Add MIT LICENSE file
-- Remove 20+ emojis from headers
-- Expand deployment section
-- Professional voice improvements</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>conjugation_gui</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">merge: accept remote version of conjugation_gui project</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>corporate_intel</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: update references after documentation reorganization
-
-- Updated paths to new docs structure
-- Fixed references to daily-reports and startup-reports
-- Aligned with portfolio documentation standards
-
-🤖 Generated with Claude Code</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>cuerpo_humano</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: add LICENSE and enhance README for portfolio
-
-- Add MIT LICENSE file
-- Add comprehensive technical overview
-- Remove 7 emojis from headers
-- Add &#039;Exploring the Code&#039; section</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>describe_it</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge active">ACTIVE</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">refactor: consolidate API keys to single settings location
-
-- Remove duplicate ApiKeyModal from UserMenu dropdown
-- Remove API key inputs from PrivacySettings (now Language tab)
-- Rename Privacy tab to Language with globe icon
-- Add defaultTab prop to SettingsModal for direct navigation
-- Consolidate API key management to ApiKeysSection only
-
-Users now configure API keys in one place: Settings &gt; API Keys tab.
-Unsplash uses env var fallback (NEXT_PUBLIC_UNSPLASH_ACCESS_KEY).
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>espanso_agentic_studio</strong>
-          <span class="project-meta">Infra</span>
-        </td>
-        <td>
-          <span class="status-badge active">ACTIVE</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">feat: Phase 5 Group 8 - Test Coverage Improvement (1101→1274 tests)
-
-Test Coverage Improvements:
-- Created 21 new tests for app_services.py (DI configuration)
-- Verified 61 error_handler.py tests (comprehensive coverage)
-- Verified 38 app_state.py tests (state machine)
-- Fixed timing-sensitive async_bridge test with retry loops
-- Added 33 GOAP E2E integration tests
-- Added DaemonHealthMonitor test suite (32 tests)
-- Added studio_ui integration tests
-
-Critical Fixes:
-- Observable: Added thread-safe RLock with snapshot pattern
-- IPC Client: Fixed disconnect() to collect errors, not swallow
-- Cache: Added WeakSet for automatic connection cleanup
-- Monitoring: Proper Observable inheritance (no dynamic manipulation)
-- Entry points: Renamed main.py→main_legacy.py, main_refactored.py→main.py
-
-Metrics:
-- Total tests: 1101 → 1274 (+173)
-- Critical 0% files fixed: 4 (app_services, app_state, async_bridge, error_handler)
-- Production readiness: 7.8/10 → 8.2/10
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>fancy_monkey</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: resolve merge conflict - use portfolio README version
-
-Keep portfolio-formatted README with technical architecture focus</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>formas_y_tamanos</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: add LICENSE and enhance README for portfolio
-
-- Add MIT LICENSE file
-- Remove 10+ emojis from headers
-- Add &#039;Exploring the Code&#039; section with 3D visualization details
-- Professional voice improvements</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
+      <tr>
         <td>
           <strong>hablas</strong>
           <span class="project-meta">Experience</span>
@@ -1050,95 +1037,41 @@ Keep portfolio-formatted README with technical architecture focus</td>
         <td>
           <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>16</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: TypeScript build errors for Vercel deployment
-
-- Add level property to TopicGroup interface (lib/types/topics.ts)
-- Fix null-to-undefined coercion in ResourceDetail audioMetadata
-- Update callScript911 type definition in integrate-json-resources.ts
-- Add proper type interfaces and error handling in test-admin-auth.ts
-- Exclude scripts folder from TypeScript compilation (tsconfig.json)
-
-Build now passes all TypeScript checks for deployment.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
+        <td class="intent-cell" title="fix: TypeScript build errors for Vercel deployment">fix: TypeScript build errors for Vercel deployment</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
+
+      <tr>
         <td>
-          <strong>internet</strong>
-          <span class="project-meta">Experience</span>
+          <strong>aves</strong>
+          <span class="project-meta">Core Systems</span>
         </td>
         <td>
-          <span class="status-badge dormant">DORMANT</span>
+          <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>13</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: add MIT LICENSE for portfolio presentation</td>
+        <td class="intent-cell" title="fix: improve ReinforcementLearningEngine categorization and test assertions">fix: improve ReinforcementLearningEngine categorization and test assertions</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
-        <td>
-          <strong>lab_visualizer</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: Add visual UI guide for interactive features</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>subjunctive_practice</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">Merge origin/master into main for production</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
+
+      <tr>
         <td>
           <strong>learn_comptia_network+</strong>
           <span class="project-meta">Experience</span>
@@ -1146,340 +1079,62 @@ Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
         <td>
           <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>12</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: enable mock API for production/static deployments
-
-The shouldUseMockAPI() function was not checking DISABLE_NETWORK_CALLS,
-causing auth flows to fail in production because:
-- DISABLE_NETWORK_CALLS is true in production builds
-- But shouldUseMockAPI() returned false (no USE_MOCK_API flag)
-- Real API calls were attempted but blocked/failed
-
-Now shouldUseMockAPI() returns true when DISABLE_NETWORK_CALLS is set,
-ensuring the mock authentication works in static deployments.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
+        <td class="intent-cell" title="fix: enable mock API for production/static deployments">fix: enable mock API for production/static deployments</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
-        <td>
-          <strong>learn_my_system</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: reorganize documentation structure
 
-- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)
-- Move PROJECT_STRUCTURE.md to docs/architecture/
-- Move guide files (STARSHIP_METAPHOR_GUIDE, THINKPAD_DESIGN_SYSTEM, DOCUMENTATION_STYLE_GUIDE) to docs/guides/
-- Move NAVIGATION_FIX_SUMMARY.md to docs/archive/
-- Add docs/README.md as documentation index
-
-Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
+      <tr>
         <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>learn_strudel</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: create standard documentation structure
-
-- Create docs structure (api, architecture, guides, development, testing, deployment, archive)
-- Add docs/README.md as documentation index
-
-Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>learning_voice_agent</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">feat: integrate RuVector self-learning vector store
-
-Implements 4-phase RuVector integration:
-- Phase 1: Vector store replacement with factory pattern and A/B testing
-- Phase 2: Knowledge graph unification with Cypher query support
-- Phase 3: Learning integration with feedback bridge and metrics
-- Phase 4: Semantic agent routing with embedding-based selection
-
-New components:
-- VectorStoreProtocol, LearningVectorStoreProtocol, GraphVectorStoreProtocol
-- RuVectorStore with GNN, adaptive compression, hybrid search
-- VectorStoreFactory with DualWriteVectorStore for safe migration
-- GraphQueryAdapter and CypherQueryBuilder for graph operations
-- VectorFeedbackBridge and LearningMetrics for quality tracking
-- SemanticAgentRouter for intelligent agent selection
-
-All 279 unit tests pass, validation script confirms 9/9 checks.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>letratos</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: reorganize documentation structure
-
-- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)
-- Move CONTRIBUTING.md and SECURITY.md to docs/guides/
-- Move daily_reports to docs/development/daily-reports/
-- Move daily_dev_startup_reports to docs/development/startup-reports/
-- Add docs/README.md as documentation index
-
-Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>llms_on_my_system</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: reorganize documentation structure
-
-- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)
-- Move COMPLETE_SETUP_GUIDE.md, QUICK_REFERENCE.md, UNIFIED_SETUP_README.md to docs/guides/
-- Move daily_reports to docs/development/daily-reports/
-- Add docs/README.md as documentation index
-
-Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>meal_assistant</strong>
-          <span class="project-meta">Core Systems</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">feat: add Railway deployment configuration
-
-Add Railway.app cloud deployment configuration for production hosting.
-
-**Configuration Files:**
-- railway.json: Build and deploy settings (Dockerfile-based)
-- railway.toml: Service configuration with health checks
-- Procfile: Start command for Railway
-- docs/RAILWAY_DEPLOYMENT.md: Complete deployment guide
-
-**Railway Project:**
-- Project ID: d68407f9-0f65-4cbf-9d4c-f3008342d848
-- Project URL: https://railway.com/project/d68407f9-0f65-4cbf-9d4c-f3008342d848
-- Environment: production
-
-**Services to Deploy:**
-1. API Service (Node.js) - Dockerfile.api
-2. PostgreSQL Database (Railway managed)
-3. Redis Cache (Railway managed)
-4. ML Service (Python) - Dockerfile.ml (optional)
-
-**Next Steps:**
-- Add PostgreSQL and Redis plugins via Railway dashboard
-- Configure environment variables (JWT_SECRET, etc.)
-- Deploy with: railway up
-- Access at: https://&lt;project-name&gt;.up.railway.app
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>mundo</strong>
+          <strong>describe_it</strong>
           <span class="project-meta">Experience</span>
         </td>
         <td>
-          <span class="status-badge dormant">DORMANT</span>
+          <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>10</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: portfolio preparation - add LICENSE and update README
+        <td class="intent-cell" title="refactor: consolidate API keys to single settings location">refactor: consolidate API keys to single settings location</td>
+        <td>
+          <span class="source-badge manual_override">Manual</span>
+        </td>
+      </tr>
 
-- Add MIT LICENSE for portfolio presentation
-- Professional voice and formatting improvements
-- Remove emoji overuse where applicable</td>
+      <tr>
+        <td>
+          <strong>espanso_agentic_studio</strong>
+          <span class="project-meta">Infra</span>
+        </td>
+        <td>
+          <span class="status-badge active">ACTIVE</span>
+        </td>
+        <td>7</td>
+        <td>
+          <div class="alignment-bar-container">
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
+          </div>
+        </td>
+        <td class="intent-cell" title="feat: Phase 5 Group 8 - Test Coverage Improvement (1101-1274 tests)">feat: Phase 5 Group 8 - Test Coverage Improvement (1101-1274 tests)</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
-        <td>
-          <strong>online_language_learning_resources</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">Merge branch &#039;main&#039; of https://github.com/bjpl/online_language_learning_resources</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>open_learn</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: portfolio preparation - add LICENSE and update README
 
-- Add MIT LICENSE for portfolio presentation
-- Professional voice and formatting improvements
-- Remove emoji overuse where applicable</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>planetas</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: portfolio preparation - add LICENSE and update README
-
-- Add MIT LICENSE for portfolio presentation
-- Professional voice and formatting improvements
-- Remove emoji overuse where applicable</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
+      <tr>
         <td>
           <strong>portfolio_cognitive_command</strong>
           <span class="project-meta">Experience</span>
@@ -1487,239 +1142,36 @@ Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
         <td>
           <span class="status-badge active">ACTIVE</span>
         </td>
+        <td>7</td>
         <td>
           <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
+            <div class="alignment-bar" style="width: 95%"></div>
+            <span class="alignment-text">95%</span>
           </div>
         </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: Resolve repo-scanner test mocking for promisified execFile
-
-- Rewrote tests/repo-scanner.test.ts with proper util.promisify mock
-- Fixed async git command testing for scanRepos, getCommitHistory, getChangedFiles
-- Removed unused execFileSync import from src/skills/repo-scanner.ts
-- Added coverage/ to .gitignore
-- Added comprehensive documentation in docs/
-- Added neural-trainer skill with tests
-- All 797 tests passing at 93% coverage
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Opus 4.5 &lt;noreply@anthropic.com&gt;</td>
+        <td class="intent-cell" title="feat: Complete Phase 1 portfolio scan with 37 projects at 95% alignment">feat: Complete Phase 1 portfolio scan with 37 projects at 95% alignment</td>
         <td>
           <span class="source-badge manual_override">Manual</span>
         </td>
       </tr>
-    
-      <tr class="">
-        <td>
-          <strong>report_assistant</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: update all documentation references after reorganization
 
-- Updated report_assistant paths and scripts
-- Fixed video_gen script references
-- Updated package.json and README.md
-- Applied changes across all projects
-
-🤖 Generated with Claude Code</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>sec_latent</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: portfolio preparation - add LICENSE and update README
-
-- Add MIT LICENSE for portfolio presentation
-- Professional voice and formatting improvements
-- Remove emoji overuse where applicable</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>sinonimos</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">feat: Add deployment guide and success modal for user guidance (#3)
-
-FEATURES ADDED:
-
-1. generateDeploymentGuide() Method:
-   - Creates DEPLOYMENT.md in output directory
-   - Step-by-step deployment instructions
-   - Platform-specific guides (GitHub Pages, Netlify, Vercel)
-   - Troubleshooting section
-   - Site structure documentation
-
-2. Success Modal (Auto-shows on first visit):
-   - Beautiful animated modal
-   - Clear 3-step process (Preview → Review → Deploy)
-   - Interactive deployment options
-   - Platform-specific quick guides
-   - Dismissible and remembers state (localStorage)
-
-USER EXPERIENCE:
-- After generation: DEPLOYMENT.md created automatically
-- On first site visit: Modal shows next steps
-- Click deployment platform: See quick instructions
-- Modal auto-hides after first visit
-- Can reopen by clicking &#039;Ver Guía Completa&#039;
-
-IMPLEMENTATION:
-- Added method to DeploymentService
-- Embedded modal in TemplateEngine HTML
-- Styled with gradient animations
-- Responsive design
-- Accessibility features (close button, keyboard support)
-
-Resolves missing user guidance after site generation.</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>sinonimos_de_caminar</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: Update README with current project status and accurate information
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>sinonimos_de_hablar</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">docs: Update README with current project status and accurate information
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
-      <tr class="">
-        <td>
-          <strong>video_gen</strong>
-          <span class="project-meta">Experience</span>
-        </td>
-        <td>
-          <span class="status-badge dormant">DORMANT</span>
-        </td>
-        <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: 95.0%"></div>
-            <span class="alignment-text">95.0%</span>
-          </div>
-        </td>
-        <td>✓</td>
-        <td class="intent-cell">fix: Enhance SSE progress tracking and jobs error display
-
-- SSE stream now tracks stage-level progress (not just overall_progress)
-- Trigger SSE updates on stage change or stage_progress change
-- Faster polling (0.3s vs 0.5s) for more responsive updates
-- Jobs API includes error_details with failed_stage info and summary
-- Add logging to output_stage for better debugging
-- Fix test assertions for conditional thumbnail inclusion
-
-Root causes:
-- SSE only tracked discrete overall_progress jumps between stages
-- Jobs page didn&#039;t expose per-stage error details
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
-        <td>
-          <span class="source-badge manual_override">Manual</span>
-        </td>
-      </tr>
-    
         </tbody>
       </table>
     </section>
-  
-    
-      <section class="drift-alerts-section">
-        <h2>Drift Alerts</h2>
-        <div class="no-alerts">
-          <span class="success-icon">✓</span>
-          <p>No drift alerts detected. All projects aligned with intent.</p>
-        </div>
-      </section>
-    
+
+
+    <section class="health-status-section">
+      <h2>Portfolio Health Status</h2>
+      <div class="health-card">
+        <div class="health-icon">&#x2714;</div>
+        <h3 class="health-title">All Clear</h3>
+        <p class="health-description">No drift alerts detected. All 37 projects are aligned with their stated intents.</p>
+      </div>
+    </section>
+
   </div>
   <script>
-    
+
     // Add any interactive features here
     console.log('Portfolio Cognitive Command Dashboard loaded');
 
@@ -1727,7 +1179,7 @@ Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</td>
     setTimeout(() => {
       location.reload();
     }, 5 * 60 * 1000);
-  
+
   </script>
 </body>
 </html>

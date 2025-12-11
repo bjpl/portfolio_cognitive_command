@@ -1,7 +1,7 @@
 # Portfolio Brief
 **Date:** 2025-12-11
 
-## 🎯 Global Precision Score
+## Global Precision Score
 
 **95.0%**
 
@@ -9,114 +9,140 @@
 
 ---
 
-## 📊 Executive Summary
+## Executive Summary
 
-- **Total Projects:** 37
-- **Active:** 8
-- **Dormant:** 29
-- **Drift Alerts:** 0
-- **Agent-Driven:** 0%
-- **Average Alignment:** 95.0%
-
----
-
-## 🚨 Red List (Requires Attention)
-
-✅ **No projects require immediate attention**
-
-All projects are aligned with strategic intent.
+| Metric | Value |
+|--------|-------|
+| Total Projects | 37 |
+| Active | 8 |
+| Dormant | 29 |
+| Drift Alerts | 0 |
+| Agent-Driven | 5.4% |
+| Average Alignment | 95.0% |
+| Total Commits (7d) | 112 |
 
 ---
 
-## 📦 Cluster Distribution
+## Activity Heatmap (Last 7 Days)
+
+```
+Project                        │ Commits │ Activity
+───────────────────────────────┼─────────┼──────────────────────────
+california_puzzle_game         │   24    │ ████████████████████████
+colombia_puzzle_game           │   23    │ ███████████████████████
+hablas                         │   16    │ ████████████████
+aves                           │   13    │ █████████████
+learn_comptia_network+         │   12    │ ████████████
+describe_it                    │   10    │ ██████████
+espanso_agentic_studio         │    7    │ ███████
+portfolio_cognitive_command    │    7    │ ███████
+───────────────────────────────┴─────────┴──────────────────────────
+```
+
+---
+
+## Cluster Distribution
 
 Portfolio organized across 3 strategic clusters:
 
-### Experience
+### Experience (28 projects)
 
-- **Projects:** 28
-- **Avg Alignment:** 95.0%
-- **Projects:** algorithms_and_data_structures, california_puzzle_game, close_reading, cocinas_aprendes, colombia_puzzle_game, colores, conjugation_gui, corporate_intel, cuerpo_humano, describe_it, fancy_monkey, formas_y_tamanos, hablas, internet, lab_visualizer, learn_comptia_network+, mundo, online_language_learning_resources, open_learn, planetas, portfolio_cognitive_command, report_assistant, sec_latent, sinonimos_de_caminar, sinonimos_de_hablar, sinonimos, subjunctive_practice, video_gen
+| Metric | Value |
+|--------|-------|
+| Projects | 28 |
+| Active | 6 |
+| Dormant | 22 |
+| Avg Alignment | 95.0% |
 
-### Core Systems
+**Active Projects:** california_puzzle_game, colombia_puzzle_game, describe_it, hablas, learn_comptia_network+, portfolio_cognitive_command
 
-- **Projects:** 8
-- **Avg Alignment:** 95.0%
-- **Projects:** aves, brandonjplambert, learn_my_system, learn_strudel, learning_voice_agent, letratos, llms_on_my_system, meal_assistant
+### Core Systems (8 projects)
 
-### Infra
+| Metric | Value |
+|--------|-------|
+| Projects | 8 |
+| Active | 1 |
+| Dormant | 7 |
+| Avg Alignment | 95.0% |
 
-- **Projects:** 1
-- **Avg Alignment:** 95.0%
-- **Projects:** espanso_agentic_studio
+**Active Projects:** aves
+
+### Infra (1 project)
+
+| Metric | Value |
+|--------|-------|
+| Projects | 1 |
+| Active | 1 |
+| Dormant | 0 |
+| Avg Alignment | 95.0% |
+
+**Active Projects:** espanso_agentic_studio
 
 ---
 
-## 🏆 Top Performers
+## Top Performers
 
 Projects excelling in alignment and execution:
 
-### 1. aves
+### 1. california_puzzle_game
+
+- **Alignment Score:** 95.0%
+- **Cluster:** Experience
+- **Activity:** 24 commits (7d)
+- **Last Intent:** fix(test): correct variable name reference in integration test
+
+### 2. colombia_puzzle_game
+
+- **Alignment Score:** 95.0%
+- **Cluster:** Experience
+- **Activity:** 23 commits (7d)
+- **Last Intent:** fix: exclude useFocusTrap from CI, remove unused test files
+
+### 3. hablas
+
+- **Alignment Score:** 95.0%
+- **Cluster:** Experience
+- **Activity:** 16 commits (7d)
+- **Last Intent:** fix: TypeScript build errors for Vercel deployment
+
+### 4. aves
 
 - **Alignment Score:** 95.0%
 - **Cluster:** Core Systems
-- **Source:** Manual Implementation
+- **Activity:** 13 commits (7d)
 - **Last Intent:** fix: improve ReinforcementLearningEngine categorization and test assertions
 
-- Reorder categorize...
-- **Activity:** 13 commits (7d)
-
-### 2. california_puzzle_game
+### 5. learn_comptia_network+
 
 - **Alignment Score:** 95.0%
 - **Cluster:** Experience
-- **Source:** Manual Implementation
-- **Last Intent:** fix(game): initialize remaining counties when game starts
-
-The counties tray was empty because re...
-- **Activity:** 23 commits (7d)
-
-### 3. colombia_puzzle_game
-
-- **Alignment Score:** 95.0%
-- **Cluster:** Experience
-- **Source:** Manual Implementation
-- **Last Intent:** fix: exclude useFocusTrap from CI, remove unused test files
-
-- useFocusTrap tests pass in isolati...
-- **Activity:** 23 commits (7d)
-
-### 4. describe_it
-
-- **Alignment Score:** 95.0%
-- **Cluster:** Experience
-- **Source:** Manual Implementation
-- **Last Intent:** refactor: consolidate API keys to single settings location
-
-- Remove duplicate ApiKeyModal from U...
-- **Activity:** 10 commits (7d)
-
-### 5. espanso_agentic_studio
-
-- **Alignment Score:** 95.0%
-- **Cluster:** Infra
-- **Source:** Manual Implementation
-- **Last Intent:** feat: Phase 5 Group 8 - Test Coverage Improvement (1101→1274 tests)
-
-Test Coverage Improvements:
-...
-- **Activity:** 7 commits (7d)
+- **Activity:** 12 commits (7d)
+- **Last Intent:** fix: enable mock API for production/static deployments
 
 ---
 
-## 💡 Strategic Recommendations
+## Portfolio Health Status
 
-2. **Revive Dormant Projects:** 29 projects (78%) are dormant. Consider archiving or reactivating.
+**All Clear** - No drift alerts detected.
 
-3. **Balance Portfolio:** Cluster "Experience" dominates with 28 projects. Consider diversifying focus.
+All projects are aligned with their stated intents and executing within acceptable parameters.
 
-4. **Increase Automation:** Only 0% of projects are agent-driven. Leverage AgentDB for more automated execution.
+---
+
+## Strategic Recommendations
+
+1. **Maintain Momentum:** 8 active projects showing healthy commit activity. Continue current development pace.
+
+2. **Evaluate Dormant Projects:** 29 projects (78%) are dormant. Consider:
+   - Archiving completed projects
+   - Reviving projects with strategic value
+   - Documenting status for portfolio presentation
+
+3. **Balance Portfolio:** Cluster "Experience" dominates with 28 projects. Consider diversifying focus across Core Systems and Infra.
+
+4. **Agent Integration:** Currently 5.4% agent-driven. Consider increasing automation for routine tasks.
+
 ---
 
 *Generated by Portfolio Cognitive Command*
-*Timestamp: 2025-12-11T18:10:15.476Z*
+*Timestamp: 2025-12-11T18:30:00.000Z*

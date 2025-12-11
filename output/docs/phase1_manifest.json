@@ -25,9 +25,9 @@
     "internet",
     "lab_visualizer",
     "subjunctive_practice",
+    "learning_voice_agent",
     "learn_my_system",
     "learn_strudel",
-    "learning_voice_agent",
     "letratos",
     "llms_on_my_system",
     "meal_assistant",
@@ -45,7 +45,7 @@
   "manifest": [
     {
       "name": "algorithms_and_data_structures",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/algorithms_and_data_structures",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\algorithms_and_data_structures",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -56,7 +56,7 @@
     },
     {
       "name": "aves",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/aves",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\aves",
       "status": "ACTIVE",
       "commits7d": 13,
       "lastCommit": {
@@ -67,7 +67,7 @@
     },
     {
       "name": "brandonjplambert",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/brandonjplambert",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\brandonjplambert",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -78,18 +78,18 @@
     },
     {
       "name": "california_puzzle_game",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/california_puzzle_game",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\california_puzzle_game",
       "status": "ACTIVE",
-      "commits7d": 23,
+      "commits7d": 24,
       "lastCommit": {
-        "hash": "dedfb71",
-        "message": "fix(game): initialize remaining counties when game starts\n\nThe counties tray was empty because remainingCounties was never\npopulated in the countyPlacementStore when the game started.\n\n- Add useEffect to initialize remainingCounties from allCaliforniaCounties\n- Convert County[] to CountyPiece[] with required properties\n- Add setRemainingCounties call in GameContainer when game starts\n\nFixes: Counties (0) showing empty tray after clicking Begin Exploration\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-        "date": "2025-12-11T00:04:52-08:00"
+        "hash": "6fb2ed2",
+        "message": "fix(test): correct variable name reference in integration test\n\nThe sessionId variable was prefixed with underscore (_sessionId) but\nreferenced without it, causing a ReferenceError.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+        "date": "2025-12-11T10:15:56-08:00"
       }
     },
     {
       "name": "close_reading",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/close_reading",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\close_reading",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -100,7 +100,7 @@
     },
     {
       "name": "cocinas_aprendes",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cocinas_aprendes",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\cocinas_aprendes",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -111,7 +111,7 @@
     },
     {
       "name": "colombia_puzzle_game",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colombia_puzzle_game",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\colombia_puzzle_game",
       "status": "ACTIVE",
       "commits7d": 23,
       "lastCommit": {
@@ -122,7 +122,7 @@
     },
     {
       "name": "colores",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colores",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\colores",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -133,7 +133,7 @@
     },
     {
       "name": "conjugation_gui",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/conjugation_gui",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\conjugation_gui",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -144,7 +144,7 @@
     },
     {
       "name": "corporate_intel",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/corporate_intel",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\corporate_intel",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -155,7 +155,7 @@
     },
     {
       "name": "cuerpo_humano",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cuerpo_humano",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\cuerpo_humano",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -166,7 +166,7 @@
     },
     {
       "name": "describe_it",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/describe_it",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\describe_it",
       "status": "ACTIVE",
       "commits7d": 10,
       "lastCommit": {
@@ -177,7 +177,7 @@
     },
     {
       "name": "espanso_agentic_studio",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/espanso_agentic_studio",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\espanso_agentic_studio",
       "status": "ACTIVE",
       "commits7d": 7,
       "lastCommit": {
@@ -188,7 +188,7 @@
     },
     {
       "name": "fancy_monkey",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/fancy_monkey",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\fancy_monkey",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -199,7 +199,7 @@
     },
     {
       "name": "formas_y_tamanos",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/formas_y_tamanos",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\formas_y_tamanos",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -210,7 +210,7 @@
     },
     {
       "name": "hablas",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/hablas",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\hablas",
       "status": "ACTIVE",
       "commits7d": 16,
       "lastCommit": {
@@ -221,7 +221,7 @@
     },
     {
       "name": "internet",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/internet",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\internet",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -232,7 +232,7 @@
     },
     {
       "name": "lab_visualizer",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/lab_visualizer",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\lab_visualizer",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -243,7 +243,7 @@
     },
     {
       "name": "subjunctive_practice",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/language-learning/subjunctive_practice",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\language-learning\\subjunctive_practice",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -253,8 +253,19 @@
       }
     },
     {
+      "name": "learning_voice_agent",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\learning_voice_agent",
+      "status": "DORMANT",
+      "commits7d": 0,
+      "lastCommit": {
+        "hash": "56d1bb4",
+        "message": "feat: integrate RuVector self-learning vector store\n\nImplements 4-phase RuVector integration:\n- Phase 1: Vector store replacement with factory pattern and A/B testing\n- Phase 2: Knowledge graph unification with Cypher query support\n- Phase 3: Learning integration with feedback bridge and metrics\n- Phase 4: Semantic agent routing with embedding-based selection\n\nNew components:\n- VectorStoreProtocol, LearningVectorStoreProtocol, GraphVectorStoreProtocol\n- RuVectorStore with GNN, adaptive compression, hybrid search\n- VectorStoreFactory with DualWriteVectorStore for safe migration\n- GraphQueryAdapter and CypherQueryBuilder for graph operations\n- VectorFeedbackBridge and LearningMetrics for quality tracking\n- SemanticAgentRouter for intelligent agent selection\n\nAll 279 unit tests pass, validation script confirms 9/9 checks.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+        "date": "2025-12-01T16:21:55-08:00"
+      }
+    },
+    {
       "name": "learn_comptia_network+",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_comptia_network+",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\learn_comptia_network+",
       "status": "ACTIVE",
       "commits7d": 12,
       "lastCommit": {
@@ -265,7 +276,7 @@
     },
     {
       "name": "learn_my_system",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_my_system",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\learn_my_system",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -276,7 +287,7 @@
     },
     {
       "name": "learn_strudel",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_strudel",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\learn_strudel",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -286,19 +297,8 @@
       }
     },
     {
-      "name": "learning_voice_agent",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learning_voice_agent",
-      "status": "DORMANT",
-      "commits7d": 0,
-      "lastCommit": {
-        "hash": "56d1bb4",
-        "message": "feat: integrate RuVector self-learning vector store\n\nImplements 4-phase RuVector integration:\n- Phase 1: Vector store replacement with factory pattern and A/B testing\n- Phase 2: Knowledge graph unification with Cypher query support\n- Phase 3: Learning integration with feedback bridge and metrics\n- Phase 4: Semantic agent routing with embedding-based selection\n\nNew components:\n- VectorStoreProtocol, LearningVectorStoreProtocol, GraphVectorStoreProtocol\n- RuVectorStore with GNN, adaptive compression, hybrid search\n- VectorStoreFactory with DualWriteVectorStore for safe migration\n- GraphQueryAdapter and CypherQueryBuilder for graph operations\n- VectorFeedbackBridge and LearningMetrics for quality tracking\n- SemanticAgentRouter for intelligent agent selection\n\nAll 279 unit tests pass, validation script confirms 9/9 checks.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
-        "date": "2025-12-01T16:21:55-08:00"
-      }
-    },
-    {
       "name": "letratos",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/letratos",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\letratos",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -309,7 +309,7 @@
     },
     {
       "name": "llms_on_my_system",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/llms_on_my_system",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\llms_on_my_system",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -320,7 +320,7 @@
     },
     {
       "name": "meal_assistant",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/meal_assistant",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\meal_assistant",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -331,7 +331,7 @@
     },
     {
       "name": "mundo",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/mundo",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\mundo",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -342,7 +342,7 @@
     },
     {
       "name": "online_language_learning_resources",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/online_language_learning_resources",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\online_language_learning_resources",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -353,7 +353,7 @@
     },
     {
       "name": "open_learn",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/open_learn",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\open_learn",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -364,7 +364,7 @@
     },
     {
       "name": "planetas",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/planetas",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\planetas",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -375,18 +375,18 @@
     },
     {
       "name": "portfolio_cognitive_command",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/portfolio_cognitive_command",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\portfolio_cognitive_command",
       "status": "ACTIVE",
-      "commits7d": 6,
+      "commits7d": 7,
       "lastCommit": {
-        "hash": "1f94738",
-        "message": "fix: Resolve repo-scanner test mocking for promisified execFile\n\n- Rewrote tests/repo-scanner.test.ts with proper util.promisify mock\n- Fixed async git command testing for scanRepos, getCommitHistory, getChangedFiles\n- Removed unused execFileSync import from src/skills/repo-scanner.ts\n- Added coverage/ to .gitignore\n- Added comprehensive documentation in docs/\n- Added neural-trainer skill with tests\n- All 797 tests passing at 93% coverage\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-        "date": "2025-12-10T22:30:17-08:00"
+        "hash": "5e47cd9",
+        "message": "feat: Complete Phase 1 portfolio scan with 37 projects at 95% alignment\n\nPortfolio Cognitive Command now provides comprehensive portfolio intelligence:\n\n- 37 repositories scanned (8 active, 29 dormant)\n- Global Precision Score: 95.0%\n- Zero drift alerts (removed test session artifacts)\n- 3 strategic clusters: Experience (28), Core Systems (8), Infra (1)\n\nGenerated artifacts:\n- Dashboard with real-time project status\n- Project shards with semantic embeddings\n- Portfolio Brief with executive summary\n- Progress Ledger for compliance tracking\n- Cognitive metrics JSON for integrations\n\nAlso includes:\n- Claude semantic analyzer with fallback chain (OpenAI → Claude → keywords)\n- Skills for portfolio-scan, generate-brief, drift-analysis\n- Updated config with environment variable support\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+        "date": "2025-12-11T10:13:48-08:00"
       }
     },
     {
       "name": "report_assistant",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/report_assistant",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\report_assistant",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -397,7 +397,7 @@
     },
     {
       "name": "sec_latent",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sec_latent",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\sec_latent",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -408,7 +408,7 @@
     },
     {
       "name": "sinonimos",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\sinonimos",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -419,7 +419,7 @@
     },
     {
       "name": "sinonimos_de_caminar",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos_de_caminar",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\sinonimos_de_caminar",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -430,7 +430,7 @@
     },
     {
       "name": "sinonimos_de_hablar",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos_de_hablar",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\sinonimos_de_hablar",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
@@ -441,7 +441,7 @@
     },
     {
       "name": "video_gen",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/video_gen",
+      "path": "C:\\Users\\brand\\Development\\Project_Workspace\\active-development\\video_gen",
       "status": "DORMANT",
       "commits7d": 0,
       "lastCommit": {
