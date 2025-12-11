@@ -12,5 +12,61 @@
     "commitHash": "8b3ef3d",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "vercel",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "TypeScript"
+    ],
+    "frameworks": [
+      "React",
+      "Next.js"
+    ],
+    "databases": [],
+    "tools": [
+      "Vitest",
+      "ESLint",
+      "Prettier",
+      "Tailwind CSS"
+    ],
+    "primaryLanguage": "TypeScript"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 10,
+    "lastCommitDate": "2025-11-23T02:28:52-08:00",
+    "daysSinceLastCommit": 18,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": false,
+    "hasTests": false,
+    "hasDocker": false,
+    "hasLinting": true,
+    "hasTypeScript": true,
+    "hasReadme": true,
+    "hasSupabase": true
+  },
+  "health": {
+    "score": 59,
+    "grade": "F",
+    "factors": {
+      "activity": 25,
+      "deployment": 100,
+      "codeQuality": 80,
+      "documentation": 80,
+      "integrations": 30
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Add test coverage",
+      "Add CI/CD pipeline (GitHub Actions recommended)"
+    ]
   }
 }

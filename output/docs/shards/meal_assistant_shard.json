@@ -12,5 +12,61 @@
     "commitHash": "5f1dce0",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "railway",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "TypeScript",
+      "Python"
+    ],
+    "frameworks": [
+      "Express",
+      "FastAPI"
+    ],
+    "databases": [
+      "PostgreSQL"
+    ],
+    "tools": [
+      "Jest",
+      "ESLint",
+      "Prettier",
+      "Pandas"
+    ],
+    "primaryLanguage": "TypeScript"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 35,
+    "lastCommitDate": "2025-12-01T21:47:56-08:00",
+    "daysSinceLastCommit": 9,
+    "commitVelocity": "low",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": true,
+    "hasLinting": true,
+    "hasTypeScript": true,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 86,
+    "grade": "B",
+    "factors": {
+      "activity": 50,
+      "deployment": 100,
+      "codeQuality": 100,
+      "documentation": 80,
+      "integrations": 100
+    },
+    "recommendations": []
   }
 }

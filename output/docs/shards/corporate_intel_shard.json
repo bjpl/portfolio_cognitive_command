@@ -12,5 +12,58 @@
     "commitHash": "bad6c74",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "docker",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "Python"
+    ],
+    "frameworks": [
+      "FastAPI"
+    ],
+    "databases": [],
+    "tools": [
+      "Pandas",
+      "SQLAlchemy"
+    ],
+    "primaryLanguage": "Python"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 17,
+    "lastCommitDate": "2025-11-23T21:09:42-08:00",
+    "daysSinceLastCommit": 17,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": true,
+    "hasLinting": false,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 67,
+    "grade": "D",
+    "factors": {
+      "activity": 25,
+      "deployment": 100,
+      "codeQuality": 60,
+      "documentation": 80,
+      "integrations": 100
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Consider adding TypeScript for type safety",
+      "Add ESLint/Prettier for consistent code style"
+    ]
   }
 }

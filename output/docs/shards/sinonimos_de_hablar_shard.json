@@ -12,5 +12,50 @@
     "commitHash": "7d73f8c",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "unknown",
+    "status": "not-configured"
+  },
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "databases": [],
+    "tools": [],
+    "primaryLanguage": "Unknown"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 0,
+    "lastCommitDate": "2025-11-11T11:21:45-08:00",
+    "daysSinceLastCommit": 30,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": false,
+    "hasRecentFeatures": false
+  },
+  "integrations": {
+    "hasCI": false,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": false,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false
+  },
+  "health": {
+    "score": 43,
+    "grade": "F",
+    "factors": {
+      "activity": 25,
+      "deployment": 30,
+      "codeQuality": 60,
+      "documentation": 80,
+      "integrations": 30
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Add deployment configuration (Vercel, Netlify, Docker)",
+      "Consider adding TypeScript for type safety"
+    ]
   }
 }

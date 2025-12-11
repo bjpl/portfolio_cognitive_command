@@ -48,21 +48,95 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/algorithms_and_data_structures",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 15,
       "lastCommit": {
         "hash": "efed2ea",
         "message": "docs: resolve merge conflicts - accept remote development",
         "date": "2025-11-23T14:01:15-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "Python"
+        ],
+        "frameworks": [
+          "Flask",
+          "FastAPI"
+        ],
+        "databases": [],
+        "tools": [
+          "Jest",
+          "ESLint",
+          "PyTorch",
+          "Pandas",
+          "SQLAlchemy"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 3,
+        "fixes": 3,
+        "docs": 3,
+        "refactors": 1,
+        "tests": 0,
+        "other": 5
       }
     },
     {
       "name": "aves",
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/aves",
       "status": "ACTIVE",
-      "commits7d": 14,
+      "commits7d": 17,
+      "commits30d": 184,
       "lastCommit": {
-        "hash": "6f3cdbc",
-        "message": "feat: add Docker-based test infrastructure and fix 472 tests\n\n## Test Infrastructure\n- Add docker-compose.test.yml for isolated Postgres test database\n- Add .env.test.local template for local Docker testing\n- Add npm scripts: test:db:start, test:db:stop, test:db:setup, test:all\n- Add setup-test-db.sh and teardown-test-db.sh scripts\n- Update CI workflow with RUN_AUTH_INTEGRATION_TESTS flag\n\n## Test Fixes\n- Fix vocabulary tests: correct annotationId type (string -> int)\n- Fix vocabulary tests: correct response assertions (strings -> ints)\n- Fix auth tests: proper skip logic with Boolean(env) check\n- Fix mlAnalytics tests: convert to integration tests with skip logic\n- Fix TypeScript errors: add missing warn import to vector services\n- Fix management.routes.ts: use correct generateAnnotations method\n\n## Test Results\n- 472 tests passing (was 479 with 30 failures)\n- 130 properly skipped (integration tests requiring DB/Supabase)\n- 19 of 24 test suites passing\n- 5 suites properly skipped (integration)\n\n## Portfolio Updates\n- Update PORTFOLIO_SHOWCASE.md with Technical Debt section\n- Add User Testing Evidence section\n- Replace placeholder screenshots with live demo guide\n- Update test metrics and honest assessment\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-        "date": "2025-12-11T10:50:56-08:00"
+        "hash": "69a5810",
+        "message": "chore: update metrics and add backend .gitignore\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+        "date": "2025-12-11T11:45:36-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 57,
+        "fixes": 78,
+        "docs": 3,
+        "refactors": 0,
+        "tests": 0,
+        "other": 46
       }
     },
     {
@@ -70,10 +144,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/brandonjplambert",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 75,
       "lastCommit": {
         "hash": "e3fdf7c",
         "message": "docs: add AI agent v2 planning documentation\n\nSwarm-generated planning artifacts from queen-coordinator, system-architect, and goal-planner agents:\n\n- Queen orchestration plan (16,000+ words)\n- System architecture design\n- Module specifications\n- GOAP execution plan with 24 actions\n- Execution commands and visualization\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-12-02T14:01:07-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "Ruby"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [
+          "Jest",
+          "ESLint",
+          "Prettier"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 27,
+        "fixes": 19,
+        "docs": 3,
+        "refactors": 3,
+        "tests": 0,
+        "other": 23
       }
     },
     {
@@ -81,10 +192,51 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/california_puzzle_game",
       "status": "ACTIVE",
       "commits7d": 27,
+      "commits30d": 47,
       "lastCommit": {
         "hash": "e59d32d",
         "message": "fix(deps): regenerate package-lock.json for rollup compatibility\n\nRegenerated lock file to fix npm optional dependency bug that prevented\n@rollup/rollup-win32-x64-msvc from being found on Windows.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
         "date": "2025-12-11T11:18:06-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React"
+        ],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Prettier",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "github-pages",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 16,
+        "fixes": 17,
+        "docs": 3,
+        "refactors": 6,
+        "tests": 2,
+        "other": 3
       }
     },
     {
@@ -92,10 +244,49 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/close_reading",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 30,
       "lastCommit": {
         "hash": "a37514f",
         "message": "fix: Resolve TypeScript build errors for Vercel deployment\n\n- Fix EntityDeduplication.ts: Expand ClaudeEntity to proper properties object\n- Fix lazyRoutes.tsx: Remove invalid Chakra UI v3 Spinner props (thickness, speed)\n- Fix ModelLoader.ts: Cast data.buffer as ArrayBuffer for crypto.subtle.digest\n- Add downlevelIteration to tsconfig.json for Map/Set iteration support\n\nSwarm coordination: Queen + Architect + GOAP planning agents\nMemory records stored with causal edges for fix chain\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-12-02T19:31:09-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React"
+        ],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Vite"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 9,
+        "fixes": 11,
+        "docs": 4,
+        "refactors": 1,
+        "tests": 0,
+        "other": 5
       }
     },
     {
@@ -103,10 +294,48 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cocinas_aprendes",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 6,
       "lastCommit": {
         "hash": "33d5673",
         "message": "docs: add LICENSE and enhance README for portfolio\n\n- Add MIT LICENSE file\n- Add comprehensive 'Exploring the Code' section\n- Remove footer emoji\n- Professional voice throughout",
         "date": "2025-11-23T02:19:00-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js"
+        ],
+        "databases": [],
+        "tools": [
+          "ESLint",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true
+      },
+      "recentCommitTypes": {
+        "features": 4,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 2
       }
     },
     {
@@ -114,10 +343,50 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colombia_puzzle_game",
       "status": "ACTIVE",
       "commits7d": 24,
+      "commits30d": 64,
       "lastCommit": {
         "hash": "87d1007",
         "message": "fix: resolve UI truncation and badge positioning issues\n\n- Fix GameModeSelector card titles being cut off by replacing Button\n  wrappers with native button elements and adding whitespace-nowrap\n- Fix hint button badge positioning in ModernGameHeader and GameHeader\n  by moving badge outside Button into a relative container wrapper\n- Improve StudyMode header button styling with consistent sizing,\n  whitespace-nowrap, and better border/shadow styling\n- Shorten view mode labels for better fit on smaller screens\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
         "date": "2025-12-11T10:22:39-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React"
+        ],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 26,
+        "fixes": 26,
+        "docs": 2,
+        "refactors": 2,
+        "tests": 1,
+        "other": 7
       }
     },
     {
@@ -125,10 +394,48 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/colores",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 9,
       "lastCommit": {
         "hash": "3f2c2c5",
         "message": "docs: add LICENSE and enhance README for portfolio\n\n- Add MIT LICENSE file\n- Remove 20+ emojis from headers\n- Expand deployment section\n- Professional voice improvements",
         "date": "2025-11-23T02:19:33-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js"
+        ],
+        "databases": [],
+        "tools": [
+          "ESLint",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true
+      },
+      "recentCommitTypes": {
+        "features": 6,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 3
       }
     },
     {
@@ -136,10 +443,42 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/conjugation_gui",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 4,
       "lastCommit": {
         "hash": "b0166fe",
         "message": "merge: accept remote version of conjugation_gui project",
         "date": "2025-11-23T14:13:55-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "Python"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Python"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 3
       }
     },
     {
@@ -147,10 +486,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/corporate_intel",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 17,
       "lastCommit": {
         "hash": "bad6c74",
         "message": "fix: update references after documentation reorganization\n\n- Updated paths to new docs structure\n- Fixed references to daily-reports and startup-reports\n- Aligned with portfolio documentation standards\n\n🤖 Generated with Claude Code",
         "date": "2025-11-23T21:09:42-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "Python"
+        ],
+        "frameworks": [
+          "FastAPI"
+        ],
+        "databases": [],
+        "tools": [
+          "Pandas",
+          "SQLAlchemy"
+        ],
+        "primaryLanguage": "Python"
+      },
+      "deployment": {
+        "platform": "docker",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 13,
+        "fixes": 1,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 3
       }
     },
     {
@@ -158,10 +534,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/cuerpo_humano",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 14,
       "lastCommit": {
         "hash": "34635cd",
         "message": "docs: add LICENSE and enhance README for portfolio\n\n- Add MIT LICENSE file\n- Add comprehensive technical overview\n- Remove 7 emojis from headers\n- Add 'Exploring the Code' section",
         "date": "2025-11-23T02:24:23-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React"
+        ],
+        "databases": [],
+        "tools": [
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 8,
+        "fixes": 1,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 5
       }
     },
     {
@@ -169,21 +582,97 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/describe_it",
       "status": "ACTIVE",
       "commits7d": 10,
+      "commits30d": 98,
       "lastCommit": {
         "hash": "3a1ebcb",
         "message": "refactor: consolidate API keys to single settings location\n\n- Remove duplicate ApiKeyModal from UserMenu dropdown\n- Remove API key inputs from PrivacySettings (now Language tab)\n- Rename Privacy tab to Language with globe icon\n- Add defaultTab prop to SettingsModal for direct navigation\n- Consolidate API key management to ApiKeysSection only\n\nUsers now configure API keys in one place: Settings > API Keys tab.\nUnsplash uses env var fallback (NEXT_PUBLIC_UNSPLASH_ACCESS_KEY).\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
         "date": "2025-12-10T23:53:25-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js"
+        ],
+        "databases": [
+          "PostgreSQL"
+        ],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Prettier",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 32,
+        "fixes": 42,
+        "docs": 4,
+        "refactors": 1,
+        "tests": 0,
+        "other": 19
       }
     },
     {
       "name": "espanso_agentic_studio",
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/espanso_agentic_studio",
       "status": "ACTIVE",
-      "commits7d": 7,
+      "commits7d": 8,
+      "commits30d": 16,
       "lastCommit": {
-        "hash": "7c12602",
-        "message": "feat: Phase 5 Group 8 - Test Coverage Improvement (1101→1274 tests)\n\nTest Coverage Improvements:\n- Created 21 new tests for app_services.py (DI configuration)\n- Verified 61 error_handler.py tests (comprehensive coverage)\n- Verified 38 app_state.py tests (state machine)\n- Fixed timing-sensitive async_bridge test with retry loops\n- Added 33 GOAP E2E integration tests\n- Added DaemonHealthMonitor test suite (32 tests)\n- Added studio_ui integration tests\n\nCritical Fixes:\n- Observable: Added thread-safe RLock with snapshot pattern\n- IPC Client: Fixed disconnect() to collect errors, not swallow\n- Cache: Added WeakSet for automatic connection cleanup\n- Monitoring: Proper Observable inheritance (no dynamic manipulation)\n- Entry points: Renamed main.py→main_legacy.py, main_refactored.py→main.py\n\nMetrics:\n- Total tests: 1101 → 1274 (+173)\n- Critical 0% files fixed: 4 (app_services, app_state, async_bridge, error_handler)\n- Production readiness: 7.8/10 → 8.2/10\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-        "date": "2025-12-09T21:47:19-08:00"
+        "hash": "118d94c",
+        "message": "fix: improve shortcut list display formatting\n\n- Change separator from Unicode arrow to pipe for reliable rendering\n- Use Consolas monospace font for consistent alignment\n- Add smart truncation based on trigger length\n- Reduce item height/padding for compact list\n- Handle empty triggers/replacements gracefully\n- Format: \"trigger  |  preview\" convention\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+        "date": "2025-12-11T11:39:13-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "Python"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 13,
+        "fixes": 1,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 2
       }
     },
     {
@@ -191,10 +680,39 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/fancy_monkey",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 9,
       "lastCommit": {
         "hash": "fa78b99",
         "message": "docs: resolve merge conflict - use portfolio README version\n\nKeep portfolio-formatted README with technical architecture focus",
         "date": "2025-11-23T13:53:25-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 2,
+        "fixes": 1,
+        "docs": 5,
+        "refactors": 0,
+        "tests": 0,
+        "other": 1
       }
     },
     {
@@ -202,10 +720,48 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/formas_y_tamanos",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 11,
       "lastCommit": {
         "hash": "9ee0971",
         "message": "docs: add LICENSE and enhance README for portfolio\n\n- Add MIT LICENSE file\n- Remove 10+ emojis from headers\n- Add 'Exploring the Code' section with 3D visualization details\n- Professional voice improvements",
         "date": "2025-11-23T02:25:46-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js"
+        ],
+        "databases": [],
+        "tools": [
+          "ESLint",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true
+      },
+      "recentCommitTypes": {
+        "features": 9,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 2
       }
     },
     {
@@ -213,10 +769,53 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/hablas",
       "status": "ACTIVE",
       "commits7d": 16,
+      "commits30d": 155,
       "lastCommit": {
         "hash": "458d980",
         "message": "fix: TypeScript build errors for Vercel deployment\n\n- Add level property to TopicGroup interface (lib/types/topics.ts)\n- Fix null-to-undefined coercion in ResourceDetail audioMetadata\n- Update callScript911 type definition in integrate-json-resources.ts\n- Add proper type interfaces and error handling in test-admin-auth.ts\n- Exclude scripts folder from TypeScript compilation (tsconfig.json)\n\nBuild now passes all TypeScript checks for deployment.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
         "date": "2025-12-10T23:29:29-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js"
+        ],
+        "databases": [
+          "PostgreSQL",
+          "Redis"
+        ],
+        "tools": [
+          "Jest",
+          "ESLint",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 63,
+        "fixes": 58,
+        "docs": 3,
+        "refactors": 7,
+        "tests": 0,
+        "other": 24
       }
     },
     {
@@ -224,10 +823,44 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/internet",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 5,
       "lastCommit": {
         "hash": "6ebd708",
         "message": "docs: add MIT LICENSE for portfolio presentation",
         "date": "2025-11-23T02:27:07-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [
+          "Vite"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 1,
+        "docs": 2,
+        "refactors": 0,
+        "tests": 0,
+        "other": 1
       }
     },
     {
@@ -235,10 +868,55 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/lab_visualizer",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 104,
       "lastCommit": {
         "hash": "12eee57",
         "message": "docs: Add visual UI guide for interactive features",
         "date": "2025-11-24T10:32:35-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js",
+          "Express"
+        ],
+        "databases": [
+          "Redis"
+        ],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Prettier",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 30,
+        "fixes": 17,
+        "docs": 1,
+        "refactors": 1,
+        "tests": 0,
+        "other": 55
       }
     },
     {
@@ -246,10 +924,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/language-learning/subjunctive_practice",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 9,
       "lastCommit": {
         "hash": "8112f84",
         "message": "Merge origin/master into main for production",
         "date": "2025-12-02T18:11:56-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "Python"
+        ],
+        "frameworks": [
+          "FastAPI"
+        ],
+        "databases": [],
+        "tools": [
+          "SQLAlchemy"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "railway",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 4,
+        "fixes": 2,
+        "docs": 1,
+        "refactors": 0,
+        "tests": 0,
+        "other": 2
       }
     },
     {
@@ -257,10 +972,51 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_comptia_network+",
       "status": "ACTIVE",
       "commits7d": 12,
+      "commits30d": 52,
       "lastCommit": {
         "hash": "5fd3734",
         "message": "fix: enable mock API for production/static deployments\n\nThe shouldUseMockAPI() function was not checking DISABLE_NETWORK_CALLS,\ncausing auth flows to fail in production because:\n- DISABLE_NETWORK_CALLS is true in production builds\n- But shouldUseMockAPI() returned false (no USE_MOCK_API flag)\n- Real API calls were attempted but blocked/failed\n\nNow shouldUseMockAPI() returns true when DISABLE_NETWORK_CALLS is set,\nensuring the mock authentication works in static deployments.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
         "date": "2025-12-10T22:38:47-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React"
+        ],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Prettier",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "docker",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 23,
+        "fixes": 13,
+        "docs": 1,
+        "refactors": 2,
+        "tests": 2,
+        "other": 11
       }
     },
     {
@@ -268,10 +1024,39 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_my_system",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 5,
       "lastCommit": {
         "hash": "4570012",
         "message": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move PROJECT_STRUCTURE.md to docs/architecture/\n- Move guide files (STARSHIP_METAPHOR_GUIDE, THINKPAD_DESIGN_SYSTEM, DOCUMENTATION_STYLE_GUIDE) to docs/guides/\n- Move NAVIGATION_FIX_SUMMARY.md to docs/archive/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-11-23T20:33:30-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 1,
+        "docs": 3,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -279,10 +1064,39 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learn_strudel",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 5,
       "lastCommit": {
         "hash": "18740b8",
         "message": "docs: create standard documentation structure\n\n- Create docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-11-23T20:33:33-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 1,
+        "docs": 3,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -290,10 +1104,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/learning_voice_agent",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 47,
       "lastCommit": {
         "hash": "56d1bb4",
         "message": "feat: integrate RuVector self-learning vector store\n\nImplements 4-phase RuVector integration:\n- Phase 1: Vector store replacement with factory pattern and A/B testing\n- Phase 2: Knowledge graph unification with Cypher query support\n- Phase 3: Learning integration with feedback bridge and metrics\n- Phase 4: Semantic agent routing with embedding-based selection\n\nNew components:\n- VectorStoreProtocol, LearningVectorStoreProtocol, GraphVectorStoreProtocol\n- RuVectorStore with GNN, adaptive compression, hybrid search\n- VectorStoreFactory with DualWriteVectorStore for safe migration\n- GraphQueryAdapter and CypherQueryBuilder for graph operations\n- VectorFeedbackBridge and LearningMetrics for quality tracking\n- SemanticAgentRouter for intelligent agent selection\n\nAll 279 unit tests pass, validation script confirms 9/9 checks.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-12-01T16:21:55-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "Python"
+        ],
+        "frameworks": [
+          "FastAPI"
+        ],
+        "databases": [],
+        "tools": [
+          "SQLAlchemy"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "railway",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 25,
+        "fixes": 8,
+        "docs": 5,
+        "refactors": 1,
+        "tests": 0,
+        "other": 8
       }
     },
     {
@@ -301,10 +1152,42 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/letratos",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 5,
       "lastCommit": {
         "hash": "8d2bbc3",
         "message": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move CONTRIBUTING.md and SECURITY.md to docs/guides/\n- Move daily_reports to docs/development/daily-reports/\n- Move daily_dev_startup_reports to docs/development/startup-reports/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-11-23T20:34:09-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "Ruby"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Ruby"
+      },
+      "deployment": {
+        "platform": "netlify",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 0,
+        "docs": 3,
+        "refactors": 0,
+        "tests": 0,
+        "other": 1
       }
     },
     {
@@ -312,10 +1195,39 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/llms_on_my_system",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 5,
       "lastCommit": {
         "hash": "8434cb8",
         "message": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move COMPLETE_SETUP_GUIDE.md, QUICK_REFERENCE.md, UNIFIED_SETUP_README.md to docs/guides/\n- Move daily_reports to docs/development/daily-reports/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-11-23T20:34:13-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 1,
+        "docs": 3,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -323,10 +1235,54 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/meal_assistant",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 35,
       "lastCommit": {
         "hash": "5f1dce0",
         "message": "feat: add Railway deployment configuration\n\nAdd Railway.app cloud deployment configuration for production hosting.\n\n**Configuration Files:**\n- railway.json: Build and deploy settings (Dockerfile-based)\n- railway.toml: Service configuration with health checks\n- Procfile: Start command for Railway\n- docs/RAILWAY_DEPLOYMENT.md: Complete deployment guide\n\n**Railway Project:**\n- Project ID: d68407f9-0f65-4cbf-9d4c-f3008342d848\n- Project URL: https://railway.com/project/d68407f9-0f65-4cbf-9d4c-f3008342d848\n- Environment: production\n\n**Services to Deploy:**\n1. API Service (Node.js) - Dockerfile.api\n2. PostgreSQL Database (Railway managed)\n3. Redis Cache (Railway managed)\n4. ML Service (Python) - Dockerfile.ml (optional)\n\n**Next Steps:**\n- Add PostgreSQL and Redis plugins via Railway dashboard\n- Configure environment variables (JWT_SECRET, etc.)\n- Deploy with: railway up\n- Access at: https://<project-name>.up.railway.app\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-12-01T21:47:56-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript",
+          "Python"
+        ],
+        "frameworks": [
+          "Express",
+          "FastAPI"
+        ],
+        "databases": [
+          "PostgreSQL"
+        ],
+        "tools": [
+          "Jest",
+          "ESLint",
+          "Prettier",
+          "Pandas"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "railway",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 20,
+        "fixes": 10,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 5
       }
     },
     {
@@ -334,10 +1290,50 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/mundo",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 10,
       "lastCommit": {
         "hash": "8b3ef3d",
         "message": "docs: portfolio preparation - add LICENSE and update README\n\n- Add MIT LICENSE for portfolio presentation\n- Professional voice and formatting improvements\n- Remove emoji overuse where applicable",
         "date": "2025-11-23T02:28:52-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React",
+          "Next.js"
+        ],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Prettier",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true
+      },
+      "recentCommitTypes": {
+        "features": 8,
+        "fixes": 1,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 1
       }
     },
     {
@@ -345,10 +1341,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/online_language_learning_resources",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 4,
       "lastCommit": {
         "hash": "75f16e0",
         "message": "Merge branch 'main' of https://github.com/bjpl/online_language_learning_resources",
         "date": "2025-11-23T02:36:34-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Prettier",
+          "Vite"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "github-pages",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 1,
+        "fixes": 0,
+        "docs": 2,
+        "refactors": 0,
+        "tests": 0,
+        "other": 1
       }
     },
     {
@@ -356,10 +1389,40 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/open_learn",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 22,
       "lastCommit": {
         "hash": "a20dc49",
         "message": "docs: portfolio preparation - add LICENSE and update README\n\n- Add MIT LICENSE for portfolio presentation\n- Professional voice and formatting improvements\n- Remove emoji overuse where applicable",
         "date": "2025-11-23T02:29:11-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 11,
+        "fixes": 5,
+        "docs": 2,
+        "refactors": 0,
+        "tests": 0,
+        "other": 4
       }
     },
     {
@@ -367,21 +1430,96 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/planetas",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 6,
       "lastCommit": {
         "hash": "8e8363b",
         "message": "docs: portfolio preparation - add LICENSE and update README\n\n- Add MIT LICENSE for portfolio presentation\n- Professional voice and formatting improvements\n- Remove emoji overuse where applicable",
         "date": "2025-11-23T02:29:43-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [
+          "React"
+        ],
+        "databases": [],
+        "tools": [
+          "Vitest",
+          "ESLint",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "vercel",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": true,
+        "hasReadme": true,
+        "hasSupabase": true
+      },
+      "recentCommitTypes": {
+        "features": 3,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 3
       }
     },
     {
       "name": "portfolio_cognitive_command",
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/portfolio_cognitive_command",
       "status": "ACTIVE",
-      "commits7d": 10,
+      "commits7d": 11,
+      "commits30d": 17,
       "lastCommit": {
-        "hash": "2a87889",
-        "message": "refine(semantic-analyzer): Improve Claude prompt for semantic feature extraction\n\nEnhanced the Claude API prompt in semantic-analyzer with:\n\n- Added system message defining role as \"semantic analysis engine\"\n- Structured prompt with clear sections: Input Context, Cluster Hint, Required Output\n- Added evaluation criteria explaining domain inference logic\n- Improved instructions for technologies, patterns, complexity assessment\n- Better guidance on keyword extraction (exclude generic terms)\n- Explicit JSON output instruction (no markdown blocks)\n\nThis improves the quality and consistency of semantic feature extraction\nfor vector embedding generation.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-        "date": "2025-12-11T10:53:57-08:00"
+        "hash": "1a9e90a",
+        "message": "feat(metrics): Add date-stamping to cognitive_metrics.json\n\n- Metrics files now saved as cognitive_metrics_YYYY-MM-DD.json\n- Preserves historical metrics across runs for trend analysis\n- Status command finds latest metrics file automatically\n- Cleaned up stale 12/3 output files from root output folder\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+        "date": "2025-12-11T11:19:51-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "TypeScript"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [
+          "Jest",
+          "ESLint"
+        ],
+        "primaryLanguage": "TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": true,
+        "hasReadme": false,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 11,
+        "fixes": 3,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 3
       }
     },
     {
@@ -389,10 +1527,44 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/report_assistant",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 9,
       "lastCommit": {
         "hash": "04f368f",
         "message": "fix: update all documentation references after reorganization\n\n- Updated report_assistant paths and scripts\n- Fixed video_gen script references\n- Updated package.json and README.md\n- Applied changes across all projects\n\n🤖 Generated with Claude Code",
         "date": "2025-11-23T21:11:01-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript"
+        ],
+        "frameworks": [],
+        "databases": [],
+        "tools": [
+          "ESLint",
+          "Prettier"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": false,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 4,
+        "fixes": 2,
+        "docs": 3,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -400,10 +1572,40 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sec_latent",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 3,
       "lastCommit": {
         "hash": "f1cbfa4",
         "message": "docs: portfolio preparation - add LICENSE and update README\n\n- Add MIT LICENSE for portfolio presentation\n- Professional voice and formatting improvements\n- Remove emoji overuse where applicable",
         "date": "2025-11-23T02:29:56-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "railway",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 3,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -411,10 +1613,40 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 4,
       "lastCommit": {
         "hash": "b6f4eda",
         "message": "feat: Add deployment guide and success modal for user guidance (#3)\n\nFEATURES ADDED:\n\n1. generateDeploymentGuide() Method:\n   - Creates DEPLOYMENT.md in output directory\n   - Step-by-step deployment instructions\n   - Platform-specific guides (GitHub Pages, Netlify, Vercel)\n   - Troubleshooting section\n   - Site structure documentation\n\n2. Success Modal (Auto-shows on first visit):\n   - Beautiful animated modal\n   - Clear 3-step process (Preview → Review → Deploy)\n   - Interactive deployment options\n   - Platform-specific quick guides\n   - Dismissible and remembers state (localStorage)\n\nUSER EXPERIENCE:\n- After generation: DEPLOYMENT.md created automatically\n- On first site visit: Modal shows next steps\n- Click deployment platform: See quick instructions\n- Modal auto-hides after first visit\n- Can reopen by clicking 'Ver Guía Completa'\n\nIMPLEMENTATION:\n- Added method to DeploymentService\n- Embedded modal in TemplateEngine HTML\n- Styled with gradient animations\n- Responsive design\n- Accessibility features (close button, keyboard support)\n\nResolves missing user guidance after site generation.",
         "date": "2025-11-17T13:44:22-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": true,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 3,
+        "fixes": 1,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -422,10 +1654,39 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos_de_caminar",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 0,
       "lastCommit": {
         "hash": "55fc310",
         "message": "docs: Update README with current project status and accurate information\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-11-11T11:21:13-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 0,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -433,10 +1694,39 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/sinonimos_de_hablar",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 0,
       "lastCommit": {
         "hash": "7d73f8c",
         "message": "docs: Update README with current project status and accurate information\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-11-11T11:21:45-08:00"
+      },
+      "techStack": {
+        "languages": [],
+        "frameworks": [],
+        "databases": [],
+        "tools": [],
+        "primaryLanguage": "Unknown"
+      },
+      "deployment": {
+        "platform": "unknown",
+        "hasConfig": false
+      },
+      "integrations": {
+        "hasCI": false,
+        "hasTests": true,
+        "hasDocker": false,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false
+      },
+      "recentCommitTypes": {
+        "features": 0,
+        "fixes": 0,
+        "docs": 0,
+        "refactors": 0,
+        "tests": 0,
+        "other": 0
       }
     },
     {
@@ -444,10 +1734,47 @@
       "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/video_gen",
       "status": "DORMANT",
       "commits7d": 0,
+      "commits30d": 71,
       "lastCommit": {
         "hash": "a049d0a",
         "message": "fix: Enhance SSE progress tracking and jobs error display\n\n- SSE stream now tracks stage-level progress (not just overall_progress)\n- Trigger SSE updates on stage change or stage_progress change\n- Faster polling (0.3s vs 0.5s) for more responsive updates\n- Jobs API includes error_details with failed_stage info and summary\n- Add logging to output_stage for better debugging\n- Fix test assertions for conditional thumbnail inclusion\n\nRoot causes:\n- SSE only tracked discrete overall_progress jumps between stages\n- Jobs page didn't expose per-stage error details\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         "date": "2025-12-02T19:54:04-08:00"
+      },
+      "techStack": {
+        "languages": [
+          "JavaScript/TypeScript",
+          "Python"
+        ],
+        "frameworks": [
+          "FastAPI"
+        ],
+        "databases": [],
+        "tools": [
+          "Tailwind CSS"
+        ],
+        "primaryLanguage": "JavaScript/TypeScript"
+      },
+      "deployment": {
+        "platform": "railway",
+        "hasConfig": true
+      },
+      "integrations": {
+        "hasCI": true,
+        "hasTests": true,
+        "hasDocker": true,
+        "hasLinting": false,
+        "hasTypeScript": false,
+        "hasReadme": true,
+        "hasSupabase": false,
+        "ciPlatform": "github-actions"
+      },
+      "recentCommitTypes": {
+        "features": 39,
+        "fixes": 25,
+        "docs": 2,
+        "refactors": 1,
+        "tests": 1,
+        "other": 3
       }
     }
   ]

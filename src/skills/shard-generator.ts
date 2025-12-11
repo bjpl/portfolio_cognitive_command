@@ -10,6 +10,55 @@ import { SemanticEmbedding } from './semantic-analyzer';
 import { CognitiveLink } from './cognitive-linker';
 import { DriftResult } from './drift-detector';
 
+export interface DeploymentInfo {
+  platform: 'vercel' | 'netlify' | 'github-pages' | 'railway' | 'docker' | 'local' | 'unknown';
+  status: 'deployed' | 'pending' | 'failed' | 'not-configured';
+  url?: string;
+  lastDeployDate?: string;
+}
+
+export interface TechStackInfo {
+  languages: string[];
+  frameworks: string[];
+  databases: string[];
+  tools: string[];
+  primaryLanguage: string;
+}
+
+export interface ActivityMetrics {
+  commits7d: number;
+  commits30d: number;
+  lastCommitDate: string;
+  daysSinceLastCommit: number;
+  commitVelocity: 'high' | 'medium' | 'low' | 'stale';
+  hasRecentBugFixes: boolean;
+  hasRecentFeatures: boolean;
+}
+
+export interface IntegrationInfo {
+  hasCI: boolean;
+  ciPlatform?: 'github-actions' | 'gitlab-ci' | 'jenkins' | 'circleci' | 'other';
+  hasTests: boolean;
+  testCoverage?: number;
+  hasDocker: boolean;
+  hasLinting: boolean;
+  hasTypeScript: boolean;
+  hasSupabase?: boolean;
+}
+
+export interface ProjectHealth {
+  score: number;  // 0-100
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  factors: {
+    activity: number;
+    deployment: number;
+    codeQuality: number;
+    documentation: number;
+    integrations: number;
+  };
+  recommendations: string[];
+}
+
 export interface ProjectShard {
   project: string;
   cluster: string;
@@ -26,6 +75,12 @@ export interface ProjectShard {
     commitCount7d: number;
     status: 'ACTIVE' | 'DORMANT';
   };
+  // Enhanced metrics
+  deployment?: DeploymentInfo;
+  techStack?: TechStackInfo;
+  activity?: ActivityMetrics;
+  integrations?: IntegrationInfo;
+  health?: ProjectHealth;
 }
 
 /**
@@ -54,6 +109,12 @@ export function generateShard(
   const alignmentScore = drift?.alignmentScore ?? 0.95;
   const driftAlert = drift?.driftAlert ?? false;
 
+  // Calculate activity metrics
+  const activity = calculateActivityMetrics(repo);
+
+  // Calculate project health
+  const health = calculateProjectHealth(repo, activity);
+
   return {
     project: repo.name,
     cluster: embedding.cluster,
@@ -69,7 +130,151 @@ export function generateShard(
       sessionId: link.sessionId || undefined,
       commitCount7d: repo.commits7d,
       status: repo.status
-    }
+    },
+    // Enhanced metrics
+    deployment: {
+      platform: repo.deployment?.platform || 'unknown',
+      status: repo.deployment?.hasConfig ? 'deployed' : 'not-configured'
+    },
+    techStack: repo.techStack,
+    activity,
+    integrations: repo.integrations,
+    health
+  };
+}
+
+/**
+ * Calculates activity metrics from repo scan data
+ */
+function calculateActivityMetrics(repo: RepoScanResult): ActivityMetrics {
+  const lastCommitDate = new Date(repo.lastCommit.date);
+  const now = new Date();
+  const daysSinceLastCommit = Math.floor((now.getTime() - lastCommitDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Determine commit velocity
+  let commitVelocity: ActivityMetrics['commitVelocity'];
+  if (repo.commits7d >= 10) {
+    commitVelocity = 'high';
+  } else if (repo.commits7d >= 3) {
+    commitVelocity = 'medium';
+  } else if (repo.commits7d >= 1 || daysSinceLastCommit < 14) {
+    commitVelocity = 'low';
+  } else {
+    commitVelocity = 'stale';
+  }
+
+  // Check for recent bug fixes and features
+  const hasRecentBugFixes = (repo.recentCommitTypes?.fixes || 0) > 0;
+  const hasRecentFeatures = (repo.recentCommitTypes?.features || 0) > 0;
+
+  return {
+    commits7d: repo.commits7d,
+    commits30d: repo.commits30d || repo.commits7d,
+    lastCommitDate: repo.lastCommit.date,
+    daysSinceLastCommit,
+    commitVelocity,
+    hasRecentBugFixes,
+    hasRecentFeatures
+  };
+}
+
+/**
+ * Calculates project health score based on multiple factors
+ */
+function calculateProjectHealth(repo: RepoScanResult, activity: ActivityMetrics): ProjectHealth {
+  const factors = {
+    activity: 0,
+    deployment: 0,
+    codeQuality: 0,
+    documentation: 0,
+    integrations: 0
+  };
+
+  const recommendations: string[] = [];
+
+  // Activity score (0-100)
+  if (activity.commitVelocity === 'high') {
+    factors.activity = 100;
+  } else if (activity.commitVelocity === 'medium') {
+    factors.activity = 75;
+  } else if (activity.commitVelocity === 'low') {
+    factors.activity = 50;
+  } else {
+    factors.activity = 25;
+    recommendations.push('Consider reviving this project or archiving it');
+  }
+
+  // Deployment score (0-100)
+  if (repo.deployment?.hasConfig) {
+    factors.deployment = 100;
+  } else {
+    factors.deployment = 30;
+    recommendations.push('Add deployment configuration (Vercel, Netlify, Docker)');
+  }
+
+  // Code quality score (0-100)
+  let codeQualityScore = 40; // Base score
+  if (repo.integrations?.hasTypeScript) codeQualityScore += 20;
+  if (repo.integrations?.hasLinting) codeQualityScore += 20;
+  if (repo.integrations?.hasTests) codeQualityScore += 20;
+  factors.codeQuality = Math.min(codeQualityScore, 100);
+
+  if (!repo.integrations?.hasTypeScript) {
+    recommendations.push('Consider adding TypeScript for type safety');
+  }
+  if (!repo.integrations?.hasLinting) {
+    recommendations.push('Add ESLint/Prettier for consistent code style');
+  }
+  if (!repo.integrations?.hasTests) {
+    recommendations.push('Add test coverage');
+  }
+
+  // Documentation score (0-100)
+  factors.documentation = repo.integrations?.hasReadme ? 80 : 20;
+  if (!repo.integrations?.hasReadme) {
+    recommendations.push('Add a README.md file');
+  }
+
+  // Integrations score (0-100)
+  let integrationScore = 30; // Base score
+  if (repo.integrations?.hasCI) integrationScore += 40;
+  if (repo.integrations?.hasDocker) integrationScore += 30;
+  factors.integrations = Math.min(integrationScore, 100);
+
+  if (!repo.integrations?.hasCI) {
+    recommendations.push('Add CI/CD pipeline (GitHub Actions recommended)');
+  }
+
+  // Calculate overall health score (weighted average)
+  const weights = {
+    activity: 0.25,
+    deployment: 0.15,
+    codeQuality: 0.30,
+    documentation: 0.10,
+    integrations: 0.20
+  };
+
+  const score = Math.round(
+    factors.activity * weights.activity +
+    factors.deployment * weights.deployment +
+    factors.codeQuality * weights.codeQuality +
+    factors.documentation * weights.documentation +
+    factors.integrations * weights.integrations
+  );
+
+  // Determine grade
+  let grade: ProjectHealth['grade'];
+  if (score >= 90) grade = 'A';
+  else if (score >= 80) grade = 'B';
+  else if (score >= 70) grade = 'C';
+  else if (score >= 60) grade = 'D';
+  else grade = 'F';
+
+  return {
+    score,
+    grade,
+    factors,
+    recommendations: recommendations.slice(0, 3) // Top 3 recommendations
   };
 }
 

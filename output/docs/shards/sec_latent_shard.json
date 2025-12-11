@@ -12,5 +12,51 @@
     "commitHash": "f1cbfa4",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "railway",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "databases": [],
+    "tools": [],
+    "primaryLanguage": "Unknown"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 3,
+    "lastCommitDate": "2025-11-23T02:29:56-08:00",
+    "daysSinceLastCommit": 18,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": false,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": false,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 61,
+    "grade": "D",
+    "factors": {
+      "activity": 25,
+      "deployment": 100,
+      "codeQuality": 60,
+      "documentation": 80,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Consider adding TypeScript for type safety",
+      "Add ESLint/Prettier for consistent code style"
+    ]
   }
 }

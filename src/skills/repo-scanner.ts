@@ -59,10 +59,41 @@ export interface RepoScanResult {
   path: string;
   status: 'ACTIVE' | 'DORMANT';
   commits7d: number;
+  commits30d: number;
   lastCommit: {
     hash: string;
     message: string;
     date: string;
+  };
+  // Enhanced scan data
+  techStack: {
+    languages: string[];
+    frameworks: string[];
+    databases: string[];
+    tools: string[];
+    primaryLanguage: string;
+  };
+  deployment: {
+    platform: 'vercel' | 'netlify' | 'github-pages' | 'railway' | 'docker' | 'local' | 'unknown';
+    hasConfig: boolean;
+  };
+  integrations: {
+    hasCI: boolean;
+    ciPlatform?: 'github-actions' | 'gitlab-ci' | 'jenkins' | 'circleci' | 'other';
+    hasTests: boolean;
+    hasDocker: boolean;
+    hasLinting: boolean;
+    hasTypeScript: boolean;
+    hasReadme: boolean;
+    hasSupabase: boolean;
+  };
+  recentCommitTypes: {
+    features: number;
+    fixes: number;
+    docs: number;
+    refactors: number;
+    tests: number;
+    other: number;
   };
 }
 
@@ -165,26 +196,345 @@ async function analyzeRepo(repoPath: string): Promise<RepoScanResult | null> {
       'HEAD'
     ], { cwd: safePath, encoding: 'utf8' });
 
+    // Count commits in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const { stdout: commits30d } = await execFileAsync('git', [
+      'rev-list',
+      '--count',
+      `--since=${thirtyDaysAgo.toISOString()}`,
+      'HEAD'
+    ], { cwd: safePath, encoding: 'utf8' });
+
     const commits7dCount = parseInt(commits7d.trim(), 10);
+    const commits30dCount = parseInt(commits30d.trim(), 10);
 
     // Determine status (ACTIVE if commits in last 7 days, DORMANT otherwise)
     const status: 'ACTIVE' | 'DORMANT' = commits7dCount > 0 ? 'ACTIVE' : 'DORMANT';
+
+    // Detect tech stack
+    const techStack = await detectTechStack(safePath);
+
+    // Detect deployment platform
+    const deployment = detectDeployment(safePath);
+
+    // Detect integrations
+    const integrations = detectIntegrations(safePath);
+
+    // Analyze recent commit types
+    const recentCommitTypes = await analyzeCommitTypes(safePath, thirtyDaysAgo);
 
     return {
       name,
       path: safePath,
       status,
       commits7d: commits7dCount,
+      commits30d: commits30dCount,
       lastCommit: {
         hash: lastCommitHash.trim().substring(0, 7), // Short hash
         message: lastCommitMessage.trim(),
         date: lastCommitDate.trim()
-      }
+      },
+      techStack,
+      deployment,
+      integrations,
+      recentCommitTypes
     };
   } catch (error) {
     console.error(`Error analyzing repository at ${repoPath}: ${error}`);
     return null;
   }
+}
+
+/**
+ * Detects the tech stack of a repository based on files present
+ */
+async function detectTechStack(repoPath: string): Promise<RepoScanResult['techStack']> {
+  const languages: string[] = [];
+  const frameworks: string[] = [];
+  const databases: string[] = [];
+  const tools: string[] = [];
+
+  // Check for language indicators
+  const fileChecks: Array<{ file: string; language?: string; framework?: string; database?: string; tool?: string }> = [
+    { file: 'package.json', language: 'JavaScript/TypeScript' },
+    { file: 'tsconfig.json', language: 'TypeScript' },
+    { file: 'requirements.txt', language: 'Python' },
+    { file: 'Pipfile', language: 'Python' },
+    { file: 'pyproject.toml', language: 'Python' },
+    { file: 'go.mod', language: 'Go' },
+    { file: 'Cargo.toml', language: 'Rust' },
+    { file: 'pom.xml', language: 'Java' },
+    { file: 'build.gradle', language: 'Java/Kotlin' },
+    { file: 'Gemfile', language: 'Ruby' },
+    { file: 'composer.json', language: 'PHP' },
+  ];
+
+  for (const check of fileChecks) {
+    if (fs.existsSync(path.join(repoPath, check.file))) {
+      if (check.language && !languages.includes(check.language)) {
+        languages.push(check.language);
+      }
+    }
+  }
+
+  // Check package.json for frameworks
+  const packageJsonPath = path.join(repoPath, 'package.json');
+  if (fs.existsSync(packageJsonPath)) {
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+
+      // Framework detection
+      if (deps['react']) frameworks.push('React');
+      if (deps['vue']) frameworks.push('Vue');
+      if (deps['@angular/core']) frameworks.push('Angular');
+      if (deps['svelte']) frameworks.push('Svelte');
+      if (deps['next']) frameworks.push('Next.js');
+      if (deps['nuxt']) frameworks.push('Nuxt.js');
+      if (deps['express']) frameworks.push('Express');
+      if (deps['fastify']) frameworks.push('Fastify');
+      if (deps['nestjs'] || deps['@nestjs/core']) frameworks.push('NestJS');
+      if (deps['electron']) frameworks.push('Electron');
+      if (deps['react-native']) frameworks.push('React Native');
+
+      // Database detection
+      if (deps['mongoose'] || deps['mongodb']) databases.push('MongoDB');
+      if (deps['pg'] || deps['postgres']) databases.push('PostgreSQL');
+      if (deps['mysql'] || deps['mysql2']) databases.push('MySQL');
+      if (deps['redis'] || deps['ioredis']) databases.push('Redis');
+      if (deps['sqlite3'] || deps['better-sqlite3']) databases.push('SQLite');
+      if (deps['prisma'] || deps['@prisma/client']) tools.push('Prisma');
+      if (deps['sequelize']) tools.push('Sequelize');
+      if (deps['typeorm']) tools.push('TypeORM');
+
+      // Tool detection
+      if (deps['jest']) tools.push('Jest');
+      if (deps['vitest']) tools.push('Vitest');
+      if (deps['mocha']) tools.push('Mocha');
+      if (deps['eslint']) tools.push('ESLint');
+      if (deps['prettier']) tools.push('Prettier');
+      if (deps['webpack']) tools.push('Webpack');
+      if (deps['vite']) tools.push('Vite');
+      if (deps['rollup']) tools.push('Rollup');
+      if (deps['tailwindcss']) tools.push('Tailwind CSS');
+    } catch {
+      // Ignore JSON parse errors
+    }
+  }
+
+  // Check requirements.txt for Python frameworks
+  const requirementsPath = path.join(repoPath, 'requirements.txt');
+  if (fs.existsSync(requirementsPath)) {
+    try {
+      const requirements = fs.readFileSync(requirementsPath, 'utf8').toLowerCase();
+      if (requirements.includes('django')) frameworks.push('Django');
+      if (requirements.includes('flask')) frameworks.push('Flask');
+      if (requirements.includes('fastapi')) frameworks.push('FastAPI');
+      if (requirements.includes('pytorch') || requirements.includes('torch')) tools.push('PyTorch');
+      if (requirements.includes('tensorflow')) tools.push('TensorFlow');
+      if (requirements.includes('pandas')) tools.push('Pandas');
+      if (requirements.includes('sqlalchemy')) tools.push('SQLAlchemy');
+    } catch {
+      // Ignore read errors
+    }
+  }
+
+  // Determine primary language
+  let primaryLanguage = 'Unknown';
+  if (languages.length > 0) {
+    // TypeScript takes precedence over JavaScript
+    if (languages.includes('TypeScript')) {
+      primaryLanguage = 'TypeScript';
+    } else {
+      primaryLanguage = languages[0];
+    }
+  }
+
+  return {
+    languages: [...new Set(languages)],
+    frameworks: [...new Set(frameworks)],
+    databases: [...new Set(databases)],
+    tools: [...new Set(tools)],
+    primaryLanguage
+  };
+}
+
+/**
+ * Detects deployment configuration in a repository
+ */
+function detectDeployment(repoPath: string): RepoScanResult['deployment'] {
+  // Check for deployment configurations
+  if (fs.existsSync(path.join(repoPath, 'vercel.json')) ||
+      fs.existsSync(path.join(repoPath, '.vercel'))) {
+    return { platform: 'vercel', hasConfig: true };
+  }
+
+  if (fs.existsSync(path.join(repoPath, 'netlify.toml')) ||
+      fs.existsSync(path.join(repoPath, '_redirects'))) {
+    return { platform: 'netlify', hasConfig: true };
+  }
+
+  if (fs.existsSync(path.join(repoPath, 'railway.json')) ||
+      fs.existsSync(path.join(repoPath, 'railway.toml'))) {
+    return { platform: 'railway', hasConfig: true };
+  }
+
+  if (fs.existsSync(path.join(repoPath, 'Dockerfile')) ||
+      fs.existsSync(path.join(repoPath, 'docker-compose.yml')) ||
+      fs.existsSync(path.join(repoPath, 'docker-compose.yaml'))) {
+    return { platform: 'docker', hasConfig: true };
+  }
+
+  // Check for GitHub Pages
+  const packageJsonPath = path.join(repoPath, 'package.json');
+  if (fs.existsSync(packageJsonPath)) {
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      if (packageJson.homepage?.includes('github.io') ||
+          packageJson.scripts?.deploy?.includes('gh-pages')) {
+        return { platform: 'github-pages', hasConfig: true };
+      }
+    } catch {
+      // Ignore errors
+    }
+  }
+
+  return { platform: 'unknown', hasConfig: false };
+}
+
+/**
+ * Detects integrations and tooling in a repository
+ */
+function detectIntegrations(repoPath: string): RepoScanResult['integrations'] {
+  const integrations: RepoScanResult['integrations'] = {
+    hasCI: false,
+    hasTests: false,
+    hasDocker: false,
+    hasLinting: false,
+    hasTypeScript: false,
+    hasReadme: false,
+    hasSupabase: false
+  };
+
+  // CI Detection
+  if (fs.existsSync(path.join(repoPath, '.github', 'workflows'))) {
+    integrations.hasCI = true;
+    integrations.ciPlatform = 'github-actions';
+  } else if (fs.existsSync(path.join(repoPath, '.gitlab-ci.yml'))) {
+    integrations.hasCI = true;
+    integrations.ciPlatform = 'gitlab-ci';
+  } else if (fs.existsSync(path.join(repoPath, 'Jenkinsfile'))) {
+    integrations.hasCI = true;
+    integrations.ciPlatform = 'jenkins';
+  } else if (fs.existsSync(path.join(repoPath, '.circleci'))) {
+    integrations.hasCI = true;
+    integrations.ciPlatform = 'circleci';
+  }
+
+  // Test detection
+  integrations.hasTests = fs.existsSync(path.join(repoPath, 'tests')) ||
+                          fs.existsSync(path.join(repoPath, 'test')) ||
+                          fs.existsSync(path.join(repoPath, '__tests__')) ||
+                          fs.existsSync(path.join(repoPath, 'spec'));
+
+  // Docker detection
+  integrations.hasDocker = fs.existsSync(path.join(repoPath, 'Dockerfile')) ||
+                           fs.existsSync(path.join(repoPath, 'docker-compose.yml')) ||
+                           fs.existsSync(path.join(repoPath, 'docker-compose.yaml'));
+
+  // Linting detection
+  integrations.hasLinting = fs.existsSync(path.join(repoPath, '.eslintrc.js')) ||
+                            fs.existsSync(path.join(repoPath, '.eslintrc.json')) ||
+                            fs.existsSync(path.join(repoPath, '.eslintrc')) ||
+                            fs.existsSync(path.join(repoPath, 'eslint.config.js')) ||
+                            fs.existsSync(path.join(repoPath, '.prettierrc')) ||
+                            fs.existsSync(path.join(repoPath, 'prettier.config.js'));
+
+  // TypeScript detection
+  integrations.hasTypeScript = fs.existsSync(path.join(repoPath, 'tsconfig.json'));
+
+  // README detection
+  integrations.hasReadme = fs.existsSync(path.join(repoPath, 'README.md')) ||
+                           fs.existsSync(path.join(repoPath, 'readme.md')) ||
+                           fs.existsSync(path.join(repoPath, 'README'));
+
+  // Supabase detection
+  integrations.hasSupabase = fs.existsSync(path.join(repoPath, 'supabase')) ||
+                              fs.existsSync(path.join(repoPath, 'supabase.config.ts')) ||
+                              fs.existsSync(path.join(repoPath, 'supabase.config.js')) ||
+                              fs.existsSync(path.join(repoPath, '.supabase')) ||
+                              detectSupabaseInPackageJson(repoPath);
+
+  return integrations;
+}
+
+/**
+ * Checks if Supabase is listed as a dependency in package.json
+ */
+function detectSupabaseInPackageJson(repoPath: string): boolean {
+  const packageJsonPath = path.join(repoPath, 'package.json');
+  if (!fs.existsSync(packageJsonPath)) {
+    return false;
+  }
+  try {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+    return Object.keys(deps).some(dep =>
+      dep.includes('supabase') || dep === '@supabase/supabase-js' || dep === '@supabase/auth-helpers-nextjs'
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Analyzes commit types from recent commits
+ */
+async function analyzeCommitTypes(
+  repoPath: string,
+  since: Date
+): Promise<RepoScanResult['recentCommitTypes']> {
+  const types: RepoScanResult['recentCommitTypes'] = {
+    features: 0,
+    fixes: 0,
+    docs: 0,
+    refactors: 0,
+    tests: 0,
+    other: 0
+  };
+
+  try {
+    const { stdout } = await execFileAsync('git', [
+      'log',
+      '--pretty=%s',
+      `--since=${since.toISOString()}`
+    ], { cwd: repoPath, encoding: 'utf8' });
+
+    const messages = stdout.split('\n').filter(m => m.trim());
+
+    for (const msg of messages) {
+      const lowerMsg = msg.toLowerCase();
+
+      if (lowerMsg.startsWith('feat') || lowerMsg.includes('add ') || lowerMsg.includes('implement')) {
+        types.features++;
+      } else if (lowerMsg.startsWith('fix') || lowerMsg.includes('bug') || lowerMsg.includes('resolve')) {
+        types.fixes++;
+      } else if (lowerMsg.startsWith('doc') || lowerMsg.includes('readme') || lowerMsg.includes('comment')) {
+        types.docs++;
+      } else if (lowerMsg.startsWith('refactor') || lowerMsg.includes('cleanup') || lowerMsg.includes('restructure')) {
+        types.refactors++;
+      } else if (lowerMsg.startsWith('test') || lowerMsg.includes('spec') || lowerMsg.includes('coverage')) {
+        types.tests++;
+      } else {
+        types.other++;
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+
+  return types;
 }
 
 /**

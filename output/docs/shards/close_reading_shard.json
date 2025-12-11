@@ -12,5 +12,58 @@
     "commitHash": "a37514f",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "vercel",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "TypeScript"
+    ],
+    "frameworks": [
+      "React"
+    ],
+    "databases": [],
+    "tools": [
+      "Vitest",
+      "ESLint",
+      "Vite"
+    ],
+    "primaryLanguage": "TypeScript"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 30,
+    "lastCommitDate": "2025-12-02T19:31:09-08:00",
+    "daysSinceLastCommit": 8,
+    "commitVelocity": "low",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": false,
+    "hasTypeScript": true,
+    "hasReadme": true,
+    "hasSupabase": true,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 74,
+    "grade": "C",
+    "factors": {
+      "activity": 50,
+      "deployment": 100,
+      "codeQuality": 80,
+      "documentation": 80,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Add ESLint/Prettier for consistent code style"
+    ]
   }
 }

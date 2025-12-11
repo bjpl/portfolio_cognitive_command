@@ -3,14 +3,65 @@
   "cluster": "Experience",
   "alignmentScore": 0.95,
   "driftAlert": false,
-  "lastIntent": "refine(semantic-analyzer): Improve Claude prompt for semantic feature extraction\n\nEnhanced the Claude API prompt in semantic-analyzer with:\n\n- Added system message defining role as \"semantic analysis engine\"\n- Structured prompt with clear sections: Input Context, Cluster Hint, Required Output\n- Added evaluation criteria explaining domain inference logic\n- Improved instructions for technologies, patterns, complexity assessment\n- Better guidance on keyword extraction (exclude generic terms)\n- Explicit JSON output instruction (no markdown blocks)\n\nThis improves the quality and consistency of semantic feature extraction\nfor vector embedding generation.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
-  "executionSummary": "Status: ACTIVE • 10 commits in last 7 days • Manual implementation",
-  "rawCommit": "refine(semantic-analyzer): Improve Claude prompt for semantic feature extraction\n\nEnhanced the Claude API prompt in semantic-analyzer with:\n\n- Added system message defining role as \"semantic analysis engine\"\n- Structured prompt with clear sections: Input Context, Cluster Hint, Required Output\n- Added evaluation criteria explaining domain inference logic\n- Improved instructions for technologies, patterns, complexity assessment\n- Better guidance on keyword extraction (exclude generic terms)\n- Explicit JSON output instruction (no markdown blocks)\n\nThis improves the quality and consistency of semantic feature extraction\nfor vector embedding generation.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "lastIntent": "feat(metrics): Add date-stamping to cognitive_metrics.json\n\n- Metrics files now saved as cognitive_metrics_YYYY-MM-DD.json\n- Preserves historical metrics across runs for trend analysis\n- Status command finds latest metrics file automatically\n- Cleaned up stale 12/3 output files from root output folder\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 11 commits in last 7 days • Manual implementation",
+  "rawCommit": "feat(metrics): Add date-stamping to cognitive_metrics.json\n\n- Metrics files now saved as cognitive_metrics_YYYY-MM-DD.json\n- Preserves historical metrics across runs for trend analysis\n- Status command finds latest metrics file automatically\n- Cleaned up stale 12/3 output files from root output folder\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
   "source": "manual_override",
   "metadata": {
-    "timestamp": "2025-12-11T10:53:57-08:00",
-    "commitHash": "2a87889",
-    "commitCount7d": 10,
+    "timestamp": "2025-12-11T11:19:51-08:00",
+    "commitHash": "1a9e90a",
+    "commitCount7d": 11,
     "status": "ACTIVE"
+  },
+  "deployment": {
+    "platform": "unknown",
+    "status": "not-configured"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "TypeScript"
+    ],
+    "frameworks": [],
+    "databases": [],
+    "tools": [
+      "Jest",
+      "ESLint"
+    ],
+    "primaryLanguage": "TypeScript"
+  },
+  "activity": {
+    "commits7d": 11,
+    "commits30d": 17,
+    "lastCommitDate": "2025-12-11T11:19:51-08:00",
+    "daysSinceLastCommit": 0,
+    "commitVelocity": "high",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": true,
+    "hasTypeScript": true,
+    "hasReadme": false,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 76,
+    "grade": "C",
+    "factors": {
+      "activity": 100,
+      "deployment": 30,
+      "codeQuality": 100,
+      "documentation": 20,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Add deployment configuration (Vercel, Netlify, Docker)",
+      "Add a README.md file"
+    ]
   }
 }

@@ -12,5 +12,53 @@
     "commitHash": "8d2bbc3",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "netlify",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "Ruby"
+    ],
+    "frameworks": [],
+    "databases": [],
+    "tools": [],
+    "primaryLanguage": "Ruby"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 5,
+    "lastCommitDate": "2025-11-23T20:34:09-08:00",
+    "daysSinceLastCommit": 17,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": false,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": false,
+    "hasDocker": false,
+    "hasLinting": false,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 55,
+    "grade": "F",
+    "factors": {
+      "activity": 25,
+      "deployment": 100,
+      "codeQuality": 40,
+      "documentation": 80,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Consider adding TypeScript for type safety",
+      "Add ESLint/Prettier for consistent code style"
+    ]
   }
 }

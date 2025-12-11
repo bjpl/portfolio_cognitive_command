@@ -15,13 +15,41 @@ export interface DashboardConfig {
     totalProjects: number;
     driftAlerts: number;
     lastUpdated: string;
+    avgHealthScore: number;
+    avgHealthGrade: string;
+    projectsWithCI: number;
+    projectsWithTests: number;
+    projectsWithDocker: number;
+    projectsWithSupabase: number;
+    projectsDeployed: number;
   };
   projects: ProjectShard[];
   clusters: Array<{
     name: string;
     projects: ProjectShard[];
     avgAlignment: number;
+    avgHealthScore: number;
   }>;
+  techStackSummary: {
+    languages: Record<string, number>;
+    frameworks: Record<string, number>;
+    databases: Record<string, number>;
+  };
+  activitySummary: {
+    highVelocity: number;
+    mediumVelocity: number;
+    lowVelocity: number;
+    stale: number;
+    totalCommits7d: number;
+    totalCommits30d: number;
+  };
+  healthDistribution: {
+    gradeA: number;
+    gradeB: number;
+    gradeC: number;
+    gradeD: number;
+    gradeF: number;
+  };
 }
 
 /**
@@ -45,12 +73,15 @@ export function buildDashboardHTML(config: DashboardConfig): string {
   <div class="dashboard">
     ${buildHeader(config.meta)}
     ${buildMetricsPanel(config.meta)}
+    ${buildHealthOverview(config)}
+    ${buildTechStackPanel(config.techStackSummary)}
+    ${buildActivityPanel(config.activitySummary)}
     ${buildClustersSection(config.clusters)}
     ${buildProjectsTable(config.projects)}
     ${buildDriftAlertsSection(config.projects)}
   </div>
   <script>
-    ${getDashboardScripts()}
+    ${getDashboardScripts(config)}
   </script>
 </body>
 </html>
@@ -76,25 +107,194 @@ function buildHeader(meta: DashboardConfig['meta']): string {
  * Builds metrics overview panel
  */
 function buildMetricsPanel(meta: DashboardConfig['meta']): string {
-  const precisionPercent = (meta.precision * 100).toFixed(1);
+  const gradeColor = meta.avgHealthGrade === 'A' ? '#4ade80' :
+                     meta.avgHealthGrade === 'B' ? '#a3e635' :
+                     meta.avgHealthGrade === 'C' ? '#facc15' :
+                     meta.avgHealthGrade === 'D' ? '#fb923c' : '#ef4444';
 
   return `
     <section class="metrics-panel">
-      <div class="metric-card">
-        <div class="metric-value">${precisionPercent}%</div>
-        <div class="metric-label">Precision Score</div>
+      <div class="metric-card highlight">
+        <div class="metric-value" style="color: ${gradeColor}">${meta.avgHealthGrade}</div>
+        <div class="metric-label">Portfolio Health</div>
+        <div class="metric-sub">${meta.avgHealthScore}/100</div>
       </div>
       <div class="metric-card">
         <div class="metric-value">${meta.active}</div>
-        <div class="metric-label">Active Projects</div>
+        <div class="metric-label">Active</div>
+        <div class="metric-sub">of ${meta.totalProjects} projects</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value">${meta.dormant}</div>
-        <div class="metric-label">Dormant Projects</div>
+        <div class="metric-value">${meta.projectsWithCI}</div>
+        <div class="metric-label">CI/CD</div>
+        <div class="metric-sub">${Math.round(meta.projectsWithCI / meta.totalProjects * 100)}% coverage</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${meta.projectsWithTests}</div>
+        <div class="metric-label">Tested</div>
+        <div class="metric-sub">${Math.round(meta.projectsWithTests / meta.totalProjects * 100)}% coverage</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${meta.projectsDeployed}</div>
+        <div class="metric-label">Deployed</div>
+        <div class="metric-sub">${Math.round(meta.projectsDeployed / meta.totalProjects * 100)}% live</div>
       </div>
       <div class="metric-card ${meta.driftAlerts > 0 ? 'alert' : ''}">
         <div class="metric-value">${meta.driftAlerts}</div>
         <div class="metric-label">Drift Alerts</div>
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Builds health overview section with grade distribution
+ */
+function buildHealthOverview(config: DashboardConfig): string {
+  const { healthDistribution } = config;
+  const total = config.projects.length;
+
+  return `
+    <section class="health-overview">
+      <h2>Health Distribution</h2>
+      <div class="health-grid">
+        <div class="grade-distribution">
+          <div class="grade-bar">
+            <div class="grade-segment grade-a" style="width: ${healthDistribution.gradeA / total * 100}%">
+              <span class="grade-label">A</span>
+              <span class="grade-count">${healthDistribution.gradeA}</span>
+            </div>
+            <div class="grade-segment grade-b" style="width: ${healthDistribution.gradeB / total * 100}%">
+              <span class="grade-label">B</span>
+              <span class="grade-count">${healthDistribution.gradeB}</span>
+            </div>
+            <div class="grade-segment grade-c" style="width: ${healthDistribution.gradeC / total * 100}%">
+              <span class="grade-label">C</span>
+              <span class="grade-count">${healthDistribution.gradeC}</span>
+            </div>
+            <div class="grade-segment grade-d" style="width: ${healthDistribution.gradeD / total * 100}%">
+              <span class="grade-label">D</span>
+              <span class="grade-count">${healthDistribution.gradeD}</span>
+            </div>
+            <div class="grade-segment grade-f" style="width: ${healthDistribution.gradeF / total * 100}%">
+              <span class="grade-label">F</span>
+              <span class="grade-count">${healthDistribution.gradeF}</span>
+            </div>
+          </div>
+        </div>
+        <div class="health-legend">
+          <div class="legend-item"><span class="dot grade-a"></span> A: ${healthDistribution.gradeA} projects (90-100)</div>
+          <div class="legend-item"><span class="dot grade-b"></span> B: ${healthDistribution.gradeB} projects (80-89)</div>
+          <div class="legend-item"><span class="dot grade-c"></span> C: ${healthDistribution.gradeC} projects (70-79)</div>
+          <div class="legend-item"><span class="dot grade-d"></span> D: ${healthDistribution.gradeD} projects (60-69)</div>
+          <div class="legend-item"><span class="dot grade-f"></span> F: ${healthDistribution.gradeF} projects (0-59)</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Builds tech stack summary panel
+ */
+function buildTechStackPanel(techStack: DashboardConfig['techStackSummary']): string {
+  const topLanguages = Object.entries(techStack.languages)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  const topFrameworks = Object.entries(techStack.frameworks)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  return `
+    <section class="tech-stack-panel">
+      <h2>Tech Stack</h2>
+      <div class="tech-grid">
+        <div class="tech-category">
+          <h3>Languages</h3>
+          <div class="tech-bars">
+            ${topLanguages.map(([lang, count]) => `
+              <div class="tech-bar-row">
+                <span class="tech-name">${lang}</span>
+                <div class="tech-bar-track">
+                  <div class="tech-bar-fill lang" style="width: ${count / Math.max(...Object.values(techStack.languages)) * 100}%"></div>
+                </div>
+                <span class="tech-count">${count}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="tech-category">
+          <h3>Frameworks</h3>
+          <div class="tech-bars">
+            ${topFrameworks.map(([fw, count]) => `
+              <div class="tech-bar-row">
+                <span class="tech-name">${fw}</span>
+                <div class="tech-bar-track">
+                  <div class="tech-bar-fill framework" style="width: ${count / Math.max(...Object.values(techStack.frameworks), 1) * 100}%"></div>
+                </div>
+                <span class="tech-count">${count}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Builds activity summary panel
+ */
+function buildActivityPanel(activity: DashboardConfig['activitySummary']): string {
+  const total = activity.highVelocity + activity.mediumVelocity + activity.lowVelocity + activity.stale;
+
+  return `
+    <section class="activity-panel">
+      <h2>Activity Overview</h2>
+      <div class="activity-grid">
+        <div class="activity-stats">
+          <div class="activity-stat">
+            <div class="stat-value">${activity.totalCommits7d}</div>
+            <div class="stat-label">Commits (7d)</div>
+          </div>
+          <div class="activity-stat">
+            <div class="stat-value">${activity.totalCommits30d}</div>
+            <div class="stat-label">Commits (30d)</div>
+          </div>
+        </div>
+        <div class="velocity-breakdown">
+          <h3>Velocity Distribution</h3>
+          <div class="velocity-bars">
+            <div class="velocity-row">
+              <span class="velocity-label">High (10+ commits/wk)</span>
+              <div class="velocity-track">
+                <div class="velocity-fill high" style="width: ${activity.highVelocity / total * 100}%"></div>
+              </div>
+              <span class="velocity-count">${activity.highVelocity}</span>
+            </div>
+            <div class="velocity-row">
+              <span class="velocity-label">Medium (3-9 commits/wk)</span>
+              <div class="velocity-track">
+                <div class="velocity-fill medium" style="width: ${activity.mediumVelocity / total * 100}%"></div>
+              </div>
+              <span class="velocity-count">${activity.mediumVelocity}</span>
+            </div>
+            <div class="velocity-row">
+              <span class="velocity-label">Low (1-2 commits/wk)</span>
+              <div class="velocity-track">
+                <div class="velocity-fill low" style="width: ${activity.lowVelocity / total * 100}%"></div>
+              </div>
+              <span class="velocity-count">${activity.lowVelocity}</span>
+            </div>
+            <div class="velocity-row">
+              <span class="velocity-label">Stale (no activity)</span>
+              <div class="velocity-track">
+                <div class="velocity-fill stale" style="width: ${activity.stale / total * 100}%"></div>
+              </div>
+              <span class="velocity-count">${activity.stale}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   `;
@@ -107,23 +307,24 @@ function buildClustersSection(
   clusters: DashboardConfig['clusters']
 ): string {
   const clusterCards = clusters.map(cluster => {
-    const avgPercent = (cluster.avgAlignment * 100).toFixed(1);
     const projectCount = cluster.projects.length;
+    const avgHealth = cluster.avgHealthScore || 0;
 
     return `
       <div class="cluster-card">
         <h3 class="cluster-name">${cluster.name}</h3>
         <div class="cluster-stats">
           <span>${projectCount} projects</span>
-          <span class="alignment-score">${avgPercent}% aligned</span>
+          <span class="health-score">Health: ${avgHealth.toFixed(0)}/100</span>
         </div>
         <div class="cluster-projects">
-          ${cluster.projects.map(p => `
-            <div class="mini-project-card ${p.driftAlert ? 'drift-alert' : ''}">
+          ${cluster.projects.slice(0, 10).map(p => `
+            <div class="mini-project-card ${p.driftAlert ? 'drift-alert' : ''}" data-health="${p.health?.grade || 'N/A'}">
               <span class="project-name">${p.project}</span>
-              <span class="project-score">${(p.alignmentScore * 100).toFixed(0)}%</span>
+              <span class="project-grade grade-${(p.health?.grade || 'F').toLowerCase()}">${p.health?.grade || 'N/A'}</span>
             </div>
           `).join('')}
+          ${cluster.projects.length > 10 ? `<div class="more-projects">+${cluster.projects.length - 10} more</div>` : ''}
         </div>
       </div>
     `;
@@ -144,34 +345,47 @@ function buildClustersSection(
  */
 function buildProjectsTable(projects: ProjectShard[]): string {
   const sortedProjects = [...projects].sort((a, b) =>
-    b.alignmentScore - a.alignmentScore
+    (b.health?.score || 0) - (a.health?.score || 0)
   );
 
   const rows = sortedProjects.map(project => {
-    const alignmentPercent = (project.alignmentScore * 100).toFixed(1);
-    const statusClass = project.metadata?.status.toLowerCase() || '';
-    const driftClass = project.driftAlert ? 'drift' : '';
+    const healthScore = project.health?.score || 0;
+    const healthGrade = project.health?.grade || 'N/A';
+    const statusClass = project.metadata?.status?.toLowerCase() || '';
+    const velocity = project.activity?.commitVelocity || 'stale';
+    const techStack = project.techStack?.primaryLanguage || 'Unknown';
+    const frameworks = project.techStack?.frameworks?.slice(0, 2).join(', ') || '-';
+    const hasCI = project.integrations?.hasCI ? '✓' : '-';
+    const hasTests = project.integrations?.hasTests ? '✓' : '-';
+    const deployment = project.deployment?.platform !== 'unknown' ? project.deployment?.platform : '-';
 
     return `
-      <tr class="${driftClass}">
+      <tr class="project-row" data-project="${project.project}">
         <td>
           <strong>${project.project}</strong>
           <span class="project-meta">${project.cluster}</span>
         </td>
         <td>
+          <span class="health-grade grade-${healthGrade.toLowerCase()}">${healthGrade}</span>
+          <span class="health-score-small">${healthScore}</span>
+        </td>
+        <td>
           <span class="status-badge ${statusClass}">${project.metadata?.status || 'UNKNOWN'}</span>
         </td>
         <td>
-          <div class="alignment-bar-container">
-            <div class="alignment-bar" style="width: ${alignmentPercent}%"></div>
-            <span class="alignment-text">${alignmentPercent}%</span>
-          </div>
+          <span class="velocity-badge ${velocity}">${velocity}</span>
+          <span class="commit-count">${project.activity?.commits7d || 0}/wk</span>
         </td>
-        <td>${project.driftAlert ? '<span class="drift-indicator">⚠️ DRIFT</span>' : '✓'}</td>
-        <td class="intent-cell">${escapeHtml(project.lastIntent)}</td>
-        <td>
-          <span class="source-badge ${project.source}">${formatSource(project.source)}</span>
+        <td class="tech-cell">
+          <span class="primary-tech">${techStack}</span>
+          ${frameworks !== '-' ? `<span class="frameworks">${frameworks}</span>` : ''}
         </td>
+        <td class="integrations-cell">
+          <span class="integration-badge ${hasCI === '✓' ? 'active' : ''}" title="CI/CD">CI</span>
+          <span class="integration-badge ${hasTests === '✓' ? 'active' : ''}" title="Tests">T</span>
+          <span class="integration-badge ${deployment !== '-' ? 'active' : ''}" title="Deployed">${deployment && deployment !== '-' ? deployment.slice(0, 2).toUpperCase() : 'D'}</span>
+        </td>
+        <td class="intent-cell">${escapeHtml(truncateText(project.lastIntent, 60))}</td>
       </tr>
     `;
   }).join('');
@@ -179,23 +393,45 @@ function buildProjectsTable(projects: ProjectShard[]): string {
   return `
     <section class="projects-section">
       <h2>All Projects</h2>
+      <div class="table-controls">
+        <input type="text" id="projectSearch" placeholder="Search projects..." class="search-input">
+        <select id="sortBy" class="sort-select">
+          <option value="health">Sort by Health</option>
+          <option value="activity">Sort by Activity</option>
+          <option value="name">Sort by Name</option>
+        </select>
+        <select id="filterCluster" class="filter-select">
+          <option value="">All Clusters</option>
+          ${[...new Set(projects.map(p => p.cluster))].map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
+      </div>
       <table class="projects-table">
         <thead>
           <tr>
             <th>Project</th>
+            <th>Health</th>
             <th>Status</th>
-            <th>Alignment</th>
-            <th>Drift</th>
+            <th>Activity</th>
+            <th>Tech</th>
+            <th>Integrations</th>
             <th>Last Intent</th>
-            <th>Source</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="projectsTableBody">
           ${rows}
         </tbody>
       </table>
     </section>
   `;
+}
+
+/**
+ * Truncates text to specified length
+ */
+function truncateText(text: string, maxLength: number): string {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
 }
 
 /**
@@ -567,21 +803,301 @@ function getDashboardStyles(): string {
       font-size: 0.8rem;
       color: #7a8ca0;
     }
+
+    /* Enhanced Styles */
+    .metric-card.highlight {
+      background: linear-gradient(135deg, #141933, #1a2540);
+      border: 2px solid #00d9ff;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: #7a8ca0;
+      margin-top: 0.25rem;
+    }
+
+    /* Health Overview */
+    .health-overview {
+      margin-bottom: 3rem;
+      background: #141933;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid #1a2236;
+    }
+
+    .health-grid {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .grade-bar {
+      display: flex;
+      height: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .grade-segment {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-width: 40px;
+      transition: all 0.3s;
+    }
+
+    .grade-segment:hover { filter: brightness(1.2); }
+    .grade-segment.grade-a { background: #4ade80; color: #0a0e27; }
+    .grade-segment.grade-b { background: #a3e635; color: #0a0e27; }
+    .grade-segment.grade-c { background: #facc15; color: #0a0e27; }
+    .grade-segment.grade-d { background: #fb923c; color: #0a0e27; }
+    .grade-segment.grade-f { background: #ef4444; color: white; }
+
+    .grade-label { font-weight: bold; font-size: 0.9rem; }
+    .grade-count { font-size: 0.75rem; }
+
+    .health-legend { font-size: 0.85rem; }
+    .legend-item { margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.grade-a { background: #4ade80; }
+    .dot.grade-b { background: #a3e635; }
+    .dot.grade-c { background: #facc15; }
+    .dot.grade-d { background: #fb923c; }
+    .dot.grade-f { background: #ef4444; }
+
+    /* Tech Stack Panel */
+    .tech-stack-panel, .activity-panel {
+      margin-bottom: 3rem;
+      background: #141933;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid #1a2236;
+    }
+
+    .tech-grid, .activity-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .tech-category h3, .velocity-breakdown h3 {
+      color: #7a8ca0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .tech-bars, .velocity-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .tech-bar-row, .velocity-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 40px;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .tech-name, .velocity-label { font-size: 0.85rem; color: #e0e6ed; }
+    .tech-bar-track, .velocity-track { height: 8px; background: #0a0e27; border-radius: 4px; overflow: hidden; }
+    .tech-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .tech-bar-fill.lang { background: linear-gradient(90deg, #00d9ff, #4ade80); }
+    .tech-bar-fill.framework { background: linear-gradient(90deg, #a855f7, #ec4899); }
+    .tech-count, .velocity-count { font-size: 0.85rem; color: #7a8ca0; text-align: right; }
+
+    .velocity-fill { height: 100%; border-radius: 4px; }
+    .velocity-fill.high { background: #4ade80; }
+    .velocity-fill.medium { background: #facc15; }
+    .velocity-fill.low { background: #fb923c; }
+    .velocity-fill.stale { background: #64748b; }
+
+    /* Activity Stats */
+    .activity-stats {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .activity-stat {
+      text-align: center;
+      padding: 1.5rem;
+      background: #0a0e27;
+      border-radius: 8px;
+      flex: 1;
+    }
+
+    .stat-value { font-size: 2rem; font-weight: bold; color: #00d9ff; }
+    .stat-label { font-size: 0.85rem; color: #7a8ca0; }
+
+    /* Table Controls */
+    .table-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-input, .sort-select, .filter-select {
+      padding: 0.75rem 1rem;
+      background: #141933;
+      border: 1px solid #1a2236;
+      border-radius: 8px;
+      color: #e0e6ed;
+      font-size: 0.9rem;
+    }
+
+    .search-input { flex: 1; }
+    .search-input:focus, .sort-select:focus, .filter-select:focus {
+      outline: none;
+      border-color: #00d9ff;
+    }
+
+    /* Health Grade in Table */
+    .health-grade {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .health-grade.grade-a { background: #4ade80; color: #0a0e27; }
+    .health-grade.grade-b { background: #a3e635; color: #0a0e27; }
+    .health-grade.grade-c { background: #facc15; color: #0a0e27; }
+    .health-grade.grade-d { background: #fb923c; color: #0a0e27; }
+    .health-grade.grade-f { background: #ef4444; color: white; }
+
+    .health-score-small { font-size: 0.75rem; color: #7a8ca0; margin-left: 0.5rem; }
+
+    /* Velocity Badge */
+    .velocity-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .velocity-badge.high { background: #4ade80; color: #0a0e27; }
+    .velocity-badge.medium { background: #facc15; color: #0a0e27; }
+    .velocity-badge.low { background: #fb923c; color: #0a0e27; }
+    .velocity-badge.stale { background: #64748b; color: #e0e6ed; }
+
+    .commit-count { font-size: 0.75rem; color: #7a8ca0; margin-left: 0.5rem; }
+
+    /* Tech Cell */
+    .tech-cell .primary-tech { font-weight: 500; }
+    .tech-cell .frameworks { display: block; font-size: 0.75rem; color: #7a8ca0; }
+
+    /* Integration Badges */
+    .integrations-cell { white-space: nowrap; }
+    .integration-badge {
+      display: inline-block;
+      padding: 0.15rem 0.4rem;
+      margin-right: 0.25rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #1a2236;
+      color: #64748b;
+    }
+
+    .integration-badge.active {
+      background: #4ade80;
+      color: #0a0e27;
+    }
+
+    /* Project Grade in Clusters */
+    .project-grade {
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .project-grade.grade-a { background: #4ade80; color: #0a0e27; }
+    .project-grade.grade-b { background: #a3e635; color: #0a0e27; }
+    .project-grade.grade-c { background: #facc15; color: #0a0e27; }
+    .project-grade.grade-d { background: #fb923c; color: #0a0e27; }
+    .project-grade.grade-f { background: #ef4444; color: white; }
+
+    .health-score { color: #4ade80; }
+    .more-projects { font-size: 0.8rem; color: #7a8ca0; text-align: center; padding: 0.5rem; }
+
+    @media (max-width: 768px) {
+      .health-grid, .tech-grid, .activity-grid { grid-template-columns: 1fr; }
+      .table-controls { flex-direction: column; }
+      .projects-table { font-size: 0.85rem; }
+    }
   `;
 }
 
 /**
  * Returns JavaScript for dashboard interactivity
  */
-function getDashboardScripts(): string {
+function getDashboardScripts(config: DashboardConfig): string {
   return `
-    // Add any interactive features here
     console.log('Portfolio Cognitive Command Dashboard loaded');
 
+    // Project data for filtering/sorting
+    const projects = ${JSON.stringify(config.projects.map(p => ({
+      name: p.project,
+      cluster: p.cluster,
+      health: p.health?.score || 0,
+      grade: p.health?.grade || 'F',
+      activity: p.activity?.commits7d || 0,
+      status: p.metadata?.status || 'UNKNOWN'
+    })))};
+
+    // Search functionality
+    const searchInput = document.getElementById('projectSearch');
+    const sortSelect = document.getElementById('sortBy');
+    const filterSelect = document.getElementById('filterCluster');
+    const tableBody = document.getElementById('projectsTableBody');
+
+    function filterAndSort() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const sortBy = sortSelect.value;
+      const filterCluster = filterSelect.value;
+
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+      rows.forEach(row => {
+        const projectName = row.getAttribute('data-project').toLowerCase();
+        const cluster = row.querySelector('.project-meta')?.textContent || '';
+
+        const matchesSearch = projectName.includes(searchTerm);
+        const matchesCluster = !filterCluster || cluster === filterCluster;
+
+        row.style.display = matchesSearch && matchesCluster ? '' : 'none';
+      });
+
+      // Sort visible rows
+      const visibleRows = rows.filter(r => r.style.display !== 'none');
+      visibleRows.sort((a, b) => {
+        const aName = a.getAttribute('data-project');
+        const bName = b.getAttribute('data-project');
+        const aProject = projects.find(p => p.name === aName) || {};
+        const bProject = projects.find(p => p.name === bName) || {};
+
+        switch(sortBy) {
+          case 'health': return (bProject.health || 0) - (aProject.health || 0);
+          case 'activity': return (bProject.activity || 0) - (aProject.activity || 0);
+          case 'name': return aName.localeCompare(bName);
+          default: return 0;
+        }
+      });
+
+      visibleRows.forEach(row => tableBody.appendChild(row));
+    }
+
+    searchInput?.addEventListener('input', filterAndSort);
+    sortSelect?.addEventListener('change', filterAndSort);
+    filterSelect?.addEventListener('change', filterAndSort);
+
     // Auto-refresh every 5 minutes
-    setTimeout(() => {
-      location.reload();
-    }, 5 * 60 * 1000);
+    setTimeout(() => location.reload(), 5 * 60 * 1000);
   `;
 }
 
@@ -626,13 +1142,68 @@ export function saveDashboard(html: string, outputPath: string): void {
  * @returns Dashboard configuration
  */
 export function createDashboardConfig(shards: ProjectShard[]): DashboardConfig {
-  // Calculate metrics
+  // Calculate basic metrics
   const activeProjects = shards.filter(s => s.metadata?.status === 'ACTIVE').length;
   const dormantProjects = shards.filter(s => s.metadata?.status === 'DORMANT').length;
   const driftAlerts = shards.filter(s => s.driftAlert).length;
 
   const totalAlignment = shards.reduce((sum, s) => sum + s.alignmentScore, 0);
   const precision = shards.length > 0 ? totalAlignment / shards.length : 0;
+
+  // Calculate health metrics
+  const totalHealthScore = shards.reduce((sum, s) => sum + (s.health?.score || 0), 0);
+  const avgHealthScore = shards.length > 0 ? Math.round(totalHealthScore / shards.length) : 0;
+  const avgHealthGrade = avgHealthScore >= 90 ? 'A' :
+                         avgHealthScore >= 80 ? 'B' :
+                         avgHealthScore >= 70 ? 'C' :
+                         avgHealthScore >= 60 ? 'D' : 'F';
+
+  // Calculate integration metrics
+  const projectsWithCI = shards.filter(s => s.integrations?.hasCI).length;
+  const projectsWithTests = shards.filter(s => s.integrations?.hasTests).length;
+  const projectsWithDocker = shards.filter(s => s.integrations?.hasDocker).length;
+  const projectsWithSupabase = shards.filter(s => s.integrations?.hasSupabase).length;
+  const projectsDeployed = shards.filter(s => s.deployment?.platform && s.deployment.platform !== 'unknown').length;
+
+  // Calculate health distribution
+  const healthDistribution = {
+    gradeA: shards.filter(s => s.health?.grade === 'A').length,
+    gradeB: shards.filter(s => s.health?.grade === 'B').length,
+    gradeC: shards.filter(s => s.health?.grade === 'C').length,
+    gradeD: shards.filter(s => s.health?.grade === 'D').length,
+    gradeF: shards.filter(s => !s.health?.grade || s.health?.grade === 'F').length
+  };
+
+  // Calculate activity summary
+  const activitySummary = {
+    highVelocity: shards.filter(s => s.activity?.commitVelocity === 'high').length,
+    mediumVelocity: shards.filter(s => s.activity?.commitVelocity === 'medium').length,
+    lowVelocity: shards.filter(s => s.activity?.commitVelocity === 'low').length,
+    stale: shards.filter(s => !s.activity?.commitVelocity || s.activity?.commitVelocity === 'stale').length,
+    totalCommits7d: shards.reduce((sum, s) => sum + (s.activity?.commits7d || 0), 0),
+    totalCommits30d: shards.reduce((sum, s) => sum + (s.activity?.commits30d || 0), 0)
+  };
+
+  // Calculate tech stack summary
+  const techStackSummary: DashboardConfig['techStackSummary'] = {
+    languages: {},
+    frameworks: {},
+    databases: {}
+  };
+
+  for (const shard of shards) {
+    if (shard.techStack) {
+      for (const lang of shard.techStack.languages || []) {
+        techStackSummary.languages[lang] = (techStackSummary.languages[lang] || 0) + 1;
+      }
+      for (const fw of shard.techStack.frameworks || []) {
+        techStackSummary.frameworks[fw] = (techStackSummary.frameworks[fw] || 0) + 1;
+      }
+      for (const db of shard.techStack.databases || []) {
+        techStackSummary.databases[db] = (techStackSummary.databases[db] || 0) + 1;
+      }
+    }
+  }
 
   // Group by clusters
   const clusterMap: Record<string, ProjectShard[]> = {};
@@ -645,7 +1216,8 @@ export function createDashboardConfig(shards: ProjectShard[]): DashboardConfig {
 
   const clusters = Object.entries(clusterMap).map(([name, projects]) => {
     const avgAlignment = projects.reduce((sum, p) => sum + p.alignmentScore, 0) / projects.length;
-    return { name, projects, avgAlignment };
+    const avgHealthScore = projects.reduce((sum, p) => sum + (p.health?.score || 0), 0) / projects.length;
+    return { name, projects, avgAlignment, avgHealthScore };
   });
 
   return {
@@ -655,9 +1227,19 @@ export function createDashboardConfig(shards: ProjectShard[]): DashboardConfig {
       dormant: dormantProjects,
       totalProjects: shards.length,
       driftAlerts,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      avgHealthScore,
+      avgHealthGrade,
+      projectsWithCI,
+      projectsWithTests,
+      projectsWithDocker,
+      projectsWithSupabase,
+      projectsDeployed
     },
     projects: shards,
-    clusters
+    clusters,
+    techStackSummary,
+    activitySummary,
+    healthDistribution
   };
 }

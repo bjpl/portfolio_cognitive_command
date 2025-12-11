@@ -12,5 +12,57 @@
     "commitHash": "75f16e0",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "github-pages",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript"
+    ],
+    "frameworks": [],
+    "databases": [],
+    "tools": [
+      "Vitest",
+      "ESLint",
+      "Prettier",
+      "Vite"
+    ],
+    "primaryLanguage": "JavaScript/TypeScript"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 4,
+    "lastCommitDate": "2025-11-23T02:36:34-08:00",
+    "daysSinceLastCommit": 18,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": false,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": true,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 67,
+    "grade": "D",
+    "factors": {
+      "activity": 25,
+      "deployment": 100,
+      "codeQuality": 80,
+      "documentation": 80,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Consider adding TypeScript for type safety"
+    ]
   }
 }

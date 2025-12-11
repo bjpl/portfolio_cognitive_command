@@ -12,5 +12,50 @@
     "commitHash": "fa78b99",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "vercel",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "databases": [],
+    "tools": [],
+    "primaryLanguage": "Unknown"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 9,
+    "lastCommitDate": "2025-11-23T13:53:25-08:00",
+    "daysSinceLastCommit": 17,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": false,
+    "hasTests": false,
+    "hasDocker": false,
+    "hasLinting": false,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false
+  },
+  "health": {
+    "score": 47,
+    "grade": "F",
+    "factors": {
+      "activity": 25,
+      "deployment": 100,
+      "codeQuality": 40,
+      "documentation": 80,
+      "integrations": 30
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Consider adding TypeScript for type safety",
+      "Add ESLint/Prettier for consistent code style"
+    ]
   }
 }

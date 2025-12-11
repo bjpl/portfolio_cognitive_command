@@ -12,5 +12,63 @@
     "commitHash": "efed2ea",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "unknown",
+    "status": "not-configured"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "Python"
+    ],
+    "frameworks": [
+      "Flask",
+      "FastAPI"
+    ],
+    "databases": [],
+    "tools": [
+      "Jest",
+      "ESLint",
+      "PyTorch",
+      "Pandas",
+      "SQLAlchemy"
+    ],
+    "primaryLanguage": "JavaScript/TypeScript"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 15,
+    "lastCommitDate": "2025-11-23T14:01:15-08:00",
+    "daysSinceLastCommit": 17,
+    "commitVelocity": "stale",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": true,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 57,
+    "grade": "F",
+    "factors": {
+      "activity": 25,
+      "deployment": 30,
+      "codeQuality": 80,
+      "documentation": 80,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Consider reviving this project or archiving it",
+      "Add deployment configuration (Vercel, Netlify, Docker)",
+      "Consider adding TypeScript for type safety"
+    ]
   }
 }

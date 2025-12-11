@@ -12,5 +12,58 @@
     "commitHash": "e3fdf7c",
     "commitCount7d": 0,
     "status": "DORMANT"
+  },
+  "deployment": {
+    "platform": "unknown",
+    "status": "not-configured"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "Ruby"
+    ],
+    "frameworks": [],
+    "databases": [],
+    "tools": [
+      "Jest",
+      "ESLint",
+      "Prettier"
+    ],
+    "primaryLanguage": "JavaScript/TypeScript"
+  },
+  "activity": {
+    "commits7d": 0,
+    "commits30d": 75,
+    "lastCommitDate": "2025-12-02T14:01:07-08:00",
+    "daysSinceLastCommit": 8,
+    "commitVelocity": "low",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": false,
+    "hasLinting": false,
+    "hasTypeScript": false,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 57,
+    "grade": "F",
+    "factors": {
+      "activity": 50,
+      "deployment": 30,
+      "codeQuality": 60,
+      "documentation": 80,
+      "integrations": 70
+    },
+    "recommendations": [
+      "Add deployment configuration (Vercel, Netlify, Docker)",
+      "Consider adding TypeScript for type safety",
+      "Add ESLint/Prettier for consistent code style"
+    ]
   }
 }

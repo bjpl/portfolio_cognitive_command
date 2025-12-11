@@ -12,5 +12,58 @@
     "commitHash": "5fd3734",
     "commitCount7d": 12,
     "status": "ACTIVE"
+  },
+  "deployment": {
+    "platform": "docker",
+    "status": "deployed"
+  },
+  "techStack": {
+    "languages": [
+      "JavaScript/TypeScript",
+      "TypeScript"
+    ],
+    "frameworks": [
+      "React"
+    ],
+    "databases": [],
+    "tools": [
+      "Vitest",
+      "ESLint",
+      "Prettier",
+      "Vite",
+      "Tailwind CSS"
+    ],
+    "primaryLanguage": "TypeScript"
+  },
+  "activity": {
+    "commits7d": 12,
+    "commits30d": 52,
+    "lastCommitDate": "2025-12-10T22:38:47-08:00",
+    "daysSinceLastCommit": 0,
+    "commitVelocity": "high",
+    "hasRecentBugFixes": true,
+    "hasRecentFeatures": true
+  },
+  "integrations": {
+    "hasCI": true,
+    "hasTests": true,
+    "hasDocker": true,
+    "hasLinting": true,
+    "hasTypeScript": true,
+    "hasReadme": true,
+    "hasSupabase": false,
+    "ciPlatform": "github-actions"
+  },
+  "health": {
+    "score": 98,
+    "grade": "A",
+    "factors": {
+      "activity": 100,
+      "deployment": 100,
+      "codeQuality": 100,
+      "documentation": 80,
+      "integrations": 100
+    },
+    "recommendations": []
   }
 }
