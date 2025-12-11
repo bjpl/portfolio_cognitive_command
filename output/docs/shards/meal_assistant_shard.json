@@ -1,0 +1,16 @@
+{
+  "project": "meal_assistant",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "feat: add Railway deployment configuration\n\nAdd Railway.app cloud deployment configuration for production hosting.\n\n**Configuration Files:**\n- railway.json: Build and deploy settings (Dockerfile-based)\n- railway.toml: Service configuration with health checks\n- Procfile: Start command for Railway\n- docs/RAILWAY_DEPLOYMENT.md: Complete deployment guide\n\n**Railway Project:**\n- Project ID: d68407f9-0f65-4cbf-9d4c-f3008342d848\n- Project URL: https://railway.com/project/d68407f9-0f65-4cbf-9d4c-f3008342d848\n- Environment: production\n\n**Services to Deploy:**\n1. API Service (Node.js) - Dockerfile.api\n2. PostgreSQL Database (Railway managed)\n3. Redis Cache (Railway managed)\n4. ML Service (Python) - Dockerfile.ml (optional)\n\n**Next Steps:**\n- Add PostgreSQL and Redis plugins via Railway dashboard\n- Configure environment variables (JWT_SECRET, etc.)\n- Deploy with: railway up\n- Access at: https://<project-name>.up.railway.app\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "feat: add Railway deployment configuration\n\nAdd Railway.app cloud deployment configuration for production hosting.\n\n**Configuration Files:**\n- railway.json: Build and deploy settings (Dockerfile-based)\n- railway.toml: Service configuration with health checks\n- Procfile: Start command for Railway\n- docs/RAILWAY_DEPLOYMENT.md: Complete deployment guide\n\n**Railway Project:**\n- Project ID: d68407f9-0f65-4cbf-9d4c-f3008342d848\n- Project URL: https://railway.com/project/d68407f9-0f65-4cbf-9d4c-f3008342d848\n- Environment: production\n\n**Services to Deploy:**\n1. API Service (Node.js) - Dockerfile.api\n2. PostgreSQL Database (Railway managed)\n3. Redis Cache (Railway managed)\n4. ML Service (Python) - Dockerfile.ml (optional)\n\n**Next Steps:**\n- Add PostgreSQL and Redis plugins via Railway dashboard\n- Configure environment variables (JWT_SECRET, etc.)\n- Deploy with: railway up\n- Access at: https://<project-name>.up.railway.app\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-01T21:47:56-08:00",
+    "commitHash": "5f1dce0",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

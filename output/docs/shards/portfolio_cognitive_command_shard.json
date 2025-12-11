@@ -3,14 +3,14 @@
   "cluster": "Experience",
   "alignmentScore": 0.95,
   "driftAlert": false,
-  "lastIntent": "feat: Production-ready v1.0.0 with GOAP implementation plan\n\nGOAP Actions Completed:\n- DELETE_DEAD_CODE: Removed 995 lines of unused pipeline code\n- ADD_CONFIG: Created src/config.ts with env-based configuration\n- FIX_CLI_HARDCODING: Replaced hardcoded paths with config\n- FIX_AGENTDB: Implemented real JSON-based AgentDB storage\n- ADD_DASHBOARD_TESTS: Added 52 comprehensive dashboard tests\n- UPDATE_VERSION: Changed from inflated v8.0 to honest v1.0.0\n\nChanges:\n- Deleted src/pipeline/drift-pipeline.ts (522 lines)\n- Deleted src/pipeline/embedding-pipeline.ts (475 lines)\n- Added src/config.ts with typed configuration\n- Updated .env.example with comprehensive docs\n- Real AgentDB in data/agentdb.json\n- 170 tests passing (118 original + 52 new)\n\nBreaking Changes:\n- Version reset from 8.0.0 to 1.0.0\n- Config-driven paths (set SCAN_DIR env var)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
-  "executionSummary": "Status: ACTIVE • 2 commits in last 7 days • Manual implementation",
-  "rawCommit": "feat: Production-ready v1.0.0 with GOAP implementation plan\n\nGOAP Actions Completed:\n- DELETE_DEAD_CODE: Removed 995 lines of unused pipeline code\n- ADD_CONFIG: Created src/config.ts with env-based configuration\n- FIX_CLI_HARDCODING: Replaced hardcoded paths with config\n- FIX_AGENTDB: Implemented real JSON-based AgentDB storage\n- ADD_DASHBOARD_TESTS: Added 52 comprehensive dashboard tests\n- UPDATE_VERSION: Changed from inflated v8.0 to honest v1.0.0\n\nChanges:\n- Deleted src/pipeline/drift-pipeline.ts (522 lines)\n- Deleted src/pipeline/embedding-pipeline.ts (475 lines)\n- Added src/config.ts with typed configuration\n- Updated .env.example with comprehensive docs\n- Real AgentDB in data/agentdb.json\n- 170 tests passing (118 original + 52 new)\n\nBreaking Changes:\n- Version reset from 8.0.0 to 1.0.0\n- Config-driven paths (set SCAN_DIR env var)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "lastIntent": "fix: Resolve repo-scanner test mocking for promisified execFile\n\n- Rewrote tests/repo-scanner.test.ts with proper util.promisify mock\n- Fixed async git command testing for scanRepos, getCommitHistory, getChangedFiles\n- Removed unused execFileSync import from src/skills/repo-scanner.ts\n- Added coverage/ to .gitignore\n- Added comprehensive documentation in docs/\n- Added neural-trainer skill with tests\n- All 797 tests passing at 93% coverage\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 6 commits in last 7 days • Manual implementation",
+  "rawCommit": "fix: Resolve repo-scanner test mocking for promisified execFile\n\n- Rewrote tests/repo-scanner.test.ts with proper util.promisify mock\n- Fixed async git command testing for scanRepos, getCommitHistory, getChangedFiles\n- Removed unused execFileSync import from src/skills/repo-scanner.ts\n- Added coverage/ to .gitignore\n- Added comprehensive documentation in docs/\n- Added neural-trainer skill with tests\n- All 797 tests passing at 93% coverage\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
   "source": "manual_override",
   "metadata": {
-    "timestamp": "2025-12-03T01:00:24-08:00",
-    "commitHash": "64dda93",
-    "commitCount7d": 2,
+    "timestamp": "2025-12-10T22:30:17-08:00",
+    "commitHash": "1f94738",
+    "commitCount7d": 6,
     "status": "ACTIVE"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "project": "learn_strudel",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "docs: create standard documentation structure\n\n- Create docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "docs: create standard documentation structure\n\n- Create docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-11-23T20:33:33-08:00",
+    "commitHash": "18740b8",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

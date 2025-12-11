@@ -1,0 +1,16 @@
+{
+  "project": "describe_it",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "refactor: consolidate API keys to single settings location\n\n- Remove duplicate ApiKeyModal from UserMenu dropdown\n- Remove API key inputs from PrivacySettings (now Language tab)\n- Rename Privacy tab to Language with globe icon\n- Add defaultTab prop to SettingsModal for direct navigation\n- Consolidate API key management to ApiKeysSection only\n\nUsers now configure API keys in one place: Settings > API Keys tab.\nUnsplash uses env var fallback (NEXT_PUBLIC_UNSPLASH_ACCESS_KEY).\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 10 commits in last 7 days • Manual implementation",
+  "rawCommit": "refactor: consolidate API keys to single settings location\n\n- Remove duplicate ApiKeyModal from UserMenu dropdown\n- Remove API key inputs from PrivacySettings (now Language tab)\n- Rename Privacy tab to Language with globe icon\n- Add defaultTab prop to SettingsModal for direct navigation\n- Consolidate API key management to ApiKeysSection only\n\nUsers now configure API keys in one place: Settings > API Keys tab.\nUnsplash uses env var fallback (NEXT_PUBLIC_UNSPLASH_ACCESS_KEY).\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-10T23:53:25-08:00",
+    "commitHash": "3a1ebcb",
+    "commitCount7d": 10,
+    "status": "ACTIVE"
+  }
+}

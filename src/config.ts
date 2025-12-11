@@ -1,8 +1,56 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as fs from 'fs';
 
 // Load environment variables from .env file
 dotenv.config();
+
+/**
+ * Intelligently detects the portfolio root directory by walking up the directory tree.
+ * Looks for a parent directory containing multiple git repositories (3+).
+ * This enables running the scanner from within any project subdirectory.
+ *
+ * @param startDir - Starting directory (defaults to process.cwd())
+ * @param maxDepth - Maximum levels to traverse up (defaults to 3)
+ * @returns The detected portfolio root or the starting directory if none found
+ */
+function detectPortfolioRoot(startDir: string = process.cwd(), maxDepth: number = 3): string {
+  let currentDir = startDir;
+
+  for (let depth = 0; depth < maxDepth; depth++) {
+    const parentDir = path.resolve(currentDir, '..');
+
+    // Prevent infinite loop at filesystem root
+    if (parentDir === currentDir) {
+      break;
+    }
+
+    try {
+      // Check if parent directory contains multiple git repos
+      const subdirs = fs.readdirSync(parentDir, { withFileTypes: true })
+        .filter(d => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'node_modules');
+
+      let gitRepoCount = 0;
+      for (const subdir of subdirs) {
+        const gitPath = path.join(parentDir, subdir.name, '.git');
+        if (fs.existsSync(gitPath)) {
+          gitRepoCount++;
+          // Early exit if we've found enough repos
+          if (gitRepoCount >= 3) {
+            return parentDir;
+          }
+        }
+      }
+    } catch {
+      // Skip inaccessible directories
+    }
+
+    currentDir = parentDir;
+  }
+
+  // Fallback to starting directory if no portfolio root found
+  return startDir;
+}
 
 export interface Config {
   // Claude API Configuration (Primary)
@@ -79,7 +127,8 @@ export const config: Config = {
   useOpenAIApi: parseBoolean(process.env.USE_OPENAI_API, false),
 
   // Project Paths
-  defaultScanDir: process.env.SCAN_DIR || process.cwd(),
+  // Smart directory detection: uses SCAN_DIR env var if set, otherwise auto-detects portfolio root
+  defaultScanDir: process.env.SCAN_DIR || detectPortfolioRoot(),
   agentDbPath: process.env.AGENTDB_PATH || path.join(process.cwd(), 'data', 'agentdb.json'),
   outputDir: process.env.OUTPUT_DIR || path.join(process.cwd(), 'output'),
 

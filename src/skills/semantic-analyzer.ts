@@ -176,8 +176,8 @@ function calculateScore(
 }
 
 /**
- * Generates embedding vector using Claude API (primary), OpenAI (fallback), or keywords
- * Claude generates semantic embeddings through structured analysis
+ * Generates embedding vector using OpenAI API (primary), Claude semantic analysis (secondary), or keywords
+ * Claude extracts semantic features which are then converted to a deterministic vector
  */
 async function generateVector(
   text: string,
@@ -186,19 +186,7 @@ async function generateVector(
 ): Promise<number[]> {
   const combinedText = `${text} ${paths.join(' ')}`.substring(0, 8000);
 
-  // Try Claude API first (primary)
-  if (claudeClient && config.useClaudeApi) {
-    try {
-      const embedding = await generateClaudeEmbedding(combinedText, cluster);
-      if (embedding) {
-        return embedding;
-      }
-    } catch (error) {
-      console.warn('[SemanticAnalyzer] Claude API failed, trying OpenAI fallback:', error);
-    }
-  }
-
-  // Try OpenAI API as fallback
+  // Try OpenAI embeddings API first (designed for embeddings)
   if (openaiClient) {
     try {
       const response = await openaiClient.embeddings.create({
@@ -207,7 +195,19 @@ async function generateVector(
       });
       return response.data[0].embedding;
     } catch (error) {
-      console.warn('[SemanticAnalyzer] OpenAI API failed, using keyword fallback:', error);
+      console.warn('[SemanticAnalyzer] OpenAI API failed, trying Claude semantic analysis:', error);
+    }
+  }
+
+  // Try Claude for semantic feature extraction (not raw embeddings)
+  if (claudeClient && config.useClaudeApi) {
+    try {
+      const features = await extractClaudeSemanticFeatures(combinedText, cluster);
+      if (features) {
+        return generateVectorFromFeatures(features, text, paths, cluster);
+      }
+    } catch (error) {
+      console.warn('[SemanticAnalyzer] Claude semantic analysis failed, using keyword fallback:', error);
     }
   }
 
@@ -216,50 +216,172 @@ async function generateVector(
 }
 
 /**
- * Generates semantic embedding using Claude API (Sonnet 4.5)
- * Uses structured semantic analysis to create dense vector representation
+ * Semantic features extracted by Claude for vector generation
  */
-async function generateClaudeEmbedding(
+interface SemanticFeatures {
+  domain: 'frontend' | 'backend' | 'infra' | 'fullstack' | 'unknown';
+  technologies: string[];
+  patterns: string[];
+  complexity: 'low' | 'medium' | 'high';
+  keywords: string[];
+  projectType: string;
+}
+
+/**
+ * Extracts semantic features using Claude API (Sonnet 4.5)
+ * Returns structured features that can be deterministically converted to a vector
+ */
+async function extractClaudeSemanticFeatures(
   text: string,
   cluster: ClusterType
-): Promise<number[] | null> {
+): Promise<SemanticFeatures | null> {
   if (!claudeClient) return null;
 
   try {
     const response = await claudeClient.messages.create({
       model: config.claudeModel,
-      max_tokens: 4096,
+      max_tokens: 1024,
       messages: [{
         role: 'user',
-        content: `Analyze this code/commit context and generate a semantic embedding as a JSON array of 1536 floating-point numbers between -1 and 1. The embedding should capture:
-1. Technical domain (frontend/backend/infra)
-2. Code patterns and architecture style
-3. Complexity and scope indicators
-4. Language/framework signals
+        content: `Analyze this code/commit context and extract semantic features. Return a JSON object with these fields:
+
+{
+  "domain": "frontend" | "backend" | "infra" | "fullstack" | "unknown",
+  "technologies": ["list", "of", "technologies", "frameworks", "languages"],
+  "patterns": ["list", "of", "architectural", "patterns"],
+  "complexity": "low" | "medium" | "high",
+  "keywords": ["top", "10", "semantic", "keywords"],
+  "projectType": "brief description of project type"
+}
 
 Context to analyze:
-${text}
+${text.substring(0, 4000)}
 
 Primary cluster hint: ${cluster}
 
-Return ONLY a valid JSON array of exactly 1536 numbers, no other text.`
+Return ONLY the JSON object, no other text.`
       }]
     });
 
-    // Extract the text content from Claude's response
     const content = response.content[0];
     if (content.type === 'text') {
-      const parsed = JSON.parse(content.text);
-      if (Array.isArray(parsed) && parsed.length === 1536) {
-        return parsed as number[];
+      // Try to extract JSON from the response (handle markdown code blocks)
+      let jsonText = content.text.trim();
+
+      // Remove markdown code block if present
+      if (jsonText.startsWith('```')) {
+        jsonText = jsonText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+      }
+
+      const parsed = JSON.parse(jsonText);
+
+      // Validate required fields
+      if (parsed.domain && parsed.technologies && parsed.keywords) {
+        return {
+          domain: parsed.domain || 'unknown',
+          technologies: Array.isArray(parsed.technologies) ? parsed.technologies : [],
+          patterns: Array.isArray(parsed.patterns) ? parsed.patterns : [],
+          complexity: parsed.complexity || 'medium',
+          keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
+          projectType: parsed.projectType || 'unknown'
+        };
       }
     }
-    console.warn('[SemanticAnalyzer] Claude returned invalid embedding format');
+    console.warn('[SemanticAnalyzer] Claude returned invalid feature format');
     return null;
   } catch (error) {
-    console.warn('[SemanticAnalyzer] Claude embedding generation failed:', error);
+    console.warn('[SemanticAnalyzer] Claude feature extraction failed:', error);
     return null;
   }
+}
+
+/**
+ * Generates a 1536-dimensional vector from extracted semantic features
+ * Uses deterministic hashing to create consistent embeddings from features
+ */
+function generateVectorFromFeatures(
+  features: SemanticFeatures,
+  text: string,
+  paths: string[],
+  cluster: ClusterType
+): number[] {
+  const dimensions = 1536;
+  const vector: number[] = new Array(dimensions).fill(0);
+
+  // Domain encoding (dimensions 0-49)
+  const domainOffsets = {
+    'frontend': 0,
+    'backend': 10,
+    'infra': 20,
+    'fullstack': 30,
+    'unknown': 40
+  };
+  const domainOffset = domainOffsets[features.domain] || 40;
+  for (let i = 0; i < 10; i++) {
+    vector[domainOffset + i] = 0.8;
+  }
+
+  // Technology hashing (dimensions 50-549)
+  for (const tech of features.technologies) {
+    const hash = simpleHash(tech.toLowerCase());
+    const idx = 50 + (Math.abs(hash) % 500);
+    vector[idx] += 0.5;
+    vector[(idx + 1) % dimensions] += 0.25;
+  }
+
+  // Pattern hashing (dimensions 550-799)
+  for (const pattern of features.patterns) {
+    const hash = simpleHash(pattern.toLowerCase());
+    const idx = 550 + (Math.abs(hash) % 250);
+    vector[idx] += 0.4;
+  }
+
+  // Complexity encoding (dimensions 800-849)
+  const complexityValues = { 'low': 0.3, 'medium': 0.6, 'high': 0.9 };
+  const complexityVal = complexityValues[features.complexity] || 0.5;
+  for (let i = 800; i < 850; i++) {
+    vector[i] = complexityVal * (1 - (i - 800) / 50);
+  }
+
+  // Keyword hashing (dimensions 850-1349)
+  for (const keyword of features.keywords) {
+    const hash = simpleHash(keyword.toLowerCase());
+    const idx = 850 + (Math.abs(hash) % 500);
+    vector[idx] += 0.6;
+    vector[(idx + 7) % dimensions] += 0.3;
+  }
+
+  // Project type hashing (dimensions 1350-1449)
+  const typeWords = features.projectType.toLowerCase().split(/\s+/);
+  for (const word of typeWords) {
+    if (word.length > 2) {
+      const hash = simpleHash(word);
+      const idx = 1350 + (Math.abs(hash) % 100);
+      vector[idx] += 0.35;
+    }
+  }
+
+  // Text and path contribution (dimensions 1450-1535)
+  const baseVector = generateKeywordVector(text, paths, cluster);
+  for (let i = 1450; i < dimensions; i++) {
+    vector[i] = baseVector[i] * 0.5;
+  }
+
+  // Normalize to unit length
+  const magnitude = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
+  if (magnitude > 0) {
+    for (let i = 0; i < vector.length; i++) {
+      vector[i] /= magnitude;
+    }
+  }
+
+  // Apply cluster bias
+  const clusterBias = getClusterBias(cluster);
+  for (let i = 0; i < 10; i++) {
+    vector[i] = (vector[i] * 0.7) + (clusterBias[i] * 0.3);
+  }
+
+  return vector;
 }
 
 /**

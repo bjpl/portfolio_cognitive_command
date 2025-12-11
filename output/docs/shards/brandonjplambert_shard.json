@@ -1,0 +1,16 @@
+{
+  "project": "brandonjplambert",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "docs: add AI agent v2 planning documentation\n\nSwarm-generated planning artifacts from queen-coordinator, system-architect, and goal-planner agents:\n\n- Queen orchestration plan (16,000+ words)\n- System architecture design\n- Module specifications\n- GOAP execution plan with 24 actions\n- Execution commands and visualization\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "docs: add AI agent v2 planning documentation\n\nSwarm-generated planning artifacts from queen-coordinator, system-architect, and goal-planner agents:\n\n- Queen orchestration plan (16,000+ words)\n- System architecture design\n- Module specifications\n- GOAP execution plan with 24 actions\n- Execution commands and visualization\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-02T14:01:07-08:00",
+    "commitHash": "e3fdf7c",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

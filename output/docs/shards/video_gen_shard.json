@@ -1,0 +1,16 @@
+{
+  "project": "video_gen",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "fix: Enhance SSE progress tracking and jobs error display\n\n- SSE stream now tracks stage-level progress (not just overall_progress)\n- Trigger SSE updates on stage change or stage_progress change\n- Faster polling (0.3s vs 0.5s) for more responsive updates\n- Jobs API includes error_details with failed_stage info and summary\n- Add logging to output_stage for better debugging\n- Fix test assertions for conditional thumbnail inclusion\n\nRoot causes:\n- SSE only tracked discrete overall_progress jumps between stages\n- Jobs page didn't expose per-stage error details\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "fix: Enhance SSE progress tracking and jobs error display\n\n- SSE stream now tracks stage-level progress (not just overall_progress)\n- Trigger SSE updates on stage change or stage_progress change\n- Faster polling (0.3s vs 0.5s) for more responsive updates\n- Jobs API includes error_details with failed_stage info and summary\n- Add logging to output_stage for better debugging\n- Fix test assertions for conditional thumbnail inclusion\n\nRoot causes:\n- SSE only tracked discrete overall_progress jumps between stages\n- Jobs page didn't expose per-stage error details\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-02T19:54:04-08:00",
+    "commitHash": "a049d0a",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "project": "letratos",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move CONTRIBUTING.md and SECURITY.md to docs/guides/\n- Move daily_reports to docs/development/daily-reports/\n- Move daily_dev_startup_reports to docs/development/startup-reports/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move CONTRIBUTING.md and SECURITY.md to docs/guides/\n- Move daily_reports to docs/development/daily-reports/\n- Move daily_dev_startup_reports to docs/development/startup-reports/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-11-23T20:34:09-08:00",
+    "commitHash": "8d2bbc3",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

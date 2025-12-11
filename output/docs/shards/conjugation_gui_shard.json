@@ -1,0 +1,16 @@
+{
+  "project": "conjugation_gui",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "merge: accept remote version of conjugation_gui project",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "merge: accept remote version of conjugation_gui project",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-11-23T14:13:55-08:00",
+    "commitHash": "b0166fe",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

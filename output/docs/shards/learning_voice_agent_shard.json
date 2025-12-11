@@ -1,0 +1,16 @@
+{
+  "project": "learning_voice_agent",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "feat: integrate RuVector self-learning vector store\n\nImplements 4-phase RuVector integration:\n- Phase 1: Vector store replacement with factory pattern and A/B testing\n- Phase 2: Knowledge graph unification with Cypher query support\n- Phase 3: Learning integration with feedback bridge and metrics\n- Phase 4: Semantic agent routing with embedding-based selection\n\nNew components:\n- VectorStoreProtocol, LearningVectorStoreProtocol, GraphVectorStoreProtocol\n- RuVectorStore with GNN, adaptive compression, hybrid search\n- VectorStoreFactory with DualWriteVectorStore for safe migration\n- GraphQueryAdapter and CypherQueryBuilder for graph operations\n- VectorFeedbackBridge and LearningMetrics for quality tracking\n- SemanticAgentRouter for intelligent agent selection\n\nAll 279 unit tests pass, validation script confirms 9/9 checks.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "feat: integrate RuVector self-learning vector store\n\nImplements 4-phase RuVector integration:\n- Phase 1: Vector store replacement with factory pattern and A/B testing\n- Phase 2: Knowledge graph unification with Cypher query support\n- Phase 3: Learning integration with feedback bridge and metrics\n- Phase 4: Semantic agent routing with embedding-based selection\n\nNew components:\n- VectorStoreProtocol, LearningVectorStoreProtocol, GraphVectorStoreProtocol\n- RuVectorStore with GNN, adaptive compression, hybrid search\n- VectorStoreFactory with DualWriteVectorStore for safe migration\n- GraphQueryAdapter and CypherQueryBuilder for graph operations\n- VectorFeedbackBridge and LearningMetrics for quality tracking\n- SemanticAgentRouter for intelligent agent selection\n\nAll 279 unit tests pass, validation script confirms 9/9 checks.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-01T16:21:55-08:00",
+    "commitHash": "56d1bb4",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

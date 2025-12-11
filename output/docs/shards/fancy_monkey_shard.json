@@ -1,0 +1,16 @@
+{
+  "project": "fancy_monkey",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "docs: resolve merge conflict - use portfolio README version\n\nKeep portfolio-formatted README with technical architecture focus",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "docs: resolve merge conflict - use portfolio README version\n\nKeep portfolio-formatted README with technical architecture focus",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-11-23T13:53:25-08:00",
+    "commitHash": "fa78b99",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

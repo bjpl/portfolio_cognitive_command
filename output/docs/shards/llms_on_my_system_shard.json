@@ -1,0 +1,16 @@
+{
+  "project": "llms_on_my_system",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move COMPLETE_SETUP_GUIDE.md, QUICK_REFERENCE.md, UNIFIED_SETUP_README.md to docs/guides/\n- Move daily_reports to docs/development/daily-reports/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "docs: reorganize documentation structure\n\n- Create standard docs structure (api, architecture, guides, development, testing, deployment, archive)\n- Move COMPLETE_SETUP_GUIDE.md, QUICK_REFERENCE.md, UNIFIED_SETUP_README.md to docs/guides/\n- Move daily_reports to docs/development/daily-reports/\n- Add docs/README.md as documentation index\n\nGenerated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-11-23T20:34:13-08:00",
+    "commitHash": "8434cb8",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

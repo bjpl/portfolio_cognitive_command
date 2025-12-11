@@ -1,0 +1,16 @@
+{
+  "project": "close_reading",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "fix: Resolve TypeScript build errors for Vercel deployment\n\n- Fix EntityDeduplication.ts: Expand ClaudeEntity to proper properties object\n- Fix lazyRoutes.tsx: Remove invalid Chakra UI v3 Spinner props (thickness, speed)\n- Fix ModelLoader.ts: Cast data.buffer as ArrayBuffer for crypto.subtle.digest\n- Add downlevelIteration to tsconfig.json for Map/Set iteration support\n\nSwarm coordination: Queen + Architect + GOAP planning agents\nMemory records stored with causal edges for fix chain\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "fix: Resolve TypeScript build errors for Vercel deployment\n\n- Fix EntityDeduplication.ts: Expand ClaudeEntity to proper properties object\n- Fix lazyRoutes.tsx: Remove invalid Chakra UI v3 Spinner props (thickness, speed)\n- Fix ModelLoader.ts: Cast data.buffer as ArrayBuffer for crypto.subtle.digest\n- Add downlevelIteration to tsconfig.json for Map/Set iteration support\n\nSwarm coordination: Queen + Architect + GOAP planning agents\nMemory records stored with causal edges for fix chain\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-02T19:31:09-08:00",
+    "commitHash": "a37514f",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "project": "hablas",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "fix: TypeScript build errors for Vercel deployment\n\n- Add level property to TopicGroup interface (lib/types/topics.ts)\n- Fix null-to-undefined coercion in ResourceDetail audioMetadata\n- Update callScript911 type definition in integrate-json-resources.ts\n- Add proper type interfaces and error handling in test-admin-auth.ts\n- Exclude scripts folder from TypeScript compilation (tsconfig.json)\n\nBuild now passes all TypeScript checks for deployment.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 16 commits in last 7 days • Manual implementation",
+  "rawCommit": "fix: TypeScript build errors for Vercel deployment\n\n- Add level property to TopicGroup interface (lib/types/topics.ts)\n- Fix null-to-undefined coercion in ResourceDetail audioMetadata\n- Update callScript911 type definition in integrate-json-resources.ts\n- Add proper type interfaces and error handling in test-admin-auth.ts\n- Exclude scripts folder from TypeScript compilation (tsconfig.json)\n\nBuild now passes all TypeScript checks for deployment.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-10T23:29:29-08:00",
+    "commitHash": "458d980",
+    "commitCount7d": 16,
+    "status": "ACTIVE"
+  }
+}

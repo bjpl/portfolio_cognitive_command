@@ -1,0 +1,16 @@
+{
+  "project": "espanso_agentic_studio",
+  "cluster": "Infra",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "feat: Phase 5 Group 8 - Test Coverage Improvement (1101→1274 tests)\n\nTest Coverage Improvements:\n- Created 21 new tests for app_services.py (DI configuration)\n- Verified 61 error_handler.py tests (comprehensive coverage)\n- Verified 38 app_state.py tests (state machine)\n- Fixed timing-sensitive async_bridge test with retry loops\n- Added 33 GOAP E2E integration tests\n- Added DaemonHealthMonitor test suite (32 tests)\n- Added studio_ui integration tests\n\nCritical Fixes:\n- Observable: Added thread-safe RLock with snapshot pattern\n- IPC Client: Fixed disconnect() to collect errors, not swallow\n- Cache: Added WeakSet for automatic connection cleanup\n- Monitoring: Proper Observable inheritance (no dynamic manipulation)\n- Entry points: Renamed main.py→main_legacy.py, main_refactored.py→main.py\n\nMetrics:\n- Total tests: 1101 → 1274 (+173)\n- Critical 0% files fixed: 4 (app_services, app_state, async_bridge, error_handler)\n- Production readiness: 7.8/10 → 8.2/10\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 7 commits in last 7 days • Manual implementation",
+  "rawCommit": "feat: Phase 5 Group 8 - Test Coverage Improvement (1101→1274 tests)\n\nTest Coverage Improvements:\n- Created 21 new tests for app_services.py (DI configuration)\n- Verified 61 error_handler.py tests (comprehensive coverage)\n- Verified 38 app_state.py tests (state machine)\n- Fixed timing-sensitive async_bridge test with retry loops\n- Added 33 GOAP E2E integration tests\n- Added DaemonHealthMonitor test suite (32 tests)\n- Added studio_ui integration tests\n\nCritical Fixes:\n- Observable: Added thread-safe RLock with snapshot pattern\n- IPC Client: Fixed disconnect() to collect errors, not swallow\n- Cache: Added WeakSet for automatic connection cleanup\n- Monitoring: Proper Observable inheritance (no dynamic manipulation)\n- Entry points: Renamed main.py→main_legacy.py, main_refactored.py→main.py\n\nMetrics:\n- Total tests: 1101 → 1274 (+173)\n- Critical 0% files fixed: 4 (app_services, app_state, async_bridge, error_handler)\n- Production readiness: 7.8/10 → 8.2/10\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-09T21:47:19-08:00",
+    "commitHash": "7c12602",
+    "commitCount7d": 7,
+    "status": "ACTIVE"
+  }
+}

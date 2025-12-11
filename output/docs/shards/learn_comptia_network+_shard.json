@@ -1,0 +1,16 @@
+{
+  "project": "learn_comptia_network+",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "fix: enable mock API for production/static deployments\n\nThe shouldUseMockAPI() function was not checking DISABLE_NETWORK_CALLS,\ncausing auth flows to fail in production because:\n- DISABLE_NETWORK_CALLS is true in production builds\n- But shouldUseMockAPI() returned false (no USE_MOCK_API flag)\n- Real API calls were attempted but blocked/failed\n\nNow shouldUseMockAPI() returns true when DISABLE_NETWORK_CALLS is set,\nensuring the mock authentication works in static deployments.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 12 commits in last 7 days • Manual implementation",
+  "rawCommit": "fix: enable mock API for production/static deployments\n\nThe shouldUseMockAPI() function was not checking DISABLE_NETWORK_CALLS,\ncausing auth flows to fail in production because:\n- DISABLE_NETWORK_CALLS is true in production builds\n- But shouldUseMockAPI() returned false (no USE_MOCK_API flag)\n- Real API calls were attempted but blocked/failed\n\nNow shouldUseMockAPI() returns true when DISABLE_NETWORK_CALLS is set,\nensuring the mock authentication works in static deployments.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-10T22:38:47-08:00",
+    "commitHash": "5fd3734",
+    "commitCount7d": 12,
+    "status": "ACTIVE"
+  }
+}

@@ -293,12 +293,19 @@ describe('Config Module', () => {
   });
 
   describe('path configuration', () => {
-    it('should use process.cwd() for default scan dir', () => {
+    it('should use detectPortfolioRoot() for default scan dir when in multi-project directory', () => {
       delete process.env.SCAN_DIR;
       jest.resetModules();
       const { config } = require('../src/config');
 
-      expect(config.defaultScanDir).toBe(process.cwd());
+      // The detectPortfolioRoot() function walks up the directory tree looking for
+      // a parent directory with 3+ git repositories. When running from within
+      // portfolio_cognitive_command, it should find the active-development parent.
+      // If no portfolio root is found, it falls back to process.cwd().
+      const expectedParent = path.resolve(process.cwd(), '..');
+      const isInPortfolio = config.defaultScanDir === expectedParent ||
+                           config.defaultScanDir === process.cwd();
+      expect(isInPortfolio).toBe(true);
     });
 
     it('should construct agentDbPath with default location', () => {

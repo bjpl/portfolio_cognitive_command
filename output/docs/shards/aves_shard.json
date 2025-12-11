@@ -1,0 +1,16 @@
+{
+  "project": "aves",
+  "cluster": "Core Systems",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "fix: improve ReinforcementLearningEngine categorization and test assertions\n\n- Reorder categorizeRejection checks to prevent false matches\n  - Check 'not found', 'does not exist', 'false' before 'feature'\n  - Prevents \"Feature not found\" being categorized as incorrect_feature\n\n- Fix test assertions that incorrectly searched SQL strings for params\n  - rejection_rate and avg_correction_magnitude are in params, not SQL\n  - Update assertions to check feedback_metrics table with param values\n\n- Fix getRejectionAnalytics test expecting undefined second param\n\nAll 27 ReinforcementLearningEngine tests now pass.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "executionSummary": "Status: ACTIVE • 13 commits in last 7 days • Manual implementation",
+  "rawCommit": "fix: improve ReinforcementLearningEngine categorization and test assertions\n\n- Reorder categorizeRejection checks to prevent false matches\n  - Check 'not found', 'does not exist', 'false' before 'feature'\n  - Prevents \"Feature not found\" being categorized as incorrect_feature\n\n- Fix test assertions that incorrectly searched SQL strings for params\n  - rejection_rate and avg_correction_magnitude are in params, not SQL\n  - Update assertions to check feedback_metrics table with param values\n\n- Fix getRejectionAnalytics test expecting undefined second param\n\nAll 27 ReinforcementLearningEngine tests now pass.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-12-10T22:29:03-08:00",
+    "commitHash": "f2b7b54",
+    "commitCount7d": 13,
+    "status": "ACTIVE"
+  }
+}

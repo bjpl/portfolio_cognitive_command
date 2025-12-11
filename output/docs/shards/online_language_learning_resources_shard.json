@@ -1,0 +1,16 @@
+{
+  "project": "online_language_learning_resources",
+  "cluster": "Experience",
+  "alignmentScore": 0.95,
+  "driftAlert": false,
+  "lastIntent": "Merge branch 'main' of https://github.com/bjpl/online_language_learning_resources",
+  "executionSummary": "Status: DORMANT • No recent activity • Manual implementation",
+  "rawCommit": "Merge branch 'main' of https://github.com/bjpl/online_language_learning_resources",
+  "source": "manual_override",
+  "metadata": {
+    "timestamp": "2025-11-23T02:36:34-08:00",
+    "commitHash": "75f16e0",
+    "commitCount7d": 0,
+    "status": "DORMANT"
+  }
+}
