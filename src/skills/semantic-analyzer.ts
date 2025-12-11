@@ -241,25 +241,45 @@ async function extractClaudeSemanticFeatures(
     const response = await claudeClient.messages.create({
       model: config.claudeModel,
       max_tokens: 1024,
+      system: `You are a semantic analysis engine for a portfolio intelligence system. Your task is to extract structured features from code commits and file paths to enable vector-based similarity search and clustering.
+
+Key guidelines:
+- Be precise and consistent in categorization
+- Extract meaningful technical signals, not generic terms
+- Focus on architectural and domain-specific patterns
+- Consider both the explicit content and implied context`,
       messages: [{
         role: 'user',
-        content: `Analyze this code/commit context and extract semantic features. Return a JSON object with these fields:
+        content: `Analyze the following code/commit context and extract semantic features for embedding generation.
+
+## Input Context
+\`\`\`
+${text.substring(0, 4000)}
+\`\`\`
+
+## Cluster Hint
+Based on keyword analysis, this content appears to align with: **${cluster}**
+
+## Required Output
+Return a JSON object with these exact fields:
 
 {
-  "domain": "frontend" | "backend" | "infra" | "fullstack" | "unknown",
-  "technologies": ["list", "of", "technologies", "frameworks", "languages"],
-  "patterns": ["list", "of", "architectural", "patterns"],
-  "complexity": "low" | "medium" | "high",
-  "keywords": ["top", "10", "semantic", "keywords"],
-  "projectType": "brief description of project type"
+  "domain": "<frontend|backend|infra|fullstack|unknown>",
+  "technologies": ["<primary tech stack items>"],
+  "patterns": ["<architectural patterns detected: MVC, microservices, event-driven, etc.>"],
+  "complexity": "<low|medium|high>",
+  "keywords": ["<10 most semantically significant terms>"],
+  "projectType": "<one-line description of project purpose>"
 }
 
-Context to analyze:
-${text.substring(0, 4000)}
+## Evaluation Criteria
+- domain: Infer from file paths (src/components=frontend, src/api=backend, .github/=infra)
+- technologies: Include languages, frameworks, libraries, and tools
+- patterns: Look for architectural indicators (Redux, REST, GraphQL, hooks, etc.)
+- complexity: Based on abstraction layers, dependencies, and integration points
+- keywords: Exclude generic terms like "the", "and", "function"
 
-Primary cluster hint: ${cluster}
-
-Return ONLY the JSON object, no other text.`
+Return ONLY valid JSON, no markdown code blocks or explanatory text.`
       }]
     });
 
