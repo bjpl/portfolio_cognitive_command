@@ -1,21 +1,7 @@
 {
-  "scan_date": "2025-12-04",
-  "total_repos": 1,
-  "active_repos": [
-    "portfolio_cognitive_command"
-  ],
+  "scan_date": "2025-12-09",
+  "total_repos": 0,
+  "active_repos": [],
   "dormant_repos": [],
-  "manifest": [
-    {
-      "name": "portfolio_cognitive_command",
-      "path": "/mnt/c/Users/brand/Development/Project_Workspace/active-development/portfolio_cognitive_command",
-      "status": "ACTIVE",
-      "commits7d": 2,
-      "lastCommit": {
-        "hash": "64dda93",
-        "message": "feat: Production-ready v1.0.0 with GOAP implementation plan\n\nGOAP Actions Completed:\n- DELETE_DEAD_CODE: Removed 995 lines of unused pipeline code\n- ADD_CONFIG: Created src/config.ts with env-based configuration\n- FIX_CLI_HARDCODING: Replaced hardcoded paths with config\n- FIX_AGENTDB: Implemented real JSON-based AgentDB storage\n- ADD_DASHBOARD_TESTS: Added 52 comprehensive dashboard tests\n- UPDATE_VERSION: Changed from inflated v8.0 to honest v1.0.0\n\nChanges:\n- Deleted src/pipeline/drift-pipeline.ts (522 lines)\n- Deleted src/pipeline/embedding-pipeline.ts (475 lines)\n- Added src/config.ts with typed configuration\n- Updated .env.example with comprehensive docs\n- Real AgentDB in data/agentdb.json\n- 170 tests passing (118 original + 52 new)\n\nBreaking Changes:\n- Version reset from 8.0.0 to 1.0.0\n- Config-driven paths (set SCAN_DIR env var)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
-        "date": "2025-12-03T01:00:24-08:00"
-      }
-    }
-  ]
+  "manifest": []
 }

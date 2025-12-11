@@ -91,10 +91,33 @@ export class FileStorageBackend implements StorageBackend {
   }
 
   /**
+   * Sanitize document ID to prevent path traversal attacks
+   * Only allows alphanumeric characters, hyphens, and underscores
+   * @param id - Raw document ID
+   * @returns Sanitized ID safe for use in file paths
+   * @throws Error if ID is empty after sanitization
+   */
+  private sanitizeDocumentId(id: string): string {
+    // Remove any path separators and traversal attempts
+    const sanitized = id
+      .replace(/\.\./g, '') // Remove path traversal
+      .replace(/[/\\]/g, '') // Remove path separators
+      .replace(/[^a-zA-Z0-9_-]/g, '_'); // Replace unsafe chars with underscore
+
+    if (sanitized.length === 0) {
+      throw new Error('Invalid document ID: empty after sanitization');
+    }
+
+    return sanitized;
+  }
+
+  /**
    * Get file path for a document
+   * Uses sanitized ID to prevent path traversal vulnerabilities
    */
   private getDocumentPath(collection: CollectionName, id: string): string {
-    return path.join(this.getCollectionPath(collection), `${id}.json`);
+    const sanitizedId = this.sanitizeDocumentId(id);
+    return path.join(this.getCollectionPath(collection), `${sanitizedId}.json`);
   }
 
   /**
