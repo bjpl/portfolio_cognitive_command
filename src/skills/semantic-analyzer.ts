@@ -8,7 +8,34 @@ import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import { config } from '../config';
 
-export type ClusterType = 'Experience' | 'Core Systems' | 'Infra';
+// New 5-category taxonomy for better portfolio value representation
+export type ClusterType =
+  | 'Web Apps'        // Full-stack web applications with UI
+  | 'AI & ML'         // AI-powered tools, LLMs, voice agents, media generation
+  | 'Learning Tools'  // Educational apps, language learning, study tools
+  | 'APIs & Services' // Backend services, data pipelines, integrations
+  | 'Developer Tools'; // CLI tools, automation, DevOps, productivity
+
+// Legacy cluster type for migration support
+export type LegacyClusterType = 'Experience' | 'Core Systems' | 'Infra';
+
+// Cluster colors for UI consistency
+export const CLUSTER_COLORS: Record<ClusterType, string> = {
+  'Web Apps': '#3b82f6',       // Blue
+  'AI & ML': '#8b5cf6',        // Purple
+  'Learning Tools': '#10b981', // Emerald
+  'APIs & Services': '#f59e0b', // Amber
+  'Developer Tools': '#6366f1'  // Indigo
+};
+
+// Cluster icons for UI
+export const CLUSTER_ICONS: Record<ClusterType, string> = {
+  'Web Apps': 'W',
+  'AI & ML': 'AI',
+  'Learning Tools': 'L',
+  'APIs & Services': 'API',
+  'Developer Tools': 'D'
+};
 
 export interface SemanticEmbedding {
   vector: number[];
@@ -42,11 +69,13 @@ export async function generateEmbedding(
   // Combine all text for analysis
   const allText = [...commitMessages, ...filePaths].join(' ').toLowerCase();
 
-  // Calculate cluster scores
+  // Calculate cluster scores using new 5-category taxonomy
   const clusterScores = {
-    'Experience': calculateExperienceScore(allText, filePaths),
-    'Core Systems': calculateCoreSystemsScore(allText, filePaths),
-    'Infra': calculateInfraScore(allText, filePaths)
+    'Web Apps': calculateWebAppsScore(allText, filePaths),
+    'AI & ML': calculateAIMLScore(allText, filePaths),
+    'Learning Tools': calculateLearningToolsScore(allText, filePaths),
+    'APIs & Services': calculateAPIsServicesScore(allText, filePaths),
+    'Developer Tools': calculateDevToolsScore(allText, filePaths)
   };
 
   // Determine primary cluster
@@ -70,76 +99,163 @@ export async function generateEmbedding(
 }
 
 /**
- * Calculates Experience cluster score
- * Focuses on frontend, UI, portfolio, user-facing work
+ * Calculates Web Apps cluster score
+ * Full-stack web applications with significant UI component
  */
-function calculateExperienceScore(text: string, paths: string[]): number {
+function calculateWebAppsScore(text: string, paths: string[]): number {
   const keywords = [
-    'ui', 'ux', 'frontend', 'react', 'vue', 'angular', 'component',
-    'portfolio', 'website', 'landing', 'page', 'design', 'style',
-    'css', 'html', 'responsive', 'mobile', 'user', 'interface',
-    'experience', 'visual', 'interactive', 'animation'
+    'ui', 'ux', 'frontend', 'react', 'vue', 'angular', 'next', 'nuxt',
+    'component', 'page', 'dashboard', 'layout', 'responsive', 'css',
+    'tailwind', 'styled', 'form', 'button', 'modal', 'navigation',
+    'sidebar', 'header', 'footer', 'webapp', 'website', 'fullstack',
+    'client', 'browser', 'dom', 'hook', 'state', 'redux', 'zustand'
   ];
 
   const pathPatterns = [
-    /^src\/(components|pages|views|ui)/i,
-    /^frontend/i,
-    /\.(jsx?|tsx?|vue|svelte)$/i,
-    /\.(css|scss|sass|less)$/i,
-    /^public/i
+    /^src\/(components|pages|views|layouts|ui)/i,
+    /^(frontend|app|client)/i,
+    /\.(tsx?|jsx?)$/i,
+    /^public/i,
+    /^styles/i,
+    /\.(css|scss|sass)$/i,
+    /^(app|pages)\//i
   ];
 
   return calculateScore(text, paths, keywords, pathPatterns);
 }
 
 /**
- * Calculates Core Systems cluster score
- * Focuses on backend, APIs, business logic, databases
+ * Calculates AI & ML cluster score
+ * AI-powered tools, LLMs, voice agents, media generation
  */
-function calculateCoreSystemsScore(text: string, paths: string[]): number {
+function calculateAIMLScore(text: string, paths: string[]): number {
   const keywords = [
-    'api', 'backend', 'server', 'endpoint', 'route', 'controller',
-    'service', 'business', 'logic', 'database', 'model', 'schema',
-    'query', 'transaction', 'auth', 'middleware', 'validation',
-    'core', 'system', 'engine', 'processor', 'handler'
+    'ai', 'ml', 'llm', 'gpt', 'claude', 'openai', 'anthropic', 'embedding',
+    'vector', 'neural', 'model', 'inference', 'train', 'predict', 'whisper',
+    'tts', 'stt', 'voice', 'agent', 'semantic', 'cognitive', 'video', 'audio',
+    'generation', 'synthesis', 'recognition', 'nlp', 'transformer', 'langchain',
+    'prompt', 'rag', 'chatbot', 'assistant', 'intelligence', 'machine learning',
+    'deep learning', 'tensor', 'pytorch', 'tensorflow', 'huggingface'
   ];
 
   const pathPatterns = [
-    /^src\/(api|services|controllers|models|core)/i,
-    /^backend/i,
-    /^server/i,
-    /\.(service|controller|repository|dao)\.ts$/i,
-    /^src\/lib/i
+    /^(ml|ai|models|agents)/i,
+    /embedding/i,
+    /neural/i,
+    /(whisper|tts|stt)/i,
+    /vector/i,
+    /^src\/(ai|ml|agents)/i,
+    /\.model\./i,
+    /cognitive/i
+  ];
+
+  // Higher weight for AI/ML projects (they're distinctive)
+  return calculateScore(text, paths, keywords, pathPatterns) * 1.3;
+}
+
+/**
+ * Calculates Learning Tools cluster score
+ * Educational apps, language learning, study tools
+ */
+function calculateLearningToolsScore(text: string, paths: string[]): number {
+  const keywords = [
+    'learn', 'study', 'quiz', 'practice', 'education', 'tutorial', 'lesson',
+    'course', 'vocabulary', 'grammar', 'spanish', 'language', 'flashcard',
+    'exercise', 'puzzle', 'game', 'score', 'progress', 'achievement',
+    'student', 'teacher', 'classroom', 'conjugation', 'verb', 'noun',
+    'subjunctive', 'tense', 'drill', 'memorize', 'test', 'exam',
+    'educational', 'knowledge', 'skill', 'training'
+  ];
+
+  const pathPatterns = [
+    /^(lessons|exercises|quizzes)/i,
+    /(learn|study|practice)/i,
+    /vocab/i,
+    /^src\/(games|puzzles|quizzes)/i,
+    /flashcard/i,
+    /conjugat/i
   ];
 
   return calculateScore(text, paths, keywords, pathPatterns);
 }
 
 /**
- * Calculates Infra cluster score
- * Focuses on DevOps, deployment, CI/CD, monitoring
+ * Calculates APIs & Services cluster score
+ * Backend services, data pipelines, integrations
  */
-function calculateInfraScore(text: string, paths: string[]): number {
+function calculateAPIsServicesScore(text: string, paths: string[]): number {
   const keywords = [
-    'deploy', 'docker', 'kubernetes', 'ci', 'cd', 'pipeline',
-    'build', 'test', 'infra', 'infrastructure', 'config',
-    'environment', 'monitoring', 'logging', 'metrics', 'devops',
-    'terraform', 'ansible', 'jenkins', 'github actions', 'gitlab'
+    'api', 'endpoint', 'route', 'controller', 'service', 'middleware',
+    'database', 'postgresql', 'mongodb', 'redis', 'express', 'fastapi',
+    'rest', 'graphql', 'mutation', 'query', 'resolver', 'schema', 'prisma',
+    'supabase', 'authentication', 'jwt', 'session', 'backend', 'server',
+    'handler', 'validation', 'crud', 'orm', 'migration', 'webhook',
+    'integration', 'pipeline', 'etl', 'stream', 'queue', 'worker'
+  ];
+
+  const pathPatterns = [
+    /^(api|backend|server|services)/i,
+    /^src\/(api|services|controllers)/i,
+    /\.service\.(ts|js)$/i,
+    /\.controller\.(ts|js)$/i,
+    /^routes/i,
+    /^handlers/i
+  ];
+
+  return calculateScore(text, paths, keywords, pathPatterns);
+}
+
+/**
+ * Calculates Developer Tools cluster score
+ * CLI tools, automation, DevOps, productivity
+ */
+function calculateDevToolsScore(text: string, paths: string[]): number {
+  const keywords = [
+    'cli', 'command', 'script', 'automation', 'workflow', 'devops',
+    'docker', 'kubernetes', 'ci', 'cd', 'pipeline', 'deploy', 'build',
+    'espanso', 'snippet', 'shortcut', 'terminal', 'shell', 'bash',
+    'config', 'tool', 'utility', 'generator', 'scaffold', 'boilerplate',
+    'lint', 'format', 'prettier', 'eslint', 'husky', 'git', 'npm',
+    'yarn', 'pnpm', 'package', 'monorepo', 'turbo', 'nx'
   ];
 
   const pathPatterns = [
     /^\.github\/workflows/i,
-    /^\.gitlab-ci/i,
+    /^(scripts|tools|cli)/i,
     /^docker/i,
-    /^k8s/i,
-    /^terraform/i,
-    /^scripts/i,
-    /^\.ci/i,
-    /\.(yml|yaml|dockerfile)$/i,
-    /^infrastructure/i
+    /^(infrastructure|infra|devops)/i,
+    /espanso/i,
+    /\.(ya?ml|dockerfile)$/i,
+    /^bin\//i,
+    /\.config\./i
   ];
 
   return calculateScore(text, paths, keywords, pathPatterns);
+}
+
+// ============================================================================
+// Legacy Scoring Functions (kept for reference/migration)
+// ============================================================================
+
+/**
+ * @deprecated Use calculateWebAppsScore instead
+ */
+function calculateExperienceScore(text: string, paths: string[]): number {
+  return calculateWebAppsScore(text, paths);
+}
+
+/**
+ * @deprecated Use calculateAPIsServicesScore instead
+ */
+function calculateCoreSystemsScore(text: string, paths: string[]): number {
+  return calculateAPIsServicesScore(text, paths);
+}
+
+/**
+ * @deprecated Use calculateDevToolsScore instead
+ */
+function calculateInfraScore(text: string, paths: string[]): number {
+  return calculateDevToolsScore(text, paths);
 }
 
 /**
@@ -471,15 +587,76 @@ function simpleHash(str: string): number {
 
 /**
  * Returns cluster-specific bias vector for first 10 dimensions
+ * Each cluster has a unique signature to improve separation in vector space
  */
 function getClusterBias(cluster: ClusterType): number[] {
-  const biases = {
-    'Experience': [0.8, 0.2, 0.1, 0.7, 0.3, 0.1, 0.5, 0.4, 0.2, 0.6],
-    'Core Systems': [0.2, 0.8, 0.7, 0.1, 0.6, 0.5, 0.3, 0.7, 0.4, 0.2],
-    'Infra': [0.1, 0.3, 0.8, 0.2, 0.4, 0.7, 0.6, 0.2, 0.8, 0.5]
+  const biases: Record<ClusterType, number[]> = {
+    'Web Apps':        [0.9, 0.3, 0.2, 0.8, 0.4, 0.2, 0.6, 0.5, 0.3, 0.7],
+    'AI & ML':         [0.3, 0.9, 0.8, 0.2, 0.7, 0.6, 0.4, 0.8, 0.5, 0.3],
+    'Learning Tools':  [0.7, 0.4, 0.3, 0.9, 0.5, 0.3, 0.7, 0.4, 0.6, 0.8],
+    'APIs & Services': [0.2, 0.7, 0.6, 0.3, 0.9, 0.8, 0.5, 0.7, 0.4, 0.2],
+    'Developer Tools': [0.1, 0.5, 0.9, 0.4, 0.6, 0.9, 0.8, 0.3, 0.9, 0.6]
   };
 
   return biases[cluster];
+}
+
+// ============================================================================
+// Migration Utilities
+// ============================================================================
+
+/**
+ * Migrates legacy cluster type to new taxonomy
+ * @param legacyCluster - Old 3-category cluster type
+ * @returns New 5-category cluster type
+ */
+export function migrateLegacyCluster(legacyCluster: LegacyClusterType | ClusterType): ClusterType {
+  const migrations: Record<LegacyClusterType, ClusterType> = {
+    'Experience': 'Web Apps',      // Experience mapped to Web Apps
+    'Core Systems': 'APIs & Services', // Core Systems mapped to APIs
+    'Infra': 'Developer Tools'     // Infra mapped to Dev Tools
+  };
+
+  // If already a new cluster type, return as-is
+  if (isNewClusterType(legacyCluster)) {
+    return legacyCluster;
+  }
+
+  return migrations[legacyCluster as LegacyClusterType] || 'Web Apps';
+}
+
+/**
+ * Checks if a cluster type is from the new taxonomy
+ */
+export function isNewClusterType(cluster: string): cluster is ClusterType {
+  const newTypes: ClusterType[] = ['Web Apps', 'AI & ML', 'Learning Tools', 'APIs & Services', 'Developer Tools'];
+  return newTypes.includes(cluster as ClusterType);
+}
+
+/**
+ * Checks if a cluster type is from the legacy taxonomy
+ */
+export function isLegacyClusterType(cluster: string): cluster is LegacyClusterType {
+  const legacyTypes: LegacyClusterType[] = ['Experience', 'Core Systems', 'Infra'];
+  return legacyTypes.includes(cluster as LegacyClusterType);
+}
+
+/**
+ * Re-analyzes a project to assign new cluster based on content
+ * More accurate than simple migration mapping
+ * @param commitMessages - Array of commit messages
+ * @param filePaths - Array of file paths
+ * @returns New cluster assignment with confidence
+ */
+export async function reclusterProject(
+  commitMessages: string[],
+  filePaths: string[]
+): Promise<{ cluster: ClusterType; confidence: number }> {
+  const embedding = await generateEmbedding(commitMessages, filePaths);
+  return {
+    cluster: embedding.cluster,
+    confidence: embedding.confidence
+  };
 }
 
 /**

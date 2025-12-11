@@ -4,7 +4,12 @@
  */
 
 import { ClusterType, SemanticEmbedding } from '../skills/semantic-analyzer';
-import { DriftResult } from '../skills/drift-detector';
+import { DriftResult, DriftAnalysis } from '../skills/drift-detector';
+import { PortfolioStrategy } from '../skills/brief-generator';
+import { AIInsightsPanel } from '../skills/dashboard-builder';
+import { Plan, PlannerOptions } from '../goap/planner';
+import { WorldState as GOAPWorldState, Goal, GoalPriority } from '../goap/goals';
+import { Action, ActionPhase, ActionStatus, ActionResult } from '../goap/actions';
 
 // ============================================================================
 // Core Document Types
@@ -26,7 +31,11 @@ export type CollectionName =
   | 'analyses'
   | 'driftAlerts'
   | 'neuralPatterns'
-  | 'metrics';
+  | 'metrics'
+  | 'goapPlans'
+  | 'swarmExecutions'
+  | 'enhancedAnalyses'
+  | 'aiInsights';
 
 // ============================================================================
 // Agent Documents
@@ -403,6 +412,368 @@ export interface MetricsDocument extends Document {
   description: string;
   tags: string[];
   customData: Record<string, unknown>;
+}
+
+// ============================================================================
+// GOAP Plan Documents
+// ============================================================================
+
+export type GOAPPlanStatus =
+  | 'planned'
+  | 'executing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled'
+  | 'replanning';
+
+export interface GOAPActionExecution {
+  actionId: string;
+  actionName: string;
+  phase: ActionPhase;
+  status: ActionStatus;
+  startTime?: Date;
+  endTime?: Date;
+  durationMs?: number;
+  error?: string;
+  stateChanges: Partial<GOAPWorldState>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface GOAPPlanDocument extends Document {
+  collection: 'goapPlans';
+
+  // Identity
+  planId: string;
+  sessionId: string;
+  goalId: string;
+  goalName: string;
+
+  // Plan Details
+  plan: Plan;
+  plannerOptions: PlannerOptions;
+  initialState: GOAPWorldState;
+  targetState: Partial<GOAPWorldState>;
+
+  // Execution
+  status: GOAPPlanStatus;
+  currentActionIndex: number;
+  actionExecutions: GOAPActionExecution[];
+
+  // Progress
+  completionPercentage: number;
+  estimatedRemainingMs: number;
+
+  // Timing
+  plannedAt: Date;
+  executionStartedAt?: Date;
+  executionEndedAt?: Date;
+  totalDurationMs?: number;
+
+  // Result
+  finalState?: GOAPWorldState;
+  success: boolean;
+  failureReason?: string;
+
+  // Replanning
+  replanCount: number;
+  previousPlanIds: string[];
+
+  // Metadata
+  performedBy: string; // agent ID
+  tags: string[];
+  customData: Record<string, unknown>;
+}
+
+// ============================================================================
+// Swarm Execution Documents
+// ============================================================================
+
+export type SwarmTopology = 'hierarchical' | 'mesh' | 'ring' | 'star';
+export type SwarmStatus = 'initializing' | 'running' | 'paused' | 'completed' | 'failed';
+
+export interface SwarmAgentAssignment {
+  agentId: string;
+  agentRole: AgentRole;
+  assignedActions: string[];
+  status: AgentStatus;
+  progress: number;
+  lastHeartbeat: Date;
+}
+
+export interface SwarmCoordinationEvent {
+  timestamp: Date;
+  eventType: 'spawn' | 'complete' | 'fail' | 'rebalance' | 'sync' | 'handoff';
+  sourceAgent: string;
+  targetAgent?: string;
+  description: string;
+  data?: Record<string, unknown>;
+}
+
+export interface SwarmExecutionState extends Document {
+  collection: 'swarmExecutions';
+
+  // Identity
+  swarmId: string;
+  sessionId: string;
+  planId?: string; // Link to GOAP plan if driven by planner
+
+  // Configuration
+  topology: SwarmTopology;
+  maxAgents: number;
+  strategy: 'balanced' | 'specialized' | 'adaptive';
+
+  // Status
+  status: SwarmStatus;
+  phase: ActionPhase;
+
+  // Agents
+  coordinatorId: string;
+  agents: SwarmAgentAssignment[];
+  activeAgentCount: number;
+
+  // Task Progress
+  totalTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  currentTasks: string[];
+
+  // Coordination
+  coordinationEvents: SwarmCoordinationEvent[];
+  lastSyncTime: Date;
+  consensusReached: boolean;
+
+  // Performance
+  startTime: Date;
+  endTime?: Date;
+  durationMs?: number;
+  tokensUsed?: number;
+  apiCalls?: number;
+
+  // Memory Namespace
+  memoryNamespace: string;
+  sharedState: Record<string, unknown>;
+
+  // Result
+  success: boolean;
+  artifacts: string[];
+  errors: string[];
+
+  // Metadata
+  tags: string[];
+  customData: Record<string, unknown>;
+}
+
+// ============================================================================
+// Enhanced Analysis Documents
+// ============================================================================
+
+export interface EnhancedAnalysisResult extends Document {
+  collection: 'enhancedAnalyses';
+
+  // Identity
+  analysisId: string;
+  sessionId: string;
+  planId?: string;
+  swarmId?: string;
+
+  // Analysis Type
+  analysisType: 'full' | 'incremental' | 'targeted';
+  scope: {
+    repositories: string[];
+    dateRange?: { start: Date; end: Date };
+    categories?: ClusterType[];
+  };
+
+  // Core Results
+  repositoryCount: number;
+  projectShards: string[]; // IDs of generated shards
+  clusterDistribution: Record<ClusterType, number>;
+
+  // Semantic Analysis
+  embeddings: SemanticEmbedding[];
+  clusterAnalysis: ClusterAnalysis[];
+
+  // Drift Analysis
+  driftResults: Array<{
+    repository: string;
+    driftResult: DriftResult;
+    driftAnalysis?: DriftAnalysis;
+  }>;
+  driftAlertCount: number;
+
+  // AI Insights
+  portfolioStrategy?: PortfolioStrategy;
+  aiInsights?: AIInsightsPanel;
+
+  // Health Metrics
+  healthMetrics: {
+    overall: number;
+    byCategory: Record<ClusterType, number>;
+    byGrade: Record<string, number>;
+  };
+
+  // Performance
+  processingTime: number;
+  tokensUsed?: number;
+  cacheHits: number;
+
+  // Status
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  error?: string;
+
+  // Timing
+  startedAt: Date;
+  completedAt?: Date;
+
+  // Metadata
+  performedBy: string;
+  tags: string[];
+  customData: Record<string, unknown>;
+}
+
+// ============================================================================
+// AI Insights Documents
+// ============================================================================
+
+export interface AIInsightDocument extends Document {
+  collection: 'aiInsights';
+
+  // Identity
+  insightId: string;
+  sessionId: string;
+  analysisId?: string;
+
+  // Type
+  insightType: 'portfolio_strategy' | 'drift_analysis' | 'dashboard_insights' | 'health_insight';
+
+  // Content
+  portfolioStrategy?: PortfolioStrategy;
+  driftAnalysis?: DriftAnalysis;
+  dashboardInsights?: AIInsightsPanel;
+
+  // Context
+  inputData: {
+    projectCount: number;
+    overallHealth: number;
+    driftAlertCount: number;
+    categories: ClusterType[];
+  };
+
+  // Generation
+  modelUsed: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  generationTimeMs: number;
+
+  // Caching
+  cacheKey: string;
+  cachedAt: Date;
+  expiresAt: Date;
+  cacheHit: boolean;
+
+  // Validation
+  validated: boolean;
+  validationScore?: number;
+  validationErrors?: string[];
+
+  // Metadata
+  tags: string[];
+  customData: Record<string, unknown>;
+}
+
+// ============================================================================
+// Skill Registry Types
+// ============================================================================
+
+export type SkillExecutorName =
+  | 'discoverRepositories'
+  | 'generateEmbedding'
+  | 'generateShard'
+  | 'calculateProjectHealth'
+  | 'detectDrift'
+  | 'analyzeDriftRootCause'
+  | 'generateDashboardInsights'
+  | 'generatePortfolioStrategy'
+  | 'generateBrief'
+  | 'buildDashboardHTML'
+  | 'writeShardFiles'
+  | 'writeMetrics'
+  | 'recordSemanticPattern'
+  | 'recordDriftPattern'
+  | 'getPatternStats'
+  | 'restoreSession'
+  | 'persistSession';
+
+export interface SkillExecutorConfig {
+  name: SkillExecutorName;
+  skillModule: SkillType | 'neural-trainer' | 'memory-coordinator' | 'brief-generator';
+  description: string;
+  timeout: number;
+  retryCount: number;
+  parallelizable: boolean;
+  requiresAI: boolean;
+  estimatedCost?: number; // API cost estimate
+}
+
+export interface SkillRegistry {
+  version: string;
+  lastUpdated: Date;
+  executors: Record<SkillExecutorName, SkillExecutorConfig>;
+  defaultConfig: {
+    maxRetries: number;
+    defaultTimeout: number;
+    parallelLimit: number;
+  };
+}
+
+// ============================================================================
+// Memory Coordinator Types
+// ============================================================================
+
+export interface MemoryNamespace {
+  name: string;
+  prefix: string;
+  ttl?: number; // seconds
+  maxEntries?: number;
+  compressionEnabled: boolean;
+}
+
+export interface MemoryEntry {
+  key: string;
+  namespace: string;
+  value: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt?: Date;
+  size: number;
+  compressed: boolean;
+}
+
+export interface MemoryCoordinatorConfig {
+  namespaces: MemoryNamespace[];
+  autoSync: {
+    enabled: boolean;
+    intervalMs: number;
+  };
+  compression: {
+    enabled: boolean;
+    threshold: number; // bytes
+  };
+  mcpIntegration: {
+    enabled: boolean;
+    serverName: string;
+  };
+}
+
+export interface MemoryStats {
+  totalEntries: number;
+  totalSize: number;
+  byNamespace: Record<string, { entries: number; size: number }>;
+  cacheHitRate: number;
+  lastSync?: Date;
+  syncErrors: number;
 }
 
 // ============================================================================

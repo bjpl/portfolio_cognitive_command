@@ -1,11 +1,36 @@
 /**
  * Dashboard Builder Skill
  * Builds React dashboard components and HTML visualizations
+ * with AI-powered insights panel
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import Anthropic from '@anthropic-ai/sdk';
 import { ProjectShard } from './shard-generator';
+
+/**
+ * AI-generated dashboard insights
+ */
+export interface AIInsightsPanel {
+  dailyFocus: {
+    priority: string;
+    reasoning: string;
+    estimatedImpact: 'high' | 'medium' | 'low';
+  };
+  trendAnalysis: {
+    direction: 'improving' | 'stable' | 'declining';
+    keyObservation: string;
+    dataPoints: string[];
+  };
+  anomalyAlerts: Array<{
+    type: 'positive' | 'negative' | 'neutral';
+    project: string;
+    observation: string;
+  }>;
+  motivationalNote: string;
+  generatedAt: string;
+}
 
 export interface DashboardConfig {
   meta: {
@@ -50,7 +75,14 @@ export interface DashboardConfig {
     gradeD: number;
     gradeF: number;
   };
+  aiInsights?: AIInsightsPanel | null;
 }
+
+/**
+ * Cache for AI insights to avoid repeated API calls
+ */
+const insightsCache = new Map<string, { insights: AIInsightsPanel; expiry: number }>();
+const INSIGHTS_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
 /**
  * Builds a complete HTML dashboard from project shards
@@ -73,6 +105,7 @@ export function buildDashboardHTML(config: DashboardConfig): string {
   <div class="dashboard">
     ${buildHeader(config.meta)}
     ${buildMetricsPanel(config.meta)}
+    ${config.aiInsights ? buildAIInsightsPanel(config.aiInsights) : ''}
     ${buildHealthOverview(config)}
     ${buildTechStackPanel(config.techStackSummary)}
     ${buildActivityPanel(config.activitySummary)}
@@ -341,7 +374,7 @@ function buildClustersSection(
 }
 
 /**
- * Builds detailed projects table
+ * Builds detailed projects table with expandable rows
  */
 function buildProjectsTable(projects: ProjectShard[]): string {
   const sortedProjects = [...projects].sort((a, b) =>
@@ -359,14 +392,21 @@ function buildProjectsTable(projects: ProjectShard[]): string {
     const hasTests = project.integrations?.hasTests ? '✓' : '-';
     const deployment = project.deployment?.platform !== 'unknown' ? project.deployment?.platform : '-';
 
-    return `
-      <tr class="project-row" data-project="${project.project}">
+    // Build tooltip content for intent cell
+    const intentTooltip = project.lastIntent ? escapeHtml(project.lastIntent) : 'No intent recorded';
+
+    // Health factors for detail row
+    const factors = project.health?.factors || {};
+
+    // Main row
+    const mainRow = `
+      <tr class="project-row ${project.driftAlert ? 'drift' : ''}" data-project="${project.project}">
         <td>
           <strong>${project.project}</strong>
           <span class="project-meta">${project.cluster}</span>
         </td>
         <td>
-          <span class="health-grade grade-${healthGrade.toLowerCase()}">${healthGrade}</span>
+          <span class="health-grade grade-${healthGrade.toLowerCase()}" data-tooltip="Score: ${healthScore}/100">${healthGrade}</span>
           <span class="health-score-small">${healthScore}</span>
         </td>
         <td>
@@ -381,28 +421,111 @@ function buildProjectsTable(projects: ProjectShard[]): string {
           ${frameworks !== '-' ? `<span class="frameworks">${frameworks}</span>` : ''}
         </td>
         <td class="integrations-cell">
-          <span class="integration-badge ${hasCI === '✓' ? 'active' : ''}" title="CI/CD">CI</span>
-          <span class="integration-badge ${hasTests === '✓' ? 'active' : ''}" title="Tests">T</span>
-          <span class="integration-badge ${deployment !== '-' ? 'active' : ''}" title="Deployed">${deployment && deployment !== '-' ? deployment.slice(0, 2).toUpperCase() : 'D'}</span>
+          <span class="integration-badge ${hasCI === '✓' ? 'active' : ''}" data-tooltip="CI/CD Pipeline">CI</span>
+          <span class="integration-badge ${hasTests === '✓' ? 'active' : ''}" data-tooltip="Test Suite">T</span>
+          <span class="integration-badge ${deployment !== '-' ? 'active' : ''}" data-tooltip="${deployment !== '-' ? 'Deployed to ' + deployment : 'Not deployed'}">${deployment && deployment !== '-' ? deployment.slice(0, 2).toUpperCase() : 'D'}</span>
         </td>
-        <td class="intent-cell">${escapeHtml(truncateText(project.lastIntent, 60))}</td>
+        <td class="intent-cell" data-tooltip="${intentTooltip}">${escapeHtml(truncateText(project.lastIntent, 50))}</td>
       </tr>
     `;
+
+    // Expandable detail row
+    const detailRow = `
+      <tr class="project-detail-row">
+        <td colspan="7">
+          <div class="project-detail-content">
+            <div class="detail-section">
+              <h4>Health Factors</h4>
+              ${buildHealthFactorsList(factors)}
+            </div>
+            <div class="detail-section">
+              <h4>Tech Stack</h4>
+              <div class="detail-item">
+                <span class="label">Primary</span>
+                <span class="value">${project.techStack?.primaryLanguage || 'Unknown'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Languages</span>
+                <span class="value">${project.techStack?.languages?.join(', ') || '-'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Frameworks</span>
+                <span class="value">${project.techStack?.frameworks?.join(', ') || '-'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Databases</span>
+                <span class="value">${project.techStack?.databases?.join(', ') || '-'}</span>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h4>Activity</h4>
+              <div class="detail-item">
+                <span class="label">Commits (7d)</span>
+                <span class="value">${project.activity?.commits7d || 0}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Commits (30d)</span>
+                <span class="value">${project.activity?.commits30d || 0}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Last Commit</span>
+                <span class="value">${project.activity?.lastCommitDate ? new Date(project.activity.lastCommitDate).toLocaleDateString() : 'Unknown'}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Velocity</span>
+                <span class="value velocity-badge ${velocity}">${velocity}</span>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h4>Last Intent</h4>
+              <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">
+                ${escapeHtml(project.lastIntent || 'No intent recorded')}
+              </p>
+              ${project.executionSummary ? `
+                <p style="font-size: 0.85rem; color: var(--color-text-muted);">
+                  <strong>Summary:</strong> ${escapeHtml(project.executionSummary)}
+                </p>
+              ` : ''}
+              ${project.driftAlert ? `
+                <p class="recommendation" style="margin-top: 0.5rem;">
+                  Drift detected - alignment score: ${(project.alignmentScore * 100).toFixed(1)}%
+                </p>
+              ` : ''}
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    return mainRow + detailRow;
   }).join('');
+
+  // Build unique cluster list for filter
+  const clusters = [...new Set(projects.map(p => p.cluster))].sort();
 
   return `
     <section class="projects-section">
       <h2>All Projects</h2>
+      <div class="quick-filters">
+        <button class="quick-filter-btn active" data-filter="all">All <span class="filter-count">${projects.length}</span></button>
+        <button class="quick-filter-btn" data-filter="active">Active <span class="filter-count">0</span></button>
+        <button class="quick-filter-btn" data-filter="attention">Needs Attention <span class="filter-count">0</span></button>
+        <button class="quick-filter-btn" data-filter="grade-a">Grade A <span class="filter-count">0</span></button>
+        <button class="quick-filter-btn" data-filter="grade-b">Grade B <span class="filter-count">0</span></button>
+        <button class="quick-filter-btn" data-filter="grade-c">Grade C <span class="filter-count">0</span></button>
+        <button class="quick-filter-btn" data-filter="grade-df">Grade D/F <span class="filter-count">0</span></button>
+      </div>
       <div class="table-controls">
         <input type="text" id="projectSearch" placeholder="Search projects..." class="search-input">
         <select id="sortBy" class="sort-select">
           <option value="health">Sort by Health</option>
           <option value="activity">Sort by Activity</option>
           <option value="name">Sort by Name</option>
+          <option value="cluster">Sort by Cluster</option>
         </select>
         <select id="filterCluster" class="filter-select">
           <option value="">All Clusters</option>
-          ${[...new Set(projects.map(p => p.cluster))].map(c => `<option value="${c}">${c}</option>`).join('')}
+          ${clusters.map(c => `<option value="${c}">${c}</option>`).join('')}
         </select>
       </div>
       <table class="projects-table">
@@ -423,6 +546,49 @@ function buildProjectsTable(projects: ProjectShard[]): string {
       </table>
     </section>
   `;
+}
+
+/**
+ * Builds health factors list for detail view
+ */
+function buildHealthFactorsList(factors: Record<string, number>): string {
+  const factorLabels: Record<string, string> = {
+    recency: 'Recency',
+    activity: 'Activity',
+    codeQuality: 'Code Quality',
+    documentation: 'Documentation',
+    testing: 'Testing',
+    cicd: 'CI/CD',
+    deployment: 'Deployment'
+  };
+
+  const factorColors: Record<string, string> = {
+    recency: 'var(--color-accent)',
+    activity: 'var(--color-grade-a)',
+    codeQuality: 'var(--color-cluster-ai)',
+    documentation: 'var(--color-cluster-learn)',
+    testing: 'var(--color-cluster-api)',
+    cicd: 'var(--color-cluster-dev)',
+    deployment: 'var(--color-grade-b)'
+  };
+
+  return Object.entries(factors)
+    .map(([key, value]) => {
+      const label = factorLabels[key] || key;
+      const color = factorColors[key] || 'var(--color-accent)';
+      const percent = Math.round(value * 100);
+
+      return `
+        <div class="detail-item">
+          <span class="label">${label}</span>
+          <span class="value">${percent}%</span>
+        </div>
+        <div class="health-factor-bar">
+          <div class="health-factor-fill" style="width: ${percent}%; background: ${color};"></div>
+        </div>
+      `;
+    })
+    .join('');
 }
 
 /**
@@ -481,200 +647,871 @@ function buildDriftAlertsSection(projects: ProjectShard[]): string {
 }
 
 /**
+ * Builds AI insights panel for dashboard
+ */
+function buildAIInsightsPanel(insights: AIInsightsPanel): string {
+  const trendIcon = {
+    improving: '📈',
+    stable: '📊',
+    declining: '📉'
+  }[insights.trendAnalysis.direction];
+
+  const impactBadge = {
+    high: '<span class="impact-badge impact-high">HIGH IMPACT</span>',
+    medium: '<span class="impact-badge impact-medium">MEDIUM IMPACT</span>',
+    low: '<span class="impact-badge impact-low">LOW IMPACT</span>'
+  }[insights.dailyFocus.estimatedImpact];
+
+  const anomalyCards = insights.anomalyAlerts.slice(0, 4).map(alert => {
+    const icon = alert.type === 'positive' ? '✅' : alert.type === 'negative' ? '⚠️' : 'ℹ️';
+    const typeClass = `anomaly-${alert.type}`;
+    return `
+      <div class="anomaly-card ${typeClass}">
+        <span class="anomaly-icon">${icon}</span>
+        <div class="anomaly-content">
+          <strong>${escapeHtml(alert.project)}</strong>
+          <p>${escapeHtml(alert.observation)}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const dataPointsList = insights.trendAnalysis.dataPoints.slice(0, 3).map(point =>
+    `<li>${escapeHtml(point)}</li>`
+  ).join('');
+
+  return `
+    <section class="ai-insights-panel glass-card">
+      <div class="ai-panel-header">
+        <div class="ai-badge">
+          <span class="ai-icon">🤖</span>
+          <span class="ai-label">AI Insights</span>
+        </div>
+        <span class="ai-timestamp">Generated: ${new Date(insights.generatedAt).toLocaleString()}</span>
+      </div>
+
+      <div class="ai-panel-grid">
+        <!-- Daily Focus Card -->
+        <div class="ai-card daily-focus">
+          <h3>🎯 Today's Focus</h3>
+          <div class="focus-content">
+            <p class="focus-priority">${escapeHtml(insights.dailyFocus.priority)}</p>
+            ${impactBadge}
+            <p class="focus-reasoning">${escapeHtml(insights.dailyFocus.reasoning)}</p>
+          </div>
+        </div>
+
+        <!-- Trend Analysis Card -->
+        <div class="ai-card trend-analysis">
+          <h3>${trendIcon} Portfolio Trend: ${capitalize(insights.trendAnalysis.direction)}</h3>
+          <p class="trend-observation">${escapeHtml(insights.trendAnalysis.keyObservation)}</p>
+          <ul class="trend-data-points">
+            ${dataPointsList}
+          </ul>
+        </div>
+
+        <!-- Anomaly Alerts -->
+        <div class="ai-card anomaly-alerts">
+          <h3>🔔 Notable Changes</h3>
+          <div class="anomaly-grid">
+            ${anomalyCards || '<p class="no-anomalies">No notable changes detected.</p>'}
+          </div>
+        </div>
+
+        <!-- Motivational Note -->
+        <div class="ai-card motivational">
+          <div class="motivational-content">
+            <span class="motivational-icon">💡</span>
+            <p>${escapeHtml(insights.motivationalNote)}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Capitalizes first letter of string
+ */
+function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Generates AI insights for dashboard using Claude API
+ * Cached for 4 hours to optimize API costs
+ * @param config - Dashboard configuration
+ * @returns AI insights or null if API unavailable
+ */
+export async function generateDashboardInsights(
+  config: DashboardConfig
+): Promise<AIInsightsPanel | null> {
+  // Check cache first
+  const cacheKey = `insights:${config.meta.totalProjects}:${config.meta.avgHealthScore.toFixed(0)}`;
+  const cached = insightsCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.insights;
+  }
+
+  // Check for API key
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.warn('[dashboard-builder] ANTHROPIC_API_KEY not set, skipping AI insights');
+    return null;
+  }
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const prompt = buildInsightsPrompt(config);
+
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    // Extract text content
+    const textBlock = response.content.find(block => block.type === 'text');
+    if (!textBlock || textBlock.type !== 'text') {
+      return null;
+    }
+
+    // Parse JSON response
+    const insights = parseInsightsResponse(textBlock.text);
+
+    // Cache the result
+    insightsCache.set(cacheKey, {
+      insights,
+      expiry: Date.now() + INSIGHTS_CACHE_TTL_MS
+    });
+
+    return insights;
+  } catch (error) {
+    console.error('[dashboard-builder] Claude API error:', error);
+    return null;
+  }
+}
+
+/**
+ * Builds the Claude prompt for dashboard insights
+ */
+function buildInsightsPrompt(config: DashboardConfig): string {
+  const topProjects = config.projects
+    .filter(p => p.health?.score !== undefined)
+    .sort((a, b) => (b.health?.score || 0) - (a.health?.score || 0))
+    .slice(0, 10)
+    .map(p => ({
+      name: p.project,
+      health: p.health?.score || 0,
+      grade: p.health?.grade || 'F',
+      velocity: p.activity?.commitVelocity || 'unknown',
+      commits7d: p.activity?.commits7d || 0
+    }));
+
+  const needsAttention = config.projects
+    .filter(p => p.driftAlert || (p.health?.score !== undefined && p.health.score < 60))
+    .slice(0, 5)
+    .map(p => ({
+      name: p.project,
+      health: p.health?.score || 0,
+      issue: p.driftAlert ? 'drift' : 'low_health'
+    }));
+
+  return `You are an AI assistant providing daily insights for a software developer's project portfolio dashboard.
+
+## Portfolio Status
+- Total Projects: ${config.meta.totalProjects}
+- Active: ${config.meta.active}, Dormant: ${config.meta.dormant}
+- Average Health: ${config.meta.avgHealthScore.toFixed(0)}/100 (Grade ${config.meta.avgHealthGrade})
+- Drift Alerts: ${config.meta.driftAlerts}
+- Commits (7d): ${config.activitySummary.totalCommits7d}
+
+## Health Distribution
+- Grade A: ${config.healthDistribution.gradeA}
+- Grade B: ${config.healthDistribution.gradeB}
+- Grade C: ${config.healthDistribution.gradeC}
+- Grade D: ${config.healthDistribution.gradeD}
+- Grade F: ${config.healthDistribution.gradeF}
+
+## Activity
+- High Velocity: ${config.activitySummary.highVelocity}
+- Medium: ${config.activitySummary.mediumVelocity}
+- Low: ${config.activitySummary.lowVelocity}
+- Stale: ${config.activitySummary.stale}
+
+## Top Projects
+${JSON.stringify(topProjects, null, 2)}
+
+## Needs Attention
+${JSON.stringify(needsAttention, null, 2)}
+
+## Task
+Generate actionable daily insights for this developer. Be concise, supportive, and specific.
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "dailyFocus": {
+    "priority": "One specific, actionable task for today",
+    "reasoning": "Brief explanation why this matters",
+    "estimatedImpact": "high|medium|low"
+  },
+  "trendAnalysis": {
+    "direction": "improving|stable|declining",
+    "keyObservation": "One sentence about portfolio trajectory",
+    "dataPoints": ["observation1", "observation2", "observation3"]
+  },
+  "anomalyAlerts": [
+    {
+      "type": "positive|negative|neutral",
+      "project": "project_name",
+      "observation": "What changed or stands out"
+    }
+  ],
+  "motivationalNote": "Brief encouraging message tailored to their portfolio state"
+}
+
+Guidelines:
+- Keep dailyFocus to ONE specific task
+- anomalyAlerts should highlight 2-4 notable changes
+- Be encouraging but honest
+- Tailor the motivational note to their actual situation`;
+}
+
+/**
+ * Parses Claude's response into AIInsightsPanel
+ */
+function parseInsightsResponse(response: string): AIInsightsPanel {
+  try {
+    // Extract JSON from response (handle markdown code blocks)
+    let jsonStr = response;
+    const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    return {
+      dailyFocus: {
+        priority: String(parsed.dailyFocus?.priority || 'Review your most active projects'),
+        reasoning: String(parsed.dailyFocus?.reasoning || 'Stay on top of your development momentum'),
+        estimatedImpact: ['high', 'medium', 'low'].includes(parsed.dailyFocus?.estimatedImpact)
+          ? parsed.dailyFocus.estimatedImpact
+          : 'medium'
+      },
+      trendAnalysis: {
+        direction: ['improving', 'stable', 'declining'].includes(parsed.trendAnalysis?.direction)
+          ? parsed.trendAnalysis.direction
+          : 'stable',
+        keyObservation: String(parsed.trendAnalysis?.keyObservation || 'Portfolio is in a stable state'),
+        dataPoints: Array.isArray(parsed.trendAnalysis?.dataPoints)
+          ? parsed.trendAnalysis.dataPoints.slice(0, 5).map(String)
+          : []
+      },
+      anomalyAlerts: Array.isArray(parsed.anomalyAlerts)
+        ? parsed.anomalyAlerts.slice(0, 6).map((a: Record<string, unknown>) => ({
+            type: ['positive', 'negative', 'neutral'].includes(a.type as string)
+              ? a.type as 'positive' | 'negative' | 'neutral'
+              : 'neutral',
+            project: String(a.project || 'Unknown'),
+            observation: String(a.observation || '')
+          }))
+        : [],
+      motivationalNote: String(parsed.motivationalNote || 'Keep building amazing projects!'),
+      generatedAt: new Date().toISOString()
+    };
+  } catch {
+    return {
+      dailyFocus: {
+        priority: 'Review your portfolio dashboard',
+        reasoning: 'Regular reviews help maintain project health',
+        estimatedImpact: 'medium'
+      },
+      trendAnalysis: {
+        direction: 'stable',
+        keyObservation: 'Portfolio status analysis in progress',
+        dataPoints: []
+      },
+      anomalyAlerts: [],
+      motivationalNote: 'Every line of code moves you forward!',
+      generatedAt: new Date().toISOString()
+    };
+  }
+}
+
+/**
+ * Clears the AI insights cache
+ */
+export function clearInsightsCache(): void {
+  insightsCache.clear();
+}
+
+/**
  * Returns CSS styles for dashboard
  */
 function getDashboardStyles(): string {
   return `
+    /* ============================================
+       CSS Custom Properties (Design Tokens)
+       ============================================ */
+    :root {
+      /* Colors - WCAG AA Compliant */
+      --color-bg-dark: #0a0e1a;
+      --color-bg-primary: rgba(20, 25, 51, 0.7);
+      --color-bg-secondary: rgba(15, 20, 40, 0.8);
+      --color-glass: rgba(20, 25, 51, 0.6);
+      --color-glass-border: rgba(0, 217, 255, 0.2);
+      --color-glass-border-hover: rgba(0, 217, 255, 0.4);
+
+      /* Accent colors */
+      --color-accent: #00d9ff;
+      --color-accent-glow: rgba(0, 217, 255, 0.3);
+      --color-text-primary: #e8ecf2;
+      --color-text-secondary: #8b9ab8;
+      --color-text-muted: #5a6a80;
+
+      /* Grade colors - WCAG AA verified */
+      --color-grade-a: #22c55e;
+      --color-grade-b: #84cc16;
+      --color-grade-c: #eab308;
+      --color-grade-d: #f97316;
+      --color-grade-f: #dc2626;
+
+      /* Cluster colors */
+      --color-cluster-web: #3b82f6;
+      --color-cluster-ai: #8b5cf6;
+      --color-cluster-learn: #10b981;
+      --color-cluster-api: #f59e0b;
+      --color-cluster-dev: #6366f1;
+
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+
+      /* Border radius */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-normal: 250ms ease;
+      --transition-slow: 400ms ease;
+
+      /* Shadows */
+      --shadow-glow: 0 0 20px var(--color-accent-glow);
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+      --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ============================================
+       Base Styles & Reset
+       ============================================ */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: #0a0e27;
-      color: #e0e6ed;
-      padding: 2rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-bg-dark);
+      background-image:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+      color: var(--color-text-primary);
+      padding: var(--space-xl);
       line-height: 1.6;
+      min-height: 100vh;
     }
 
-    .dashboard { max-width: 1400px; margin: 0 auto; }
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
+    .dashboard { max-width: 1440px; margin: 0 auto; }
+
+    /* ============================================
+       Glassmorphism Card Base
+       ============================================ */
+    .glass-card {
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      transition: all var(--transition-normal);
+    }
+
+    .glass-card:hover {
+      border-color: var(--color-glass-border-hover);
+      box-shadow: var(--shadow-elevated), var(--shadow-glow);
+      transform: translateY(-2px);
+    }
+
+    /* ============================================
+       Rich Tooltip System
+       ============================================ */
+    [data-tooltip] {
+      position: relative;
+      cursor: help;
+    }
+
+    [data-tooltip]::before,
+    [data-tooltip]::after {
+      position: absolute;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all var(--transition-normal);
+      z-index: 1000;
+    }
+
+    [data-tooltip]::before {
+      content: attr(data-tooltip);
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      padding: var(--space-sm) var(--space-md);
+      background: rgba(10, 14, 26, 0.98);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: 0.85rem;
+      font-weight: 400;
+      white-space: nowrap;
+      max-width: 320px;
+      box-shadow: var(--shadow-elevated);
+    }
+
+    [data-tooltip]::after {
+      content: '';
+      bottom: calc(100% + 4px);
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: rgba(10, 14, 26, 0.98);
+    }
+
+    [data-tooltip]:hover::before,
+    [data-tooltip]:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    [data-tooltip]:hover::before {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Multi-line tooltips */
+    [data-tooltip-multiline]::before {
+      white-space: pre-line;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    /* Tooltip positions */
+    [data-tooltip-pos="right"]::before {
+      bottom: auto;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-8px);
+    }
+
+    [data-tooltip-pos="right"]::after {
+      bottom: auto;
+      left: calc(100% + 4px);
+      top: 50%;
+      transform: translateY(-50%);
+      border: 6px solid transparent;
+      border-right-color: rgba(10, 14, 26, 0.98);
+    }
+
+    [data-tooltip-pos="right"]:hover::before {
+      transform: translateY(-50%) translateX(0);
+    }
+
+    /* ============================================
+       Header Styles
+       ============================================ */
     .dashboard-header {
       text-align: center;
-      margin-bottom: 3rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 2px solid #1a2236;
+      margin-bottom: var(--space-2xl);
+      padding: var(--space-xl);
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-xl);
+      animation: slideDown var(--transition-slow) ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .dashboard-header h1 {
-      font-size: 2.5rem;
-      color: #00d9ff;
-      margin-bottom: 0.5rem;
+      font-size: 2.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--color-accent) 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-sm);
+      letter-spacing: -0.02em;
     }
 
     .subtitle {
-      color: #7a8ca0;
+      color: var(--color-text-secondary);
       font-size: 1.1rem;
+      font-weight: 400;
     }
 
     .last-updated {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #556677;
+      margin-top: var(--space-md);
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
     }
 
+    /* ============================================
+       Metrics Panel
+       ============================================ */
     .metrics-panel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
     }
 
     .metric-card {
-      background: #141933;
-      padding: 2rem;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-glass-border);
       text-align: center;
-      transition: transform 0.2s;
+      transition: all var(--transition-normal);
+      animation: fadeInUp var(--transition-slow) ease-out both;
     }
 
-    .metric-card:hover { transform: translateY(-4px); }
+    .metric-card:nth-child(1) { animation-delay: 50ms; }
+    .metric-card:nth-child(2) { animation-delay: 100ms; }
+    .metric-card:nth-child(3) { animation-delay: 150ms; }
+    .metric-card:nth-child(4) { animation-delay: 200ms; }
+    .metric-card:nth-child(5) { animation-delay: 250ms; }
+    .metric-card:nth-child(6) { animation-delay: 300ms; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .metric-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-glass-border-hover);
+      box-shadow: var(--shadow-elevated), var(--shadow-glow);
+    }
 
     .metric-card.alert {
-      border-color: #ff6b6b;
-      background: linear-gradient(135deg, #141933, #2a1a1a);
+      border-color: var(--color-grade-f);
+      background: linear-gradient(135deg, var(--color-glass), rgba(220, 38, 38, 0.15));
     }
 
     .metric-value {
       font-size: 2.5rem;
-      font-weight: bold;
-      color: #00d9ff;
-      margin-bottom: 0.5rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin-bottom: var(--space-xs);
+      transition: transform var(--transition-fast);
+    }
+
+    .metric-card:hover .metric-value {
+      transform: scale(1.05);
     }
 
     .metric-label {
-      color: #7a8ca0;
-      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     h2 {
-      font-size: 1.8rem;
-      color: #00d9ff;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #1a2236;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--color-accent);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--color-glass-border);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
     }
 
-    .clusters-section { margin-bottom: 3rem; }
+    h2::before {
+      content: '';
+      width: 4px;
+      height: 1.2em;
+      background: var(--color-accent);
+      border-radius: 2px;
+    }
+
+    /* ============================================
+       Clusters Section
+       ============================================ */
+    .clusters-section { margin-bottom: var(--space-2xl); }
 
     .clusters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-lg);
     }
 
     .cluster-card {
-      background: #141933;
-      padding: 1.5rem;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-glass-border);
+      transition: all var(--transition-normal);
     }
 
+    .cluster-card:hover {
+      border-color: var(--color-glass-border-hover);
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .cluster-card[data-cluster="Web Apps"] { border-left: 4px solid var(--color-cluster-web); }
+    .cluster-card[data-cluster="AI & ML"] { border-left: 4px solid var(--color-cluster-ai); }
+    .cluster-card[data-cluster="Learning Tools"] { border-left: 4px solid var(--color-cluster-learn); }
+    .cluster-card[data-cluster="APIs & Services"] { border-left: 4px solid var(--color-cluster-api); }
+    .cluster-card[data-cluster="Developer Tools"] { border-left: 4px solid var(--color-cluster-dev); }
+
     .cluster-name {
-      font-size: 1.3rem;
-      color: #00d9ff;
-      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .cluster-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
     }
 
     .cluster-stats {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #1a2236;
-      color: #7a8ca0;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-glass-border);
+      color: var(--color-text-secondary);
       font-size: 0.9rem;
     }
 
-    .alignment-score { color: #4ade80; }
+    .alignment-score { color: var(--color-grade-a); }
 
     .cluster-projects {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: var(--space-xs);
     }
 
     .mini-project-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem;
-      background: #0a0e27;
-      border-radius: 6px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-sm);
       font-size: 0.9rem;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .mini-project-card:hover {
+      background: rgba(0, 217, 255, 0.1);
+      transform: translateX(4px);
     }
 
     .mini-project-card.drift-alert {
-      border-left: 3px solid #ff6b6b;
+      border-left: 3px solid var(--color-grade-f);
     }
 
-    .project-score { color: #4ade80; font-weight: 600; }
+    .project-score { color: var(--color-grade-a); font-weight: 600; }
 
+    /* ============================================
+       Projects Table - Enhanced
+       ============================================ */
     .projects-table {
       width: 100%;
-      background: #141933;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
-      border-collapse: collapse;
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-glass-border);
+      border-collapse: separate;
+      border-spacing: 0;
       overflow: hidden;
     }
 
     .projects-table thead {
-      background: #0a0e27;
+      background: var(--color-bg-secondary);
     }
 
     .projects-table th {
-      padding: 1rem;
+      padding: var(--space-md) var(--space-lg);
       text-align: left;
-      color: #00d9ff;
+      color: var(--color-accent);
       font-weight: 600;
       text-transform: uppercase;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--color-glass-border);
     }
 
     .projects-table td {
-      padding: 1rem;
-      border-top: 1px solid #1a2236;
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--color-glass-border);
+      vertical-align: middle;
+    }
+
+    .projects-table tbody tr {
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .projects-table tbody tr:hover {
+      background: rgba(0, 217, 255, 0.05);
+    }
+
+    .projects-table tbody tr.expanded {
+      background: rgba(0, 217, 255, 0.08);
     }
 
     .projects-table tr.drift {
-      background: linear-gradient(90deg, rgba(255,107,107,0.1), transparent);
+      background: linear-gradient(90deg, rgba(220, 38, 38, 0.1), transparent);
+    }
+
+    /* Expandable Project Detail Row */
+    .project-detail-row {
+      display: none;
+    }
+
+    .project-detail-row.visible {
+      display: table-row;
+      animation: slideDown var(--transition-normal) ease-out;
+    }
+
+    .project-detail-row td {
+      padding: 0;
+      background: var(--color-bg-secondary);
+    }
+
+    .project-detail-content {
+      padding: var(--space-lg);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .detail-section {
+      background: var(--color-glass);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-glass-border);
+    }
+
+    .detail-section h4 {
+      color: var(--color-accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-section .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--space-xs) 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .detail-section .detail-item:last-child {
+      border-bottom: none;
+    }
+
+    .detail-item .label {
+      color: var(--color-text-secondary);
+    }
+
+    .detail-item .value {
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    /* Health Factor Bars in Detail */
+    .health-factor-bar {
+      height: 6px;
+      background: var(--color-bg-dark);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: var(--space-xs);
+    }
+
+    .health-factor-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width var(--transition-slow);
     }
 
     .status-badge {
       display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .status-badge.active {
-      background: #4ade80;
-      color: #0a0e27;
+      background: var(--color-grade-a);
+      color: var(--color-bg-dark);
     }
 
     .status-badge.dormant {
-      background: #64748b;
-      color: #e0e6ed;
+      background: var(--color-text-muted);
+      color: var(--color-text-primary);
     }
 
     .alignment-bar-container {
       position: relative;
-      background: #0a0e27;
+      background: var(--color-bg-dark);
       height: 24px;
       border-radius: 12px;
       overflow: hidden;
@@ -685,8 +1522,8 @@ function getDashboardStyles(): string {
       top: 0;
       left: 0;
       height: 100%;
-      background: linear-gradient(90deg, #00d9ff, #4ade80);
-      transition: width 0.3s;
+      background: linear-gradient(90deg, var(--color-accent), var(--color-grade-a));
+      transition: width var(--transition-slow);
     }
 
     .alignment-text {
@@ -696,147 +1533,403 @@ function getDashboardStyles(): string {
       text-align: center;
       font-size: 0.85rem;
       font-weight: 600;
-      color: #e0e6ed;
+      color: var(--color-text-primary);
       z-index: 1;
     }
 
     .drift-indicator {
-      color: #ff6b6b;
+      color: var(--color-grade-f);
       font-weight: 600;
     }
 
     .intent-cell {
-      max-width: 400px;
+      max-width: 300px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       font-size: 0.9rem;
-      color: #9ca3af;
+      color: var(--color-text-secondary);
+    }
+
+    .intent-cell[data-tooltip] {
+      cursor: pointer;
     }
 
     .source-badge {
       display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
     }
 
     .source-badge.agent_swarm {
-      background: #00d9ff;
-      color: #0a0e27;
+      background: var(--color-accent);
+      color: var(--color-bg-dark);
     }
 
     .source-badge.manual_override {
-      background: #fbbf24;
-      color: #0a0e27;
+      background: var(--color-grade-c);
+      color: var(--color-bg-dark);
     }
 
-    .drift-alerts-section { margin-top: 3rem; }
+    /* ============================================
+       Drift Alerts Section
+       ============================================ */
+    .drift-alerts-section { margin-top: var(--space-2xl); }
 
     .no-alerts {
       text-align: center;
-      padding: 3rem;
-      background: #141933;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
+      padding: var(--space-2xl);
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-glass-border);
     }
 
     .success-icon {
       font-size: 3rem;
-      color: #4ade80;
+      color: var(--color-grade-a);
+      margin-bottom: var(--space-md);
     }
 
     .drift-alerts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: var(--space-lg);
     }
 
     .drift-alert-card {
-      background: linear-gradient(135deg, #2a1a1a, #141933);
-      border: 2px solid #ff6b6b;
-      border-radius: 12px;
-      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), var(--color-glass));
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--color-grade-f);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      transition: all var(--transition-normal);
+    }
+
+    .drift-alert-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(220, 38, 38, 0.2);
     }
 
     .alert-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 107, 107, 0.3);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid rgba(220, 38, 38, 0.3);
     }
 
     .alert-header h4 {
-      font-size: 1.2rem;
-      color: #ff6b6b;
+      font-size: 1.1rem;
+      color: var(--color-grade-f);
+      font-weight: 600;
     }
 
     .alert-score {
       font-weight: 600;
-      color: #fbbf24;
+      color: var(--color-grade-c);
     }
 
     .alert-body p {
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
+      margin-bottom: var(--space-sm);
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
     }
 
     .recommendation {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      background: rgba(255, 107, 107, 0.1);
-      border-left: 3px solid #ff6b6b;
-      color: #fbbf24;
+      margin-top: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      background: rgba(220, 38, 38, 0.1);
+      border-left: 3px solid var(--color-grade-f);
+      color: var(--color-grade-c);
       font-weight: 500;
+      font-size: 0.9rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    /* ============================================
+       AI Insights Panel
+       ============================================ */
+    .ai-insights-panel {
+      margin: var(--space-xl) 0;
+      padding: var(--space-xl);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), var(--color-glass));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .ai-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .ai-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-xs) var(--space-md);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.1));
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: var(--radius-xl);
+    }
+
+    .ai-icon {
+      font-size: 1.2rem;
+    }
+
+    .ai-label {
+      font-weight: 600;
+      color: #a78bfa;
+      letter-spacing: 0.5px;
+    }
+
+    .ai-timestamp {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .ai-panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-lg);
+    }
+
+    .ai-card {
+      background: rgba(15, 20, 40, 0.6);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      transition: all var(--transition-normal);
+    }
+
+    .ai-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .ai-card h3 {
+      font-size: 1rem;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* Daily Focus Card */
+    .daily-focus {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(15, 20, 40, 0.6));
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .focus-priority {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-sm);
+    }
+
+    .impact-badge {
+      display: inline-block;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-right: var(--space-sm);
+    }
+
+    .impact-high {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--color-grade-a);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .impact-medium {
+      background: rgba(234, 179, 8, 0.2);
+      color: var(--color-grade-c);
+      border: 1px solid rgba(234, 179, 8, 0.4);
+    }
+
+    .impact-low {
+      background: rgba(139, 92, 246, 0.2);
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .focus-reasoning {
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      margin-top: var(--space-sm);
+    }
+
+    /* Trend Analysis Card */
+    .trend-observation {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .trend-data-points {
+      list-style: none;
+      padding: 0;
+    }
+
+    .trend-data-points li {
+      padding: var(--space-xs) 0;
+      padding-left: var(--space-md);
+      position: relative;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+    }
+
+    .trend-data-points li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--color-accent);
+    }
+
+    /* Anomaly Alerts Card */
+    .anomaly-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .anomaly-card {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      background: rgba(20, 25, 51, 0.4);
+    }
+
+    .anomaly-positive {
+      border-left: 3px solid var(--color-grade-a);
+    }
+
+    .anomaly-negative {
+      border-left: 3px solid var(--color-grade-d);
+    }
+
+    .anomaly-neutral {
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .anomaly-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .anomaly-content strong {
+      color: var(--color-text-primary);
+      font-size: 0.85rem;
+    }
+
+    .anomaly-content p {
+      color: var(--color-text-secondary);
+      font-size: 0.8rem;
+      margin-top: var(--space-xs);
+    }
+
+    .no-anomalies {
+      color: var(--color-text-muted);
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    /* Motivational Card */
+    .motivational {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(15, 20, 40, 0.6));
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .motivational-content {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .motivational-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .motivational-content p {
+      font-size: 1rem;
+      color: var(--color-text-primary);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .ai-panel-grid {
+        grid-template-columns: 1fr;
+      }
+      .daily-focus,
+      .motivational {
+        grid-column: span 1;
+      }
     }
 
     .project-meta {
       display: inline-block;
-      margin-left: 0.5rem;
-      padding: 0.2rem 0.5rem;
-      background: #0a0e27;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      color: #7a8ca0;
+      margin-left: var(--space-sm);
+      padding: var(--space-xs) var(--space-sm);
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
     }
 
     /* Enhanced Styles */
     .metric-card.highlight {
-      background: linear-gradient(135deg, #141933, #1a2540);
-      border: 2px solid #00d9ff;
+      background: linear-gradient(135deg, var(--color-glass), rgba(0, 217, 255, 0.1));
+      border: 2px solid var(--color-accent);
     }
 
     .metric-sub {
       font-size: 0.8rem;
-      color: #7a8ca0;
-      margin-top: 0.25rem;
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
     }
 
-    /* Health Overview */
+    /* ============================================
+       Health Overview
+       ============================================ */
     .health-overview {
-      margin-bottom: 3rem;
-      background: #141933;
-      padding: 2rem;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
+      margin-bottom: var(--space-2xl);
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-glass-border);
     }
 
     .health-grid {
       display: grid;
-      grid-template-columns: 1fr 200px;
-      gap: 2rem;
+      grid-template-columns: 1fr 220px;
+      gap: var(--space-xl);
       align-items: center;
     }
 
     .grade-bar {
       display: flex;
-      height: 40px;
-      border-radius: 8px;
+      height: 48px;
+      border-radius: var(--radius-md);
       overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .grade-segment {
@@ -844,191 +1937,300 @@ function getDashboardStyles(): string {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-width: 40px;
-      transition: all 0.3s;
+      min-width: 48px;
+      transition: all var(--transition-normal);
+      cursor: pointer;
     }
 
-    .grade-segment:hover { filter: brightness(1.2); }
-    .grade-segment.grade-a { background: #4ade80; color: #0a0e27; }
-    .grade-segment.grade-b { background: #a3e635; color: #0a0e27; }
-    .grade-segment.grade-c { background: #facc15; color: #0a0e27; }
-    .grade-segment.grade-d { background: #fb923c; color: #0a0e27; }
-    .grade-segment.grade-f { background: #ef4444; color: white; }
+    .grade-segment:hover {
+      filter: brightness(1.15);
+      transform: scaleY(1.05);
+    }
 
-    .grade-label { font-weight: bold; font-size: 0.9rem; }
-    .grade-count { font-size: 0.75rem; }
+    .grade-segment.grade-a { background: var(--color-grade-a); color: var(--color-bg-dark); }
+    .grade-segment.grade-b { background: var(--color-grade-b); color: var(--color-bg-dark); }
+    .grade-segment.grade-c { background: var(--color-grade-c); color: var(--color-bg-dark); }
+    .grade-segment.grade-d { background: var(--color-grade-d); color: var(--color-bg-dark); }
+    .grade-segment.grade-f { background: var(--color-grade-f); color: white; }
+
+    .grade-label { font-weight: 700; font-size: 1rem; }
+    .grade-count { font-size: 0.75rem; opacity: 0.9; }
 
     .health-legend { font-size: 0.85rem; }
-    .legend-item { margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .legend-item {
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      color: var(--color-text-secondary);
+    }
     .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot.grade-a { background: #4ade80; }
-    .dot.grade-b { background: #a3e635; }
-    .dot.grade-c { background: #facc15; }
-    .dot.grade-d { background: #fb923c; }
-    .dot.grade-f { background: #ef4444; }
+    .dot.grade-a { background: var(--color-grade-a); }
+    .dot.grade-b { background: var(--color-grade-b); }
+    .dot.grade-c { background: var(--color-grade-c); }
+    .dot.grade-d { background: var(--color-grade-d); }
+    .dot.grade-f { background: var(--color-grade-f); }
 
-    /* Tech Stack Panel */
+    /* ============================================
+       Tech Stack & Activity Panels
+       ============================================ */
     .tech-stack-panel, .activity-panel {
-      margin-bottom: 3rem;
-      background: #141933;
-      padding: 2rem;
-      border-radius: 12px;
-      border: 1px solid #1a2236;
+      margin-bottom: var(--space-2xl);
+      background: var(--color-glass);
+      backdrop-filter: blur(20px);
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-glass-border);
     }
 
     .tech-grid, .activity-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+      gap: var(--space-xl);
     }
 
     .tech-category h3, .velocity-breakdown h3 {
-      color: #7a8ca0;
-      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
       text-transform: uppercase;
-      margin-bottom: 1rem;
+      margin-bottom: var(--space-md);
+      letter-spacing: 0.5px;
     }
 
-    .tech-bars, .velocity-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+    .tech-bars, .velocity-bars { display: flex; flex-direction: column; gap: var(--space-sm); }
 
     .tech-bar-row, .velocity-row {
       display: grid;
-      grid-template-columns: 120px 1fr 40px;
+      grid-template-columns: 100px 1fr 40px;
       align-items: center;
-      gap: 1rem;
+      gap: var(--space-md);
     }
 
-    .tech-name, .velocity-label { font-size: 0.85rem; color: #e0e6ed; }
-    .tech-bar-track, .velocity-track { height: 8px; background: #0a0e27; border-radius: 4px; overflow: hidden; }
-    .tech-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
-    .tech-bar-fill.lang { background: linear-gradient(90deg, #00d9ff, #4ade80); }
+    .tech-name, .velocity-label {
+      font-size: 0.85rem;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tech-bar-track, .velocity-track {
+      height: 8px;
+      background: var(--color-bg-dark);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .tech-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width var(--transition-slow);
+    }
+
+    .tech-bar-fill.lang { background: linear-gradient(90deg, var(--color-accent), var(--color-grade-a)); }
     .tech-bar-fill.framework { background: linear-gradient(90deg, #a855f7, #ec4899); }
-    .tech-count, .velocity-count { font-size: 0.85rem; color: #7a8ca0; text-align: right; }
+    .tech-count, .velocity-count { font-size: 0.85rem; color: var(--color-text-muted); text-align: right; }
 
     .velocity-fill { height: 100%; border-radius: 4px; }
-    .velocity-fill.high { background: #4ade80; }
-    .velocity-fill.medium { background: #facc15; }
-    .velocity-fill.low { background: #fb923c; }
-    .velocity-fill.stale { background: #64748b; }
+    .velocity-fill.high { background: var(--color-grade-a); }
+    .velocity-fill.medium { background: var(--color-grade-c); }
+    .velocity-fill.low { background: var(--color-grade-d); }
+    .velocity-fill.stale { background: var(--color-text-muted); }
 
     /* Activity Stats */
     .activity-stats {
       display: flex;
-      gap: 2rem;
+      gap: var(--space-lg);
     }
 
     .activity-stat {
       text-align: center;
-      padding: 1.5rem;
-      background: #0a0e27;
-      border-radius: 8px;
+      padding: var(--space-lg);
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
       flex: 1;
+      transition: all var(--transition-normal);
     }
 
-    .stat-value { font-size: 2rem; font-weight: bold; color: #00d9ff; }
-    .stat-label { font-size: 0.85rem; color: #7a8ca0; }
+    .activity-stat:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
 
-    /* Table Controls */
+    .stat-value { font-size: 2rem; font-weight: 700; color: var(--color-accent); }
+    .stat-label { font-size: 0.85rem; color: var(--color-text-secondary); margin-top: var(--space-xs); }
+
+    /* ============================================
+       Table Controls - Enhanced
+       ============================================ */
     .table-controls {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
     }
 
     .search-input, .sort-select, .filter-select {
-      padding: 0.75rem 1rem;
-      background: #141933;
-      border: 1px solid #1a2236;
-      border-radius: 8px;
-      color: #e0e6ed;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--color-glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
       font-size: 0.9rem;
+      transition: all var(--transition-fast);
     }
 
-    .search-input { flex: 1; }
+    .search-input { flex: 1; min-width: 200px; }
     .search-input:focus, .sort-select:focus, .filter-select:focus {
       outline: none;
-      border-color: #00d9ff;
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* Quick Filter Buttons */
+    .quick-filters {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .quick-filter-btn {
+      padding: var(--space-xs) var(--space-md);
+      background: var(--color-glass);
+      border: 1px solid var(--color-glass-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text-secondary);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .quick-filter-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .quick-filter-btn.active {
+      background: var(--color-accent);
+      color: var(--color-bg-dark);
+      border-color: var(--color-accent);
     }
 
     /* Health Grade in Table */
     .health-grade {
-      display: inline-block;
-      width: 28px;
-      height: 28px;
-      line-height: 28px;
-      text-align: center;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: transform var(--transition-fast);
     }
 
-    .health-grade.grade-a { background: #4ade80; color: #0a0e27; }
-    .health-grade.grade-b { background: #a3e635; color: #0a0e27; }
-    .health-grade.grade-c { background: #facc15; color: #0a0e27; }
-    .health-grade.grade-d { background: #fb923c; color: #0a0e27; }
-    .health-grade.grade-f { background: #ef4444; color: white; }
+    .health-grade:hover {
+      transform: scale(1.1);
+    }
 
-    .health-score-small { font-size: 0.75rem; color: #7a8ca0; margin-left: 0.5rem; }
+    .health-grade.grade-a { background: var(--color-grade-a); color: var(--color-bg-dark); }
+    .health-grade.grade-b { background: var(--color-grade-b); color: var(--color-bg-dark); }
+    .health-grade.grade-c { background: var(--color-grade-c); color: var(--color-bg-dark); }
+    .health-grade.grade-d { background: var(--color-grade-d); color: var(--color-bg-dark); }
+    .health-grade.grade-f { background: var(--color-grade-f); color: white; }
+
+    .health-score-small { font-size: 0.75rem; color: var(--color-text-muted); margin-left: var(--space-sm); }
 
     /* Velocity Badge */
     .velocity-badge {
       display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
+      font-weight: 600;
       text-transform: uppercase;
     }
 
-    .velocity-badge.high { background: #4ade80; color: #0a0e27; }
-    .velocity-badge.medium { background: #facc15; color: #0a0e27; }
-    .velocity-badge.low { background: #fb923c; color: #0a0e27; }
-    .velocity-badge.stale { background: #64748b; color: #e0e6ed; }
+    .velocity-badge.high { background: var(--color-grade-a); color: var(--color-bg-dark); }
+    .velocity-badge.medium { background: var(--color-grade-c); color: var(--color-bg-dark); }
+    .velocity-badge.low { background: var(--color-grade-d); color: var(--color-bg-dark); }
+    .velocity-badge.stale { background: var(--color-text-muted); color: var(--color-text-primary); }
 
-    .commit-count { font-size: 0.75rem; color: #7a8ca0; margin-left: 0.5rem; }
+    .commit-count { font-size: 0.75rem; color: var(--color-text-muted); margin-left: var(--space-sm); }
 
     /* Tech Cell */
-    .tech-cell .primary-tech { font-weight: 500; }
-    .tech-cell .frameworks { display: block; font-size: 0.75rem; color: #7a8ca0; }
+    .tech-cell .primary-tech { font-weight: 500; color: var(--color-text-primary); }
+    .tech-cell .frameworks { display: block; font-size: 0.75rem; color: var(--color-text-muted); }
 
     /* Integration Badges */
     .integrations-cell { white-space: nowrap; }
     .integration-badge {
-      display: inline-block;
-      padding: 0.15rem 0.4rem;
-      margin-right: 0.25rem;
-      border-radius: 3px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      background: #1a2236;
-      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xs);
+      margin-right: var(--space-xs);
+      border-radius: var(--radius-sm);
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: var(--color-bg-secondary);
+      color: var(--color-text-muted);
+      min-width: 24px;
+      height: 22px;
+      transition: all var(--transition-fast);
     }
 
     .integration-badge.active {
-      background: #4ade80;
-      color: #0a0e27;
+      background: var(--color-grade-a);
+      color: var(--color-bg-dark);
     }
 
     /* Project Grade in Clusters */
     .project-grade {
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
       font-size: 0.75rem;
-      font-weight: bold;
+      font-weight: 700;
     }
 
-    .project-grade.grade-a { background: #4ade80; color: #0a0e27; }
-    .project-grade.grade-b { background: #a3e635; color: #0a0e27; }
-    .project-grade.grade-c { background: #facc15; color: #0a0e27; }
-    .project-grade.grade-d { background: #fb923c; color: #0a0e27; }
-    .project-grade.grade-f { background: #ef4444; color: white; }
+    .project-grade.grade-a { background: var(--color-grade-a); color: var(--color-bg-dark); }
+    .project-grade.grade-b { background: var(--color-grade-b); color: var(--color-bg-dark); }
+    .project-grade.grade-c { background: var(--color-grade-c); color: var(--color-bg-dark); }
+    .project-grade.grade-d { background: var(--color-grade-d); color: var(--color-bg-dark); }
+    .project-grade.grade-f { background: var(--color-grade-f); color: white; }
 
-    .health-score { color: #4ade80; }
-    .more-projects { font-size: 0.8rem; color: #7a8ca0; text-align: center; padding: 0.5rem; }
+    .health-score { color: var(--color-grade-a); }
+    .more-projects {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      text-align: center;
+      padding: var(--space-sm);
+    }
+
+    /* ============================================
+       Responsive Design
+       ============================================ */
+    @media (max-width: 1024px) {
+      .health-grid { grid-template-columns: 1fr; }
+      .tech-grid, .activity-grid { grid-template-columns: 1fr; }
+    }
 
     @media (max-width: 768px) {
-      .health-grid, .tech-grid, .activity-grid { grid-template-columns: 1fr; }
+      body { padding: var(--space-md); }
+      .dashboard-header h1 { font-size: 2rem; }
       .table-controls { flex-direction: column; }
       .projects-table { font-size: 0.85rem; }
+      .projects-table th, .projects-table td { padding: var(--space-sm); }
+      .quick-filters { flex-wrap: wrap; }
+      .drift-alerts-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .metrics-panel { grid-template-columns: 1fr 1fr; }
+      .metric-value { font-size: 1.8rem; }
+      .clusters-grid { grid-template-columns: 1fr; }
     }
   `;
 }
@@ -1037,67 +2239,260 @@ function getDashboardStyles(): string {
  * Returns JavaScript for dashboard interactivity
  */
 function getDashboardScripts(config: DashboardConfig): string {
+  // Build detailed project data for expandable rows
+  const projectDetails = config.projects.map(p => ({
+    name: p.project,
+    cluster: p.cluster,
+    health: p.health?.score || 0,
+    grade: p.health?.grade || 'F',
+    activity: p.activity?.commits7d || 0,
+    commits30d: p.activity?.commits30d || 0,
+    velocity: p.activity?.commitVelocity || 'stale',
+    status: p.metadata?.status || 'UNKNOWN',
+    techStack: p.techStack || {},
+    integrations: p.integrations || {},
+    deployment: p.deployment || {},
+    lastIntent: p.lastIntent || '',
+    executionSummary: p.executionSummary || '',
+    healthFactors: p.health?.factors || {},
+    driftAlert: p.driftAlert || false,
+    alignmentScore: p.alignmentScore || 0
+  }));
+
   return `
-    console.log('Portfolio Cognitive Command Dashboard loaded');
+    console.log('Portfolio Cognitive Command Dashboard v2.0 loaded');
 
-    // Project data for filtering/sorting
-    const projects = ${JSON.stringify(config.projects.map(p => ({
-      name: p.project,
-      cluster: p.cluster,
-      health: p.health?.score || 0,
-      grade: p.health?.grade || 'F',
-      activity: p.activity?.commits7d || 0,
-      status: p.metadata?.status || 'UNKNOWN'
-    })))};
+    // Project data for filtering/sorting/expanding
+    const projects = ${JSON.stringify(projectDetails)};
 
-    // Search functionality
+    // DOM Elements
     const searchInput = document.getElementById('projectSearch');
     const sortSelect = document.getElementById('sortBy');
     const filterSelect = document.getElementById('filterCluster');
     const tableBody = document.getElementById('projectsTableBody');
 
-    function filterAndSort() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const sortBy = sortSelect.value;
-      const filterCluster = filterSelect.value;
+    // State
+    let activeQuickFilter = 'all';
+    let expandedProject = null;
 
-      const rows = Array.from(tableBody.querySelectorAll('tr'));
+    // Initialize quick filter buttons
+    function initQuickFilters() {
+      const container = document.querySelector('.quick-filters');
+      if (!container) return;
+
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('.quick-filter-btn');
+        if (!btn) return;
+
+        // Update active state
+        container.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        activeQuickFilter = btn.dataset.filter;
+        filterAndSort();
+      });
+    }
+
+    // Main filter/sort function
+    function filterAndSort() {
+      const searchTerm = (searchInput?.value || '').toLowerCase();
+      const sortBy = sortSelect?.value || 'health';
+      const filterCluster = filterSelect?.value || '';
+
+      const rows = Array.from(tableBody?.querySelectorAll('tr.project-row') || []);
 
       rows.forEach(row => {
-        const projectName = row.getAttribute('data-project').toLowerCase();
-        const cluster = row.querySelector('.project-meta')?.textContent || '';
+        const projectName = (row.getAttribute('data-project') || '').toLowerCase();
+        const project = projects.find(p => p.name === row.getAttribute('data-project')) || {};
+        const cluster = project.cluster || '';
+        const grade = project.grade || 'F';
+        const status = project.status || '';
 
-        const matchesSearch = projectName.includes(searchTerm);
+        // Search filter
+        const matchesSearch = !searchTerm || projectName.includes(searchTerm) ||
+                             cluster.toLowerCase().includes(searchTerm);
+
+        // Cluster filter
         const matchesCluster = !filterCluster || cluster === filterCluster;
 
-        row.style.display = matchesSearch && matchesCluster ? '' : 'none';
+        // Quick filter
+        let matchesQuickFilter = true;
+        switch(activeQuickFilter) {
+          case 'active':
+            matchesQuickFilter = status === 'ACTIVE';
+            break;
+          case 'attention':
+            matchesQuickFilter = project.driftAlert || project.health < 70;
+            break;
+          case 'grade-a':
+            matchesQuickFilter = grade === 'A';
+            break;
+          case 'grade-b':
+            matchesQuickFilter = grade === 'B';
+            break;
+          case 'grade-c':
+            matchesQuickFilter = grade === 'C';
+            break;
+          case 'grade-df':
+            matchesQuickFilter = grade === 'D' || grade === 'F';
+            break;
+        }
+
+        const visible = matchesSearch && matchesCluster && matchesQuickFilter;
+        row.style.display = visible ? '' : 'none';
+
+        // Hide detail row if main row is hidden
+        const detailRow = row.nextElementSibling;
+        if (detailRow?.classList.contains('project-detail-row') && !visible) {
+          detailRow.classList.remove('visible');
+        }
       });
 
       // Sort visible rows
       const visibleRows = rows.filter(r => r.style.display !== 'none');
       visibleRows.sort((a, b) => {
-        const aName = a.getAttribute('data-project');
-        const bName = b.getAttribute('data-project');
-        const aProject = projects.find(p => p.name === aName) || {};
-        const bProject = projects.find(p => p.name === bName) || {};
+        const aProject = projects.find(p => p.name === a.getAttribute('data-project')) || {};
+        const bProject = projects.find(p => p.name === b.getAttribute('data-project')) || {};
 
         switch(sortBy) {
           case 'health': return (bProject.health || 0) - (aProject.health || 0);
           case 'activity': return (bProject.activity || 0) - (aProject.activity || 0);
-          case 'name': return aName.localeCompare(bName);
+          case 'name': return (aProject.name || '').localeCompare(bProject.name || '');
+          case 'cluster': return (aProject.cluster || '').localeCompare(bProject.cluster || '');
           default: return 0;
         }
       });
 
-      visibleRows.forEach(row => tableBody.appendChild(row));
+      visibleRows.forEach(row => {
+        const detailRow = row.nextElementSibling;
+        tableBody.appendChild(row);
+        if (detailRow?.classList.contains('project-detail-row')) {
+          tableBody.appendChild(detailRow);
+        }
+      });
+
+      updateFilterCounts();
     }
 
+    // Update quick filter counts
+    function updateFilterCounts() {
+      const counts = {
+        all: projects.length,
+        active: projects.filter(p => p.status === 'ACTIVE').length,
+        attention: projects.filter(p => p.driftAlert || p.health < 70).length,
+        'grade-a': projects.filter(p => p.grade === 'A').length,
+        'grade-b': projects.filter(p => p.grade === 'B').length,
+        'grade-c': projects.filter(p => p.grade === 'C').length,
+        'grade-df': projects.filter(p => p.grade === 'D' || p.grade === 'F').length
+      };
+
+      document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        const filter = btn.dataset.filter;
+        const countSpan = btn.querySelector('.filter-count');
+        if (countSpan && counts[filter] !== undefined) {
+          countSpan.textContent = counts[filter];
+        }
+      });
+    }
+
+    // Click-to-expand project details
+    function initExpandableRows() {
+      tableBody?.addEventListener('click', (e) => {
+        const row = e.target.closest('tr.project-row');
+        if (!row) return;
+
+        const projectName = row.getAttribute('data-project');
+        const detailRow = row.nextElementSibling;
+
+        // Close previously expanded
+        if (expandedProject && expandedProject !== projectName) {
+          const prevRow = tableBody.querySelector(\`tr[data-project="\${expandedProject}"]\`);
+          const prevDetail = prevRow?.nextElementSibling;
+          prevRow?.classList.remove('expanded');
+          prevDetail?.classList.remove('visible');
+        }
+
+        // Toggle current
+        if (detailRow?.classList.contains('project-detail-row')) {
+          const isExpanding = !detailRow.classList.contains('visible');
+          row.classList.toggle('expanded', isExpanding);
+          detailRow.classList.toggle('visible', isExpanding);
+          expandedProject = isExpanding ? projectName : null;
+        }
+      });
+
+      // Keyboard navigation - Escape to close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && expandedProject) {
+          const row = tableBody?.querySelector(\`tr[data-project="\${expandedProject}"]\`);
+          const detailRow = row?.nextElementSibling;
+          row?.classList.remove('expanded');
+          detailRow?.classList.remove('visible');
+          expandedProject = null;
+        }
+      });
+    }
+
+    // Grade segment click filtering
+    function initGradeSegmentClick() {
+      document.querySelectorAll('.grade-segment').forEach(segment => {
+        segment.addEventListener('click', () => {
+          const grade = segment.querySelector('.grade-label')?.textContent?.toLowerCase();
+          if (!grade) return;
+
+          // Find and click the corresponding quick filter
+          const filterBtn = document.querySelector(\`.quick-filter-btn[data-filter="grade-\${grade}"]\`);
+          if (filterBtn) {
+            filterBtn.click();
+          } else if (grade === 'd' || grade === 'f') {
+            document.querySelector('.quick-filter-btn[data-filter="grade-df"]')?.click();
+          }
+        });
+      });
+    }
+
+    // Animate progress bars on load
+    function animateProgressBars() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const bar = entry.target;
+            const width = bar.style.width;
+            bar.style.width = '0';
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                bar.style.width = width;
+              });
+            });
+            observer.unobserve(bar);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.tech-bar-fill, .velocity-fill, .grade-segment').forEach(bar => {
+        observer.observe(bar);
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initQuickFilters();
+      initExpandableRows();
+      initGradeSegmentClick();
+      animateProgressBars();
+      updateFilterCounts();
+    });
+
+    // Event listeners
     searchInput?.addEventListener('input', filterAndSort);
     sortSelect?.addEventListener('change', filterAndSort);
     filterSelect?.addEventListener('change', filterAndSort);
 
     // Auto-refresh every 5 minutes
     setTimeout(() => location.reload(), 5 * 60 * 1000);
+
+    // Expose for debugging
+    window.portfolioDashboard = { projects, filterAndSort };
   `;
 }
 

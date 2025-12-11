@@ -58,6 +58,10 @@ export class FileStorageBackend implements StorageBackend {
       'driftAlerts',
       'neuralPatterns',
       'metrics',
+      'goapPlans',
+      'swarmExecutions',
+      'enhancedAnalyses',
+      'aiInsights',
     ];
 
     // Ensure base directories
@@ -85,6 +89,10 @@ export class FileStorageBackend implements StorageBackend {
       driftAlerts: path.join(this.basePath, 'sessions', 'alerts'),
       neuralPatterns: path.join(this.basePath, 'agents', 'patterns'),
       metrics: path.join(this.basePath, 'sessions', 'metrics'),
+      goapPlans: path.join(this.basePath, 'goap', 'plans'),
+      swarmExecutions: path.join(this.basePath, 'swarm', 'executions'),
+      enhancedAnalyses: path.join(this.basePath, 'sessions', 'enhanced'),
+      aiInsights: path.join(this.basePath, 'ai', 'insights'),
     };
 
     return pathMap[collection] || path.join(this.basePath, collection);

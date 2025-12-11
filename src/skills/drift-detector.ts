@@ -1,9 +1,11 @@
 /**
  * Drift Detector Skill
  * Detects alignment drift between intent and implementation
+ * with AI-powered root cause analysis
  */
 
 import { generateEmbedding, cosineSimilarity } from './semantic-analyzer';
+import Anthropic from '@anthropic-ai/sdk';
 
 export interface DriftResult {
   alignmentScore: number;
@@ -12,6 +14,46 @@ export interface DriftResult {
   intentVector: number[];
   implementationVector: number[];
 }
+
+/**
+ * Drift root cause categories
+ */
+export type DriftCategory =
+  | 'scope_creep'       // Feature expansion beyond original intent
+  | 'tech_pivot'        // Technology stack change mid-project
+  | 'requirements_shift' // External requirements changed
+  | 'maintenance_drift' // Gradual decay from bug fixes/patches
+  | 'abandoned_direction' // Started feature never completed
+  | 'refactoring_divergence' // Code structure changed without intent update
+  | 'unknown';
+
+/**
+ * Severity levels for drift
+ */
+export type DriftSeverity = 'critical' | 'high' | 'medium' | 'low';
+
+/**
+ * AI-powered drift root cause analysis
+ */
+export interface DriftAnalysis {
+  rootCause: string;
+  category: DriftCategory;
+  severity: DriftSeverity;
+  confidence: number;
+  suggestedActions: string[];
+  technicalDebt: {
+    estimated: 'high' | 'medium' | 'low';
+    areas: string[];
+  };
+  realignmentStrategy: string;
+  analysisTimestamp: string;
+}
+
+/**
+ * Cache for drift analysis to avoid repeated API calls
+ */
+const driftAnalysisCache = new Map<string, { analysis: DriftAnalysis; expiry: number }>();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Detects drift between stated intent and actual implementation
@@ -224,4 +266,282 @@ export function generateDriftReport(driftResult: DriftResult): string {
   ];
 
   return report.join('\n');
+}
+
+/**
+ * Analyzes drift root cause using Claude API
+ * Only called when driftAlert === true to optimize API costs
+ * @param projectName - Name of the project
+ * @param intent - Original intent/requirements
+ * @param implementation - Actual implementation details
+ * @param driftResult - Existing drift detection result
+ * @returns AI-powered drift analysis or null if API unavailable
+ */
+export async function analyzeDriftRootCause(
+  projectName: string,
+  intent: string,
+  implementation: string,
+  driftResult: DriftResult
+): Promise<DriftAnalysis | null> {
+  // Only analyze if drift is detected (cost optimization)
+  if (!driftResult.driftAlert) {
+    return null;
+  }
+
+  // Check cache first
+  const cacheKey = `${projectName}:${driftResult.alignmentScore.toFixed(2)}`;
+  const cached = driftAnalysisCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.analysis;
+  }
+
+  // Check for API key
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.warn('[drift-detector] ANTHROPIC_API_KEY not set, skipping AI analysis');
+    return createFallbackAnalysis(driftResult);
+  }
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const prompt = buildDriftAnalysisPrompt(projectName, intent, implementation, driftResult);
+
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    // Extract text content
+    const textBlock = response.content.find(block => block.type === 'text');
+    if (!textBlock || textBlock.type !== 'text') {
+      return createFallbackAnalysis(driftResult);
+    }
+
+    // Parse JSON response
+    const analysis = parseDriftAnalysisResponse(textBlock.text, driftResult);
+
+    // Cache the result
+    driftAnalysisCache.set(cacheKey, {
+      analysis,
+      expiry: Date.now() + CACHE_TTL_MS
+    });
+
+    return analysis;
+  } catch (error) {
+    console.error('[drift-detector] Claude API error:', error);
+    return createFallbackAnalysis(driftResult);
+  }
+}
+
+/**
+ * Builds the Claude prompt for drift root cause analysis
+ */
+function buildDriftAnalysisPrompt(
+  projectName: string,
+  intent: string,
+  implementation: string,
+  driftResult: DriftResult
+): string {
+  return `You are a technical debt analyst specializing in software project drift detection.
+
+Analyze the drift between stated intent and actual implementation for project "${projectName}".
+
+## Alignment Metrics
+- Alignment Score: ${(driftResult.alignmentScore * 100).toFixed(1)}%
+- High Precision Analysis: ${driftResult.highPrecision ? 'Yes' : 'No'}
+
+## Original Intent/Requirements
+${intent.substring(0, 2000)}
+
+## Actual Implementation
+${implementation.substring(0, 2000)}
+
+## Task
+Identify the root cause of drift and provide actionable recommendations.
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "rootCause": "Brief 1-2 sentence explanation of why drift occurred",
+  "category": "scope_creep|tech_pivot|requirements_shift|maintenance_drift|abandoned_direction|refactoring_divergence|unknown",
+  "severity": "critical|high|medium|low",
+  "confidence": 0.0-1.0,
+  "suggestedActions": ["action1", "action2", "action3"],
+  "technicalDebt": {
+    "estimated": "high|medium|low",
+    "areas": ["area1", "area2"]
+  },
+  "realignmentStrategy": "Specific strategy to bring implementation back in alignment with intent"
+}
+
+Choose category based on:
+- scope_creep: Features added beyond original scope
+- tech_pivot: Technology stack changed significantly
+- requirements_shift: External requirements changed
+- maintenance_drift: Gradual decay from patches/fixes
+- abandoned_direction: Started feature never completed
+- refactoring_divergence: Code restructured without updating intent
+- unknown: Cannot determine root cause`;
+}
+
+/**
+ * Parses Claude's response into DriftAnalysis
+ */
+function parseDriftAnalysisResponse(
+  response: string,
+  driftResult: DriftResult
+): DriftAnalysis {
+  try {
+    // Extract JSON from response (handle markdown code blocks)
+    let jsonStr = response;
+    const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    // Validate and sanitize response
+    const validCategories: DriftCategory[] = [
+      'scope_creep', 'tech_pivot', 'requirements_shift',
+      'maintenance_drift', 'abandoned_direction', 'refactoring_divergence', 'unknown'
+    ];
+    const validSeverities: DriftSeverity[] = ['critical', 'high', 'medium', 'low'];
+    const validDebtLevels = ['high', 'medium', 'low'];
+
+    return {
+      rootCause: String(parsed.rootCause || 'Unable to determine root cause'),
+      category: validCategories.includes(parsed.category) ? parsed.category : 'unknown',
+      severity: validSeverities.includes(parsed.severity)
+        ? parsed.severity
+        : driftResult.alignmentScore < 0.5 ? 'critical' : 'high',
+      confidence: typeof parsed.confidence === 'number'
+        ? Math.max(0, Math.min(1, parsed.confidence))
+        : 0.5,
+      suggestedActions: Array.isArray(parsed.suggestedActions)
+        ? parsed.suggestedActions.slice(0, 5).map(String)
+        : ['Review implementation against original requirements'],
+      technicalDebt: {
+        estimated: validDebtLevels.includes(parsed.technicalDebt?.estimated)
+          ? parsed.technicalDebt.estimated
+          : 'medium',
+        areas: Array.isArray(parsed.technicalDebt?.areas)
+          ? parsed.technicalDebt.areas.slice(0, 5).map(String)
+          : ['Unknown']
+      },
+      realignmentStrategy: String(parsed.realignmentStrategy || 'Conduct thorough code review'),
+      analysisTimestamp: new Date().toISOString()
+    };
+  } catch {
+    return createFallbackAnalysis(driftResult);
+  }
+}
+
+/**
+ * Creates fallback analysis when AI is unavailable
+ */
+function createFallbackAnalysis(driftResult: DriftResult): DriftAnalysis {
+  const severity: DriftSeverity = driftResult.alignmentScore < 0.3 ? 'critical'
+    : driftResult.alignmentScore < 0.5 ? 'high'
+    : driftResult.alignmentScore < 0.7 ? 'medium'
+    : 'low';
+
+  return {
+    rootCause: 'Automated analysis unavailable. Manual review recommended.',
+    category: 'unknown',
+    severity,
+    confidence: 0.3,
+    suggestedActions: [
+      'Compare current implementation with original requirements',
+      'Review recent commit history for scope changes',
+      'Document any intentional pivots'
+    ],
+    technicalDebt: {
+      estimated: severity === 'critical' || severity === 'high' ? 'high' : 'medium',
+      areas: ['Implementation-intent alignment']
+    },
+    realignmentStrategy: 'Manual code review and requirements reconciliation needed',
+    analysisTimestamp: new Date().toISOString()
+  };
+}
+
+/**
+ * Generates enhanced drift report with AI analysis
+ * @param driftResult - Result from detectDrift
+ * @param aiAnalysis - Optional AI-powered analysis
+ * @returns Enhanced formatted report string
+ */
+export function generateEnhancedDriftReport(
+  driftResult: DriftResult,
+  aiAnalysis?: DriftAnalysis | null
+): string {
+  const basicAnalysis = analyzeDriftAreas(driftResult);
+
+  const report = [
+    '=== ENHANCED DRIFT ANALYSIS REPORT ===',
+    '',
+    `Alignment Score: ${(driftResult.alignmentScore * 100).toFixed(1)}%`,
+    `Drift Alert: ${driftResult.driftAlert ? 'YES' : 'NO'}`,
+    `High Precision: ${driftResult.highPrecision ? 'YES' : 'NO'}`,
+    `Vector Divergence: ${(basicAnalysis.vectorDivergence * 100).toFixed(1)}%`,
+    ''
+  ];
+
+  if (aiAnalysis) {
+    report.push(
+      '--- AI Root Cause Analysis ---',
+      `Category: ${formatCategory(aiAnalysis.category)}`,
+      `Severity: ${aiAnalysis.severity.toUpperCase()}`,
+      `Confidence: ${(aiAnalysis.confidence * 100).toFixed(0)}%`,
+      '',
+      `Root Cause: ${aiAnalysis.rootCause}`,
+      '',
+      'Suggested Actions:',
+      ...aiAnalysis.suggestedActions.map((a, i) => `  ${i + 1}. ${a}`),
+      '',
+      `Technical Debt: ${aiAnalysis.technicalDebt.estimated.toUpperCase()}`,
+      `  Areas: ${aiAnalysis.technicalDebt.areas.join(', ')}`,
+      '',
+      `Realignment Strategy: ${aiAnalysis.realignmentStrategy}`,
+      ''
+    );
+  }
+
+  report.push(
+    '--- Basic Recommendations ---',
+    ...basicAnalysis.recommendations.map(r => `• ${r}`),
+    '',
+    '=== END REPORT ==='
+  );
+
+  return report.join('\n');
+}
+
+/**
+ * Formats drift category for display
+ */
+function formatCategory(category: DriftCategory): string {
+  const labels: Record<DriftCategory, string> = {
+    'scope_creep': 'Scope Creep',
+    'tech_pivot': 'Technology Pivot',
+    'requirements_shift': 'Requirements Shift',
+    'maintenance_drift': 'Maintenance Drift',
+    'abandoned_direction': 'Abandoned Direction',
+    'refactoring_divergence': 'Refactoring Divergence',
+    'unknown': 'Unknown'
+  };
+  return labels[category] || 'Unknown';
+}
+
+/**
+ * Clears the drift analysis cache
+ */
+export function clearDriftAnalysisCache(): void {
+  driftAnalysisCache.clear();
 }

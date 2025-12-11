@@ -1,10 +1,12 @@
 /**
  * Brief Generator Skill
  * Generates executive Portfolio Brief markdown documents with enhanced metrics
+ * and AI-powered strategic insights
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import Anthropic from '@anthropic-ai/sdk';
 import { ProjectShard, ProjectHealth, ActivityMetrics, TechStackInfo, IntegrationInfo } from './shard-generator';
 
 export interface CognitiveMetrics {
@@ -83,7 +85,55 @@ export interface PortfolioBriefData {
     withSupabase: number;
     deployed: number;
   };
+  aiStrategy?: PortfolioStrategy | null;
 }
+
+/**
+ * Strategic insight categories
+ */
+export type StrategyInsightType =
+  | 'consolidation'   // Merge similar projects
+  | 'investment'      // Prioritize for growth
+  | 'maintenance'     // Keep stable, minimal effort
+  | 'retirement'      // Archive or deprecate
+  | 'acceleration';   // Fast-track development
+
+/**
+ * AI-powered portfolio strategy insights
+ */
+export interface PortfolioStrategy {
+  executiveSummary: string;
+  insights: Array<{
+    project: string;
+    type: StrategyInsightType;
+    recommendation: string;
+    priority: 'high' | 'medium' | 'low';
+    reasoning: string;
+  }>;
+  techDebtAssessment: {
+    overallLevel: 'critical' | 'high' | 'moderate' | 'low';
+    hotspots: string[];
+    quickWins: string[];
+  };
+  riskWarnings: Array<{
+    type: 'abandonment' | 'complexity' | 'dependency' | 'security' | 'performance';
+    description: string;
+    affectedProjects: string[];
+  }>;
+  focusAreas: {
+    immediate: string[];
+    shortTerm: string[];
+    longTerm: string[];
+  };
+  portfolioTrend: 'growing' | 'stable' | 'declining' | 'transitioning';
+  analysisTimestamp: string;
+}
+
+/**
+ * Cache for portfolio strategy to avoid repeated API calls
+ */
+const strategyCache = new Map<string, { strategy: PortfolioStrategy; expiry: number }>();
+const STRATEGY_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Loads all project shards from directory
@@ -634,4 +684,505 @@ export function batchGenerateBriefs(
   }
 
   return results;
+}
+
+/**
+ * Generates AI-powered portfolio strategy insights
+ * Called once per brief generation (cached for 24h)
+ * @param data - Portfolio brief data
+ * @returns Portfolio strategy or null if API unavailable
+ */
+export async function generatePortfolioStrategy(
+  data: PortfolioBriefData
+): Promise<PortfolioStrategy | null> {
+  // Check cache first
+  const cacheKey = `strategy:${data.shards.length}:${data.healthSummary.avgScore.toFixed(0)}`;
+  const cached = strategyCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.strategy;
+  }
+
+  // Check for API key
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.warn('[brief-generator] ANTHROPIC_API_KEY not set, skipping AI strategy');
+    return null;
+  }
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const prompt = buildStrategyPrompt(data);
+
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    // Extract text content
+    const textBlock = response.content.find(block => block.type === 'text');
+    if (!textBlock || textBlock.type !== 'text') {
+      return null;
+    }
+
+    // Parse JSON response
+    const strategy = parseStrategyResponse(textBlock.text);
+
+    // Cache the result
+    strategyCache.set(cacheKey, {
+      strategy,
+      expiry: Date.now() + STRATEGY_CACHE_TTL_MS
+    });
+
+    return strategy;
+  } catch (error) {
+    console.error('[brief-generator] Claude API error:', error);
+    return null;
+  }
+}
+
+/**
+ * Builds the Claude prompt for portfolio strategy analysis
+ */
+function buildStrategyPrompt(data: PortfolioBriefData): string {
+  const projectSummaries = data.shards.slice(0, 30).map(s => ({
+    name: s.project,
+    cluster: s.cluster,
+    health: s.health?.score || 0,
+    grade: s.health?.grade || 'F',
+    velocity: s.activity?.commitVelocity || 'unknown',
+    commits7d: s.activity?.commits7d || 0,
+    hasTests: s.integrations?.hasTests || false,
+    hasCI: s.integrations?.hasCI || false,
+    deployed: s.deployment?.status === 'deployed',
+    tech: s.techStack?.primaryLanguage || 'unknown'
+  }));
+
+  return `You are a technical portfolio strategist helping a developer optimize their project portfolio.
+
+## Portfolio Overview
+- Total Projects: ${data.shards.length}
+- Average Health: ${data.healthSummary.avgScore.toFixed(0)}/100 (Grade ${data.healthSummary.avgGrade})
+- Grade Distribution: A=${data.healthSummary.distribution.A || 0}, B=${data.healthSummary.distribution.B || 0}, C=${data.healthSummary.distribution.C || 0}, D=${data.healthSummary.distribution.D || 0}, F=${data.healthSummary.distribution.F || 0}
+- Active Commits (7d): ${data.activitySummary.totalCommits7d}
+- High Velocity: ${data.activitySummary.highVelocity} projects
+- Stale: ${data.activitySummary.stale} projects
+
+## Cluster Distribution
+${data.clusterAnalysis.map(c => `- ${c.cluster}: ${c.count} projects (Health: ${c.avgHealthGrade})`).join('\n')}
+
+## Infrastructure Coverage
+- CI/CD: ${data.integrationSummary.withCI}/${data.shards.length}
+- Tests: ${data.integrationSummary.withTests}/${data.shards.length}
+- TypeScript: ${data.integrationSummary.withTypeScript}/${data.shards.length}
+- Deployed: ${data.integrationSummary.deployed}/${data.shards.length}
+
+## Top Languages
+${data.techSummary.languages.slice(0, 5).map(l => `- ${l.name}: ${l.count} projects`).join('\n')}
+
+## Projects Summary (Top 30)
+${JSON.stringify(projectSummaries, null, 2)}
+
+## Projects Needing Attention
+${data.needsAttention.slice(0, 10).map(s => `- ${s.project}: Health ${s.health?.score || 0}, ${s.health?.recommendations?.slice(0, 2).join('; ') || 'No recommendations'}`).join('\n')}
+
+## Task
+Provide strategic insights and actionable recommendations for this portfolio.
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "executiveSummary": "2-3 sentence high-level assessment of portfolio health and trajectory",
+  "insights": [
+    {
+      "project": "project_name",
+      "type": "consolidation|investment|maintenance|retirement|acceleration",
+      "recommendation": "Specific action to take",
+      "priority": "high|medium|low",
+      "reasoning": "Why this recommendation"
+    }
+  ],
+  "techDebtAssessment": {
+    "overallLevel": "critical|high|moderate|low",
+    "hotspots": ["area1", "area2"],
+    "quickWins": ["quick_win1", "quick_win2"]
+  },
+  "riskWarnings": [
+    {
+      "type": "abandonment|complexity|dependency|security|performance",
+      "description": "Risk description",
+      "affectedProjects": ["project1", "project2"]
+    }
+  ],
+  "focusAreas": {
+    "immediate": ["This week priorities"],
+    "shortTerm": ["This month priorities"],
+    "longTerm": ["This quarter priorities"]
+  },
+  "portfolioTrend": "growing|stable|declining|transitioning"
+}
+
+Guidelines:
+- Limit insights to 5-8 most impactful projects
+- Focus on actionable, specific recommendations
+- Be honest about technical debt without being alarmist
+- Consider the developer's limited time and resources`;
+}
+
+/**
+ * Parses Claude's response into PortfolioStrategy
+ */
+function parseStrategyResponse(response: string): PortfolioStrategy {
+  try {
+    // Extract JSON from response (handle markdown code blocks)
+    let jsonStr = response;
+    const jsonMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1].trim();
+    }
+
+    const parsed = JSON.parse(jsonStr);
+
+    // Validate and sanitize response
+    const validInsightTypes: StrategyInsightType[] = [
+      'consolidation', 'investment', 'maintenance', 'retirement', 'acceleration'
+    ];
+    const validRiskTypes = ['abandonment', 'complexity', 'dependency', 'security', 'performance'];
+    const validTrends = ['growing', 'stable', 'declining', 'transitioning'];
+    const validDebtLevels = ['critical', 'high', 'moderate', 'low'];
+
+    return {
+      executiveSummary: String(parsed.executiveSummary || 'Portfolio analysis completed.'),
+      insights: Array.isArray(parsed.insights)
+        ? parsed.insights.slice(0, 10).map((i: Record<string, unknown>) => ({
+            project: String(i.project || 'Unknown'),
+            type: validInsightTypes.includes(i.type as StrategyInsightType)
+              ? i.type as StrategyInsightType
+              : 'maintenance',
+            recommendation: String(i.recommendation || 'Review project status'),
+            priority: ['high', 'medium', 'low'].includes(i.priority as string)
+              ? i.priority as 'high' | 'medium' | 'low'
+              : 'medium',
+            reasoning: String(i.reasoning || '')
+          }))
+        : [],
+      techDebtAssessment: {
+        overallLevel: validDebtLevels.includes(parsed.techDebtAssessment?.overallLevel)
+          ? parsed.techDebtAssessment.overallLevel as 'critical' | 'high' | 'moderate' | 'low'
+          : 'moderate',
+        hotspots: Array.isArray(parsed.techDebtAssessment?.hotspots)
+          ? parsed.techDebtAssessment.hotspots.slice(0, 5).map(String)
+          : [],
+        quickWins: Array.isArray(parsed.techDebtAssessment?.quickWins)
+          ? parsed.techDebtAssessment.quickWins.slice(0, 5).map(String)
+          : []
+      },
+      riskWarnings: Array.isArray(parsed.riskWarnings)
+        ? parsed.riskWarnings.slice(0, 5).map((r: Record<string, unknown>) => ({
+            type: validRiskTypes.includes(r.type as string)
+              ? r.type as 'abandonment' | 'complexity' | 'dependency' | 'security' | 'performance'
+              : 'complexity',
+            description: String(r.description || ''),
+            affectedProjects: Array.isArray(r.affectedProjects)
+              ? r.affectedProjects.slice(0, 5).map(String)
+              : []
+          }))
+        : [],
+      focusAreas: {
+        immediate: Array.isArray(parsed.focusAreas?.immediate)
+          ? parsed.focusAreas.immediate.slice(0, 3).map(String)
+          : [],
+        shortTerm: Array.isArray(parsed.focusAreas?.shortTerm)
+          ? parsed.focusAreas.shortTerm.slice(0, 3).map(String)
+          : [],
+        longTerm: Array.isArray(parsed.focusAreas?.longTerm)
+          ? parsed.focusAreas.longTerm.slice(0, 3).map(String)
+          : []
+      },
+      portfolioTrend: validTrends.includes(parsed.portfolioTrend)
+        ? parsed.portfolioTrend as 'growing' | 'stable' | 'declining' | 'transitioning'
+        : 'stable',
+      analysisTimestamp: new Date().toISOString()
+    };
+  } catch {
+    return {
+      executiveSummary: 'Unable to generate AI strategy. Manual review recommended.',
+      insights: [],
+      techDebtAssessment: {
+        overallLevel: 'moderate',
+        hotspots: [],
+        quickWins: []
+      },
+      riskWarnings: [],
+      focusAreas: {
+        immediate: [],
+        shortTerm: [],
+        longTerm: []
+      },
+      portfolioTrend: 'stable',
+      analysisTimestamp: new Date().toISOString()
+    };
+  }
+}
+
+/**
+ * Generates AI strategy section for brief markdown
+ * @param strategy - Portfolio strategy from AI
+ * @returns Markdown string for AI strategy section
+ */
+export function generateStrategyMarkdown(strategy: PortfolioStrategy): string {
+  let md = '';
+
+  md += `## 🤖 AI Strategic Insights\n\n`;
+  md += `**Portfolio Trend:** ${formatTrend(strategy.portfolioTrend)}\n\n`;
+  md += `### Executive Summary\n\n`;
+  md += `${strategy.executiveSummary}\n\n`;
+
+  // Focus Areas
+  if (strategy.focusAreas.immediate.length > 0 ||
+      strategy.focusAreas.shortTerm.length > 0 ||
+      strategy.focusAreas.longTerm.length > 0) {
+    md += `### Focus Areas\n\n`;
+    if (strategy.focusAreas.immediate.length > 0) {
+      md += `**Immediate (This Week):**\n`;
+      for (const item of strategy.focusAreas.immediate) {
+        md += `- ${item}\n`;
+      }
+      md += `\n`;
+    }
+    if (strategy.focusAreas.shortTerm.length > 0) {
+      md += `**Short-Term (This Month):**\n`;
+      for (const item of strategy.focusAreas.shortTerm) {
+        md += `- ${item}\n`;
+      }
+      md += `\n`;
+    }
+    if (strategy.focusAreas.longTerm.length > 0) {
+      md += `**Long-Term (This Quarter):**\n`;
+      for (const item of strategy.focusAreas.longTerm) {
+        md += `- ${item}\n`;
+      }
+      md += `\n`;
+    }
+  }
+
+  // Project Insights
+  if (strategy.insights.length > 0) {
+    md += `### Project-Specific Recommendations\n\n`;
+    md += `| Project | Strategy | Priority | Recommendation |\n`;
+    md += `|---------|----------|----------|----------------|\n`;
+    for (const insight of strategy.insights) {
+      const strategyIcon = getStrategyIcon(insight.type);
+      md += `| ${insight.project} | ${strategyIcon} ${formatInsightType(insight.type)} | ${insight.priority.toUpperCase()} | ${truncateText(insight.recommendation, 60)} |\n`;
+    }
+    md += `\n`;
+
+    // Detailed reasoning
+    md += `<details>\n<summary>📋 Detailed Reasoning</summary>\n\n`;
+    for (const insight of strategy.insights) {
+      md += `**${insight.project}** (${formatInsightType(insight.type)})\n`;
+      md += `> ${insight.reasoning}\n\n`;
+    }
+    md += `</details>\n\n`;
+  }
+
+  // Tech Debt Assessment
+  md += `### Technical Debt Assessment\n\n`;
+  md += `**Overall Level:** ${formatDebtLevel(strategy.techDebtAssessment.overallLevel)}\n\n`;
+  if (strategy.techDebtAssessment.hotspots.length > 0) {
+    md += `**Hotspots:**\n`;
+    for (const hotspot of strategy.techDebtAssessment.hotspots) {
+      md += `- ${hotspot}\n`;
+    }
+    md += `\n`;
+  }
+  if (strategy.techDebtAssessment.quickWins.length > 0) {
+    md += `**Quick Wins:**\n`;
+    for (const win of strategy.techDebtAssessment.quickWins) {
+      md += `- ✅ ${win}\n`;
+    }
+    md += `\n`;
+  }
+
+  // Risk Warnings
+  if (strategy.riskWarnings.length > 0) {
+    md += `### Risk Warnings\n\n`;
+    for (const risk of strategy.riskWarnings) {
+      const icon = getRiskIcon(risk.type);
+      md += `#### ${icon} ${formatRiskType(risk.type)}\n\n`;
+      md += `${risk.description}\n\n`;
+      if (risk.affectedProjects.length > 0) {
+        md += `*Affected: ${risk.affectedProjects.join(', ')}*\n\n`;
+      }
+    }
+  }
+
+  md += `---\n\n`;
+  md += `*AI analysis generated: ${new Date(strategy.analysisTimestamp).toLocaleString()}*\n\n`;
+
+  return md;
+}
+
+/**
+ * Formats portfolio trend for display
+ */
+function formatTrend(trend: string): string {
+  const trends: Record<string, string> = {
+    'growing': '📈 Growing',
+    'stable': '📊 Stable',
+    'declining': '📉 Declining',
+    'transitioning': '🔄 Transitioning'
+  };
+  return trends[trend] || trend;
+}
+
+/**
+ * Formats insight type for display
+ */
+function formatInsightType(type: StrategyInsightType): string {
+  const types: Record<StrategyInsightType, string> = {
+    'consolidation': 'Consolidate',
+    'investment': 'Invest',
+    'maintenance': 'Maintain',
+    'retirement': 'Retire',
+    'acceleration': 'Accelerate'
+  };
+  return types[type] || type;
+}
+
+/**
+ * Gets icon for strategy type
+ */
+function getStrategyIcon(type: StrategyInsightType): string {
+  const icons: Record<StrategyInsightType, string> = {
+    'consolidation': '🔗',
+    'investment': '💰',
+    'maintenance': '🔧',
+    'retirement': '📦',
+    'acceleration': '🚀'
+  };
+  return icons[type] || '📌';
+}
+
+/**
+ * Formats risk type for display
+ */
+function formatRiskType(type: string): string {
+  const types: Record<string, string> = {
+    'abandonment': 'Abandonment Risk',
+    'complexity': 'Complexity Risk',
+    'dependency': 'Dependency Risk',
+    'security': 'Security Risk',
+    'performance': 'Performance Risk'
+  };
+  return types[type] || type;
+}
+
+/**
+ * Gets icon for risk type
+ */
+function getRiskIcon(type: string): string {
+  const icons: Record<string, string> = {
+    'abandonment': '⚠️',
+    'complexity': '🔴',
+    'dependency': '🔗',
+    'security': '🛡️',
+    'performance': '⏱️'
+  };
+  return icons[type] || '⚡';
+}
+
+/**
+ * Formats debt level for display
+ */
+function formatDebtLevel(level: string): string {
+  const levels: Record<string, string> = {
+    'critical': '🔴 Critical',
+    'high': '🟠 High',
+    'moderate': '🟡 Moderate',
+    'low': '🟢 Low'
+  };
+  return levels[level] || level;
+}
+
+/**
+ * Clears the strategy cache
+ */
+export function clearStrategyCache(): void {
+  strategyCache.clear();
+}
+
+/**
+ * Generates brief with AI strategy enhancement
+ * @param shardDir - Directory containing shard files
+ * @param metricsPath - Path to cognitive_metrics.json
+ * @param outputDir - Directory to save brief
+ * @param includeAIStrategy - Whether to include AI strategy analysis
+ * @returns Brief generation result
+ */
+export async function generateEnhancedBrief(
+  shardDir: string,
+  metricsPath: string,
+  outputDir: string,
+  includeAIStrategy: boolean = true
+): Promise<BriefGeneratorResult> {
+  // Load data
+  const shards = loadShards(shardDir);
+  const metrics = loadMetrics(metricsPath);
+
+  // Analyze portfolio
+  const data = analyzePortfolio(shards, metrics);
+
+  // Generate AI strategy if enabled
+  if (includeAIStrategy) {
+    data.aiStrategy = await generatePortfolioStrategy(data);
+  }
+
+  // Generate markdown (enhanced with AI section)
+  let markdown = generateBriefMarkdown(data);
+
+  // Insert AI strategy section before Strategic Recommendations
+  if (data.aiStrategy) {
+    const aiSection = generateStrategyMarkdown(data.aiStrategy);
+    const insertPoint = markdown.indexOf('## 💡 Strategic Recommendations');
+    if (insertPoint > -1) {
+      markdown = markdown.slice(0, insertPoint) + aiSection + markdown.slice(insertPoint);
+    } else {
+      // Append before footer
+      const footerPoint = markdown.indexOf('*Generated by Portfolio');
+      if (footerPoint > -1) {
+        markdown = markdown.slice(0, footerPoint) + aiSection + markdown.slice(footerPoint);
+      }
+    }
+  }
+
+  // Create filename with date
+  const date = new Date().toISOString().split('T')[0];
+  const filename = `Portfolio_Brief_${date}.md`;
+  const filepath = path.join(outputDir, filename);
+
+  // Ensure output directory exists
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Save to file
+  fs.writeFileSync(filepath, markdown, 'utf8');
+
+  return {
+    filename,
+    filepath,
+    precisionScore: metrics.precisionScore,
+    healthScore: data.healthSummary.avgScore,
+    healthGrade: data.healthSummary.avgGrade,
+    redListCount: data.needsAttention.length,
+    topPerformersCount: data.topPerformers.length,
+    clusterCount: data.clusterAnalysis.length,
+    generatedAt: new Date().toISOString()
+  };
 }
