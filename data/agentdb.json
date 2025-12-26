@@ -360,7 +360,7 @@
     },
     {
       "sessionId": "test_session_temp",
-      "startTime": "2025-12-11T20:18:38.364Z",
+      "startTime": "2025-12-26T01:29:05.879Z",
       "commits": [
         "test_commit"
       ],
@@ -458,9 +458,30 @@
           "filesModified": 6
         }
       }
+    },
+    {
+      "sessionId": "session_2025-12-25_crash_recovery",
+      "startTime": "2025-12-25T23:00:00.000Z",
+      "commits": [
+        "8dfb648"
+      ],
+      "reasoning": "Crash recovery via AgentDB → Identified 21 test failures from health-based scoring migration → Fixed config.test.ts (3 tests), dashboard-builder.test.ts (6 tests), brief-generator.test.ts (12 tests) → Added factors to health objects, fixed redList threshold → All 797 tests passing",
+      "prompt": "Recover from crash and continue 5-phase enhancement work",
+      "outcome": "COMPLETE: All 797 tests passing, test assertions aligned with health-based scoring system",
+      "fixes": {
+        "config.test.ts": "Handle dotenv loading .env during tests with type checks",
+        "dashboard-builder.test.ts": "Add factors to health objects, fix tbody assertion",
+        "brief-generator.test.ts": "Add factors to mock helper, adjust redList threshold from 0.55 to 0.45"
+      },
+      "testResults": {
+        "total": 797,
+        "passed": 797,
+        "failed": 0,
+        "suites": 22
+      }
     }
   ],
-  "lastUpdated": "2025-12-11T22:30:00.000Z",
+  "lastUpdated": "2025-12-26T01:45:00.000Z",
   "goapActions": [
     {
       "id": "FIX_NPM",
